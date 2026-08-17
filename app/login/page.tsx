@@ -146,14 +146,24 @@ function LoginContent() {
         if (data.success) {
           setSuccessMessage(data.message);
           
-          // Save mock auth token
-          localStorage.setItem("admin-auth-token", data.token);
-          localStorage.setItem("admin-email", data.email);
+          if (activeTab === "signup") {
+            // Redirect newly registered user back to Sign In tab
+            setTimeout(() => {
+              setShowOtpScreen(false);
+              setActiveTab("signin");
+              setPassword(""); // clear password field
+              setSuccessMessage("Registration successful! Please login to complete 2-Step Verification.");
+            }, 2000);
+          } else {
+            // Save mock auth token for login
+            localStorage.setItem("admin-auth-token", data.token);
+            localStorage.setItem("admin-email", data.email);
 
-          // Clear sessions and redirect
-          setTimeout(() => {
-            router.push(redirectPath);
-          }, 1500);
+            // Clear sessions and redirect
+            setTimeout(() => {
+              router.push(redirectPath);
+            }, 1500);
+          }
         } else {
           setError(data.message || "Invalid OTP.");
           setAttemptsLeft(data.attemptsLeft ?? 3);
