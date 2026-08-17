@@ -1170,7 +1170,7 @@ export default function Home() {
           <div className="relative flex items-center">
             <div
               key={pulseKey}
-              className="w-full rounded-[2rem] border border-[#d6ded6] bg-white p-5 shadow-[0_30px_80px_rgba(32,57,40,0.10)] transition-shadow duration-700 sm:p-7"
+              className="w-full rounded-[2rem] border border-[#d6ded6] bg-white p-5 shadow-[0_30px_80px_rgba(32,57,40,0.10)] hover:shadow-[0_20px_50px_rgba(34,197,94,0.25)] hover:border-[#22c55e] hover:scale-[1.015] transition-all duration-500 ease-out sm:p-7"
             >
               <div className="flex items-center justify-between border-b border-[#e5eae5] pb-5">
                 <div>
@@ -1192,7 +1192,7 @@ export default function Home() {
               <div className="mt-6 grid grid-cols-2 gap-3">
                 {/* SUBMISSIONS */}
 
-                <div className="rounded-2xl bg-[#f5f7f4] p-4 transition hover:-translate-y-0.5">
+                <div className="rounded-2xl bg-[#f5f7f4] p-4 border border-transparent hover:border-[#22c55e]/40 hover:bg-[#eafaea]/30 hover:shadow-[0_4px_12px_rgba(34,197,94,0.15)] transition-all duration-300 hover:-translate-y-0.5">
                   <p className="text-2xl font-bold tracking-tight text-[#173f2a]">
                     <AnimatedNumber
                       value={
@@ -1208,7 +1208,7 @@ export default function Home() {
 
                 {/* HOTSPOTS */}
 
-                <div className="rounded-2xl bg-[#f5f7f4] p-4 transition hover:-translate-y-0.5">
+                <div className="rounded-2xl bg-[#f5f7f4] p-4 border border-transparent hover:border-[#22c55e]/40 hover:bg-[#eafaea]/30 hover:shadow-[0_4px_12px_rgba(34,197,94,0.15)] transition-all duration-300 hover:-translate-y-0.5">
                   <p className="text-2xl font-bold tracking-tight text-[#173f2a]">
                     <AnimatedNumber
                       value={
@@ -1224,7 +1224,7 @@ export default function Home() {
 
                 {/* CRITICAL */}
 
-                <div className="rounded-2xl bg-[#f5f7f4] p-4 transition hover:-translate-y-0.5">
+                <div className="rounded-2xl bg-[#f5f7f4] p-4 border border-transparent hover:border-[#22c55e]/40 hover:bg-[#eafaea]/30 hover:shadow-[0_4px_12px_rgba(34,197,94,0.15)] transition-all duration-300 hover:-translate-y-0.5">
                   <p className="text-2xl font-bold tracking-tight text-[#173f2a]">
                     <AnimatedNumber
                       value={
@@ -1240,7 +1240,7 @@ export default function Home() {
 
                 {/* EVIDENCE */}
 
-                <div className="rounded-2xl bg-[#f5f7f4] p-4 transition hover:-translate-y-0.5">
+                <div className="rounded-2xl bg-[#f5f7f4] p-4 border border-transparent hover:border-[#22c55e]/40 hover:bg-[#eafaea]/30 hover:shadow-[0_4px_12px_rgba(34,197,94,0.15)] transition-all duration-300 hover:-translate-y-0.5">
                   <p className="text-2xl font-bold tracking-tight text-[#173f2a]">
                     <AnimatedNumber
                       value={
@@ -1257,7 +1257,7 @@ export default function Home() {
 
               {/* TOP NEED */}
 
-              <div className="mt-6 rounded-2xl border border-[#e1e7e1] p-4">
+              <div className="mt-6 rounded-2xl border border-[#e1e7e1] hover:border-[#22c55e]/40 hover:bg-[#eafaea]/10 hover:shadow-[0_4px_12px_rgba(34,197,94,0.12)] transition-all duration-300 p-4">
                 {topPriority ? (
                   <>
                     <div className="flex items-center justify-between">
