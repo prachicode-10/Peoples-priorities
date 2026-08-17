@@ -1,0 +1,322 @@
+{
+  "source": "National Health Profile / Central Bureau of Health Intelligence, Ministry of Health & Family Welfare, Government of India",
+  "year": 2011,
+  "dataset": "State/UT wise Distribution of Population, Sex Ratio, Density and Decadal Growth rate of Population",
+  "records": [
+    {
+      "state": "Andhra Pradesh",
+      "population": 84665533,
+      "malePopulation": 42509881,
+      "femalePopulation": 42155652,
+      "sexRatio": 992,
+      "densityPerSqKm": 308,
+      "decadalGrowthRate": 11.1
+    },
+    {
+      "state": "Arunachal Pradesh",
+      "population": 1382611,
+      "malePopulation": 720232,
+      "femalePopulation": 662379,
+      "sexRatio": 920,
+      "densityPerSqKm": 17,
+      "decadalGrowthRate": 25.92
+    },
+    {
+      "state": "Assam",
+      "population": 31169272,
+      "malePopulation": 15954927,
+      "femalePopulation": 15214345,
+      "sexRatio": 954,
+      "densityPerSqKm": 397,
+      "decadalGrowthRate": 16.93
+    },
+    {
+      "state": "Bihar",
+      "population": 103804637,
+      "malePopulation": 54185347,
+      "femalePopulation": 49619290,
+      "sexRatio": 916,
+      "densityPerSqKm": 1102,
+      "decadalGrowthRate": 25.07
+    },
+    {
+      "state": "Chhattisgarh",
+      "population": 25540196,
+      "malePopulation": 12827915,
+      "femalePopulation": 12712281,
+      "sexRatio": 991,
+      "densityPerSqKm": 189,
+      "decadalGrowthRate": 22.59
+    },
+    {
+      "state": "Goa",
+      "population": 1457723,
+      "malePopulation": 740711,
+      "femalePopulation": 717012,
+      "sexRatio": 968,
+      "densityPerSqKm": 394,
+      "decadalGrowthRate": 8.17
+    },
+    {
+      "state": "Gujarat",
+      "population": 60383628,
+      "malePopulation": 31482282,
+      "femalePopulation": 28901346,
+      "sexRatio": 918,
+      "densityPerSqKm": 308,
+      "decadalGrowthRate": 19.17
+    },
+    {
+      "state": "Haryana",
+      "population": 25353081,
+      "malePopulation": 13505130,
+      "femalePopulation": 11847951,
+      "sexRatio": 877,
+      "densityPerSqKm": 573,
+      "decadalGrowthRate": 19.9
+    },
+    {
+      "state": "Himachal Pradesh",
+      "population": 6856509,
+      "malePopulation": 3473892,
+      "femalePopulation": 3382617,
+      "sexRatio": 974,
+      "densityPerSqKm": 123,
+      "decadalGrowthRate": 12.81
+    },
+    {
+      "state": "Jammu & Kashmir",
+      "population": 12548926,
+      "malePopulation": 6665561,
+      "femalePopulation": 5883365,
+      "sexRatio": 883,
+      "densityPerSqKm": 124,
+      "decadalGrowthRate": 23.71
+    },
+    {
+      "state": "Jharkhand",
+      "population": 32966238,
+      "malePopulation": 16931688,
+      "femalePopulation": 16034550,
+      "sexRatio": 947,
+      "densityPerSqKm": 414,
+      "decadalGrowthRate": 22.34
+    },
+    {
+      "state": "Karnataka",
+      "population": 61130704,
+      "malePopulation": 31057742,
+      "femalePopulation": 30072962,
+      "sexRatio": 968,
+      "densityPerSqKm": 319,
+      "decadalGrowthRate": 15.67
+    },
+    {
+      "state": "Kerala",
+      "population": 33387677,
+      "malePopulation": 16021290,
+      "femalePopulation": 17366387,
+      "sexRatio": 1084,
+      "densityPerSqKm": 859,
+      "decadalGrowthRate": 4.86
+    },
+    {
+      "state": "Madhya Pradesh",
+      "population": 72597565,
+      "malePopulation": 37612920,
+      "femalePopulation": 34984645,
+      "sexRatio": 930,
+      "densityPerSqKm": 236,
+      "decadalGrowthRate": 20.3
+    },
+    {
+      "state": "Maharashtra",
+      "population": 112372972,
+      "malePopulation": 58361397,
+      "femalePopulation": 54011575,
+      "sexRatio": 925,
+      "densityPerSqKm": 365,
+      "decadalGrowthRate": 15.99
+    },
+    {
+      "state": "Manipur",
+      "population": 2721756,
+      "malePopulation": 1369764,
+      "femalePopulation": 1351992,
+      "sexRatio": 987,
+      "densityPerSqKm": 122,
+      "decadalGrowthRate": 18.65
+    },
+    {
+      "state": "Meghalaya",
+      "population": 2964007,
+      "malePopulation": 1492668,
+      "femalePopulation": 1471339,
+      "sexRatio": 986,
+      "densityPerSqKm": 132,
+      "decadalGrowthRate": 27.82
+    },
+    {
+      "state": "Mizoram",
+      "population": 1091014,
+      "malePopulation": 552339,
+      "femalePopulation": 538675,
+      "sexRatio": 975,
+      "densityPerSqKm": 52,
+      "decadalGrowthRate": 22.78
+    },
+    {
+      "state": "Nagaland",
+      "population": 1980602,
+      "malePopulation": 1025707,
+      "femalePopulation": 954895,
+      "sexRatio": 931,
+      "densityPerSqKm": 119,
+      "decadalGrowthRate": -0.47
+    },
+    {
+      "state": "Odisha",
+      "population": 41947358,
+      "malePopulation": 21201678,
+      "femalePopulation": 20745680,
+      "sexRatio": 978,
+      "densityPerSqKm": 269,
+      "decadalGrowthRate": 13.97
+    },
+    {
+      "state": "Punjab",
+      "population": 27704236,
+      "malePopulation": 14634819,
+      "femalePopulation": 13069417,
+      "sexRatio": 893,
+      "densityPerSqKm": 550,
+      "decadalGrowthRate": 13.73
+    },
+    {
+      "state": "Rajasthan",
+      "population": 68621012,
+      "malePopulation": 35620086,
+      "femalePopulation": 33000926,
+      "sexRatio": 926,
+      "densityPerSqKm": 201,
+      "decadalGrowthRate": 21.44
+    },
+    {
+      "state": "Sikkim",
+      "population": 607688,
+      "malePopulation": 321661,
+      "femalePopulation": 286027,
+      "sexRatio": 889,
+      "densityPerSqKm": 86,
+      "decadalGrowthRate": 12.36
+    },
+    {
+      "state": "Tamil Nadu",
+      "population": 72138958,
+      "malePopulation": 36158871,
+      "femalePopulation": 35980087,
+      "sexRatio": 995,
+      "densityPerSqKm": 555,
+      "decadalGrowthRate": 15.6
+    },
+    {
+      "state": "Tripura",
+      "population": 3671032,
+      "malePopulation": 1871867,
+      "femalePopulation": 1799165,
+      "sexRatio": 961,
+      "densityPerSqKm": 350,
+      "decadalGrowthRate": 14.75
+    },
+    {
+      "state": "Uttar Pradesh",
+      "population": 199581477,
+      "malePopulation": 104596415,
+      "femalePopulation": 94985062,
+      "sexRatio": 908,
+      "densityPerSqKm": 828,
+      "decadalGrowthRate": 20.09
+    },
+    {
+      "state": "Uttarakhand",
+      "population": 10116752,
+      "malePopulation": 5154178,
+      "femalePopulation": 4962574,
+      "sexRatio": 963,
+      "densityPerSqKm": 189,
+      "decadalGrowthRate": 19.17
+    },
+    {
+      "state": "West Bengal",
+      "population": 91347736,
+      "malePopulation": 46927389,
+      "femalePopulation": 44420347,
+      "sexRatio": 947,
+      "densityPerSqKm": 1029,
+      "decadalGrowthRate": 13.93
+    },
+    {
+      "state": "Andaman & Nicobar Islands",
+      "population": 379944,
+      "malePopulation": 202330,
+      "femalePopulation": 177614,
+      "sexRatio": 878,
+      "densityPerSqKm": 46,
+      "decadalGrowthRate": 6.68
+    },
+    {
+      "state": "Chandigarh",
+      "population": 1054686,
+      "malePopulation": 580282,
+      "femalePopulation": 474404,
+      "sexRatio": 818,
+      "densityPerSqKm": 9252,
+      "decadalGrowthRate": 17.1
+    },
+    {
+      "state": "Dadra & Nagar Haveli",
+      "population": 342853,
+      "malePopulation": 193178,
+      "femalePopulation": 149675,
+      "sexRatio": 775,
+      "densityPerSqKm": 698,
+      "decadalGrowthRate": 55.5
+    },
+    {
+      "state": "Daman & Diu",
+      "population": 242911,
+      "malePopulation": 150100,
+      "femalePopulation": 92811,
+      "sexRatio": 618,
+      "densityPerSqKm": 2169,
+      "decadalGrowthRate": 53.54
+    },
+    {
+      "state": "NCT of Delhi",
+      "population": 16753235,
+      "malePopulation": 8976410,
+      "femalePopulation": 7776825,
+      "sexRatio": 866,
+      "densityPerSqKm": 11297,
+      "decadalGrowthRate": 20.96
+    },
+    {
+      "state": "Lakshadweep",
+      "population": 64429,
+      "malePopulation": 33106,
+      "femalePopulation": 31323,
+      "sexRatio": 946,
+      "densityPerSqKm": 2013,
+      "decadalGrowthRate": 6.23
+    },
+    {
+      "state": "Puducherry",
+      "population": 1244464,
+      "malePopulation": 610485,
+      "femalePopulation": 633979,
+      "sexRatio": 1038,
+      "densityPerSqKm": 2598,
+      "decadalGrowthRate": 27.72
+    }
+  ]
+}

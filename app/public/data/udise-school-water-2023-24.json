@@ -1,0 +1,378 @@
+{
+  "source": "UDISE+ 2023-24, Ministry of Education, Government of India",
+  "year": 2023,
+  "dataset": "State/UT-wise number of schools, drinking water facility and functional drinking water facility",
+  "reference": "https://dashboard.udiseplus.gov.in/",
+  "records": [
+    {
+      "state": "India",
+      "totalSchools": 1471891,
+      "schoolsWithDrinkingWater": 1447311,
+      "schoolsWithFunctionalDrinkingWater": 1411865,
+      "drinkingWaterCoveragePct": 98.3,
+      "functionalDrinkingWaterPct": 95.9,
+      "schoolsWithoutDrinkingWater": 24580,
+      "schoolsWithoutFunctionalDrinkingWater": 60026
+    },
+    {
+      "state": "Andaman & Nicobar Islands",
+      "totalSchools": 412,
+      "schoolsWithDrinkingWater": 412,
+      "schoolsWithFunctionalDrinkingWater": 410,
+      "drinkingWaterCoveragePct": 100.0,
+      "functionalDrinkingWaterPct": 99.5,
+      "schoolsWithoutDrinkingWater": 0,
+      "schoolsWithoutFunctionalDrinkingWater": 2
+    },
+    {
+      "state": "Andhra Pradesh",
+      "totalSchools": 61373,
+      "schoolsWithDrinkingWater": 61366,
+      "schoolsWithFunctionalDrinkingWater": 61217,
+      "drinkingWaterCoveragePct": 100.0,
+      "functionalDrinkingWaterPct": 99.7,
+      "schoolsWithoutDrinkingWater": 7,
+      "schoolsWithoutFunctionalDrinkingWater": 156
+    },
+    {
+      "state": "Arunachal Pradesh",
+      "totalSchools": 3490,
+      "schoolsWithDrinkingWater": 2912,
+      "schoolsWithFunctionalDrinkingWater": 2490,
+      "drinkingWaterCoveragePct": 83.4,
+      "functionalDrinkingWaterPct": 71.3,
+      "schoolsWithoutDrinkingWater": 578,
+      "schoolsWithoutFunctionalDrinkingWater": 1000
+    },
+    {
+      "state": "Assam",
+      "totalSchools": 56630,
+      "schoolsWithDrinkingWater": 54341,
+      "schoolsWithFunctionalDrinkingWater": 53294,
+      "drinkingWaterCoveragePct": 96.0,
+      "functionalDrinkingWaterPct": 94.1,
+      "schoolsWithoutDrinkingWater": 2289,
+      "schoolsWithoutFunctionalDrinkingWater": 3336
+    },
+    {
+      "state": "Bihar",
+      "totalSchools": 94686,
+      "schoolsWithDrinkingWater": 90577,
+      "schoolsWithFunctionalDrinkingWater": 88310,
+      "drinkingWaterCoveragePct": 95.7,
+      "functionalDrinkingWaterPct": 93.3,
+      "schoolsWithoutDrinkingWater": 4109,
+      "schoolsWithoutFunctionalDrinkingWater": 6376
+    },
+    {
+      "state": "Chandigarh",
+      "totalSchools": 230,
+      "schoolsWithDrinkingWater": 230,
+      "schoolsWithFunctionalDrinkingWater": 230,
+      "drinkingWaterCoveragePct": 100.0,
+      "functionalDrinkingWaterPct": 100.0,
+      "schoolsWithoutDrinkingWater": 0,
+      "schoolsWithoutFunctionalDrinkingWater": 0
+    },
+    {
+      "state": "Chhattisgarh",
+      "totalSchools": 56615,
+      "schoolsWithDrinkingWater": 56083,
+      "schoolsWithFunctionalDrinkingWater": 55119,
+      "drinkingWaterCoveragePct": 99.1,
+      "functionalDrinkingWaterPct": 97.4,
+      "schoolsWithoutDrinkingWater": 532,
+      "schoolsWithoutFunctionalDrinkingWater": 1496
+    },
+    {
+      "state": "Dadra & Nagar Haveli and Daman & Diu",
+      "totalSchools": 432,
+      "schoolsWithDrinkingWater": 432,
+      "schoolsWithFunctionalDrinkingWater": 432,
+      "drinkingWaterCoveragePct": 100.0,
+      "functionalDrinkingWaterPct": 100.0,
+      "schoolsWithoutDrinkingWater": 0,
+      "schoolsWithoutFunctionalDrinkingWater": 0
+    },
+    {
+      "state": "Delhi",
+      "totalSchools": 5497,
+      "schoolsWithDrinkingWater": 5497,
+      "schoolsWithFunctionalDrinkingWater": 5497,
+      "drinkingWaterCoveragePct": 100.0,
+      "functionalDrinkingWaterPct": 100.0,
+      "schoolsWithoutDrinkingWater": 0,
+      "schoolsWithoutFunctionalDrinkingWater": 0
+    },
+    {
+      "state": "Goa",
+      "totalSchools": 1487,
+      "schoolsWithDrinkingWater": 1487,
+      "schoolsWithFunctionalDrinkingWater": 1487,
+      "drinkingWaterCoveragePct": 100.0,
+      "functionalDrinkingWaterPct": 100.0,
+      "schoolsWithoutDrinkingWater": 0,
+      "schoolsWithoutFunctionalDrinkingWater": 0
+    },
+    {
+      "state": "Gujarat",
+      "totalSchools": 53626,
+      "schoolsWithDrinkingWater": 53602,
+      "schoolsWithFunctionalDrinkingWater": 53586,
+      "drinkingWaterCoveragePct": 100.0,
+      "functionalDrinkingWaterPct": 99.9,
+      "schoolsWithoutDrinkingWater": 24,
+      "schoolsWithoutFunctionalDrinkingWater": 40
+    },
+    {
+      "state": "Haryana",
+      "totalSchools": 23517,
+      "schoolsWithDrinkingWater": 23511,
+      "schoolsWithFunctionalDrinkingWater": 23497,
+      "drinkingWaterCoveragePct": 100.0,
+      "functionalDrinkingWaterPct": 99.9,
+      "schoolsWithoutDrinkingWater": 6,
+      "schoolsWithoutFunctionalDrinkingWater": 20
+    },
+    {
+      "state": "Himachal Pradesh",
+      "totalSchools": 17826,
+      "schoolsWithDrinkingWater": 17826,
+      "schoolsWithFunctionalDrinkingWater": 17826,
+      "drinkingWaterCoveragePct": 100.0,
+      "functionalDrinkingWaterPct": 100.0,
+      "schoolsWithoutDrinkingWater": 0,
+      "schoolsWithoutFunctionalDrinkingWater": 0
+    },
+    {
+      "state": "Jammu & Kashmir",
+      "totalSchools": 24296,
+      "schoolsWithDrinkingWater": 24149,
+      "schoolsWithFunctionalDrinkingWater": 23508,
+      "drinkingWaterCoveragePct": 99.4,
+      "functionalDrinkingWaterPct": 96.8,
+      "schoolsWithoutDrinkingWater": 147,
+      "schoolsWithoutFunctionalDrinkingWater": 788
+    },
+    {
+      "state": "Jharkhand",
+      "totalSchools": 44475,
+      "schoolsWithDrinkingWater": 43863,
+      "schoolsWithFunctionalDrinkingWater": 42831,
+      "drinkingWaterCoveragePct": 98.6,
+      "functionalDrinkingWaterPct": 96.3,
+      "schoolsWithoutDrinkingWater": 612,
+      "schoolsWithoutFunctionalDrinkingWater": 1644
+    },
+    {
+      "state": "Karnataka",
+      "totalSchools": 75869,
+      "schoolsWithDrinkingWater": 75777,
+      "schoolsWithFunctionalDrinkingWater": 75468,
+      "drinkingWaterCoveragePct": 99.9,
+      "functionalDrinkingWaterPct": 99.5,
+      "schoolsWithoutDrinkingWater": 92,
+      "schoolsWithoutFunctionalDrinkingWater": 401
+    },
+    {
+      "state": "Kerala",
+      "totalSchools": 15864,
+      "schoolsWithDrinkingWater": 15850,
+      "schoolsWithFunctionalDrinkingWater": 15820,
+      "drinkingWaterCoveragePct": 99.9,
+      "functionalDrinkingWaterPct": 99.7,
+      "schoolsWithoutDrinkingWater": 14,
+      "schoolsWithoutFunctionalDrinkingWater": 44
+    },
+    {
+      "state": "Ladakh",
+      "totalSchools": 995,
+      "schoolsWithDrinkingWater": 955,
+      "schoolsWithFunctionalDrinkingWater": 899,
+      "drinkingWaterCoveragePct": 96.0,
+      "functionalDrinkingWaterPct": 90.4,
+      "schoolsWithoutDrinkingWater": 40,
+      "schoolsWithoutFunctionalDrinkingWater": 96
+    },
+    {
+      "state": "Lakshadweep",
+      "totalSchools": 37,
+      "schoolsWithDrinkingWater": 37,
+      "schoolsWithFunctionalDrinkingWater": 37,
+      "drinkingWaterCoveragePct": 100.0,
+      "functionalDrinkingWaterPct": 100.0,
+      "schoolsWithoutDrinkingWater": 0,
+      "schoolsWithoutFunctionalDrinkingWater": 0
+    },
+    {
+      "state": "Madhya Pradesh",
+      "totalSchools": 123412,
+      "schoolsWithDrinkingWater": 122746,
+      "schoolsWithFunctionalDrinkingWater": 115970,
+      "drinkingWaterCoveragePct": 99.5,
+      "functionalDrinkingWaterPct": 94.0,
+      "schoolsWithoutDrinkingWater": 666,
+      "schoolsWithoutFunctionalDrinkingWater": 7442
+    },
+    {
+      "state": "Maharashtra",
+      "totalSchools": 108237,
+      "schoolsWithDrinkingWater": 107686,
+      "schoolsWithFunctionalDrinkingWater": 106474,
+      "drinkingWaterCoveragePct": 99.5,
+      "functionalDrinkingWaterPct": 98.4,
+      "schoolsWithoutDrinkingWater": 551,
+      "schoolsWithoutFunctionalDrinkingWater": 1763
+    },
+    {
+      "state": "Manipur",
+      "totalSchools": 4646,
+      "schoolsWithDrinkingWater": 4634,
+      "schoolsWithFunctionalDrinkingWater": 4620,
+      "drinkingWaterCoveragePct": 99.7,
+      "functionalDrinkingWaterPct": 99.4,
+      "schoolsWithoutDrinkingWater": 12,
+      "schoolsWithoutFunctionalDrinkingWater": 26
+    },
+    {
+      "state": "Meghalaya",
+      "totalSchools": 14601,
+      "schoolsWithDrinkingWater": 8242,
+      "schoolsWithFunctionalDrinkingWater": 7197,
+      "drinkingWaterCoveragePct": 56.4,
+      "functionalDrinkingWaterPct": 49.3,
+      "schoolsWithoutDrinkingWater": 6359,
+      "schoolsWithoutFunctionalDrinkingWater": 7404
+    },
+    {
+      "state": "Mizoram",
+      "totalSchools": 3941,
+      "schoolsWithDrinkingWater": 3597,
+      "schoolsWithFunctionalDrinkingWater": 3539,
+      "drinkingWaterCoveragePct": 91.3,
+      "functionalDrinkingWaterPct": 89.8,
+      "schoolsWithoutDrinkingWater": 344,
+      "schoolsWithoutFunctionalDrinkingWater": 402
+    },
+    {
+      "state": "Nagaland",
+      "totalSchools": 2725,
+      "schoolsWithDrinkingWater": 1949,
+      "schoolsWithFunctionalDrinkingWater": 1811,
+      "drinkingWaterCoveragePct": 71.5,
+      "functionalDrinkingWaterPct": 66.5,
+      "schoolsWithoutDrinkingWater": 776,
+      "schoolsWithoutFunctionalDrinkingWater": 914
+    },
+    {
+      "state": "Odisha",
+      "totalSchools": 61693,
+      "schoolsWithDrinkingWater": 61685,
+      "schoolsWithFunctionalDrinkingWater": 61402,
+      "drinkingWaterCoveragePct": 100.0,
+      "functionalDrinkingWaterPct": 99.5,
+      "schoolsWithoutDrinkingWater": 8,
+      "schoolsWithoutFunctionalDrinkingWater": 291
+    },
+    {
+      "state": "Puducherry",
+      "totalSchools": 735,
+      "schoolsWithDrinkingWater": 735,
+      "schoolsWithFunctionalDrinkingWater": 735,
+      "drinkingWaterCoveragePct": 100.0,
+      "functionalDrinkingWaterPct": 100.0,
+      "schoolsWithoutDrinkingWater": 0,
+      "schoolsWithoutFunctionalDrinkingWater": 0
+    },
+    {
+      "state": "Punjab",
+      "totalSchools": 27404,
+      "schoolsWithDrinkingWater": 27381,
+      "schoolsWithFunctionalDrinkingWater": 27311,
+      "drinkingWaterCoveragePct": 99.9,
+      "functionalDrinkingWaterPct": 99.7,
+      "schoolsWithoutDrinkingWater": 23,
+      "schoolsWithoutFunctionalDrinkingWater": 93
+    },
+    {
+      "state": "Rajasthan",
+      "totalSchools": 107757,
+      "schoolsWithDrinkingWater": 105157,
+      "schoolsWithFunctionalDrinkingWater": 97733,
+      "drinkingWaterCoveragePct": 97.6,
+      "functionalDrinkingWaterPct": 90.7,
+      "schoolsWithoutDrinkingWater": 2600,
+      "schoolsWithoutFunctionalDrinkingWater": 10024
+    },
+    {
+      "state": "Sikkim",
+      "totalSchools": 1254,
+      "schoolsWithDrinkingWater": 1249,
+      "schoolsWithFunctionalDrinkingWater": 1240,
+      "drinkingWaterCoveragePct": 99.6,
+      "functionalDrinkingWaterPct": 98.9,
+      "schoolsWithoutDrinkingWater": 5,
+      "schoolsWithoutFunctionalDrinkingWater": 14
+    },
+    {
+      "state": "Tamil Nadu",
+      "totalSchools": 58722,
+      "schoolsWithDrinkingWater": 58106,
+      "schoolsWithFunctionalDrinkingWater": 57875,
+      "drinkingWaterCoveragePct": 99.0,
+      "functionalDrinkingWaterPct": 98.6,
+      "schoolsWithoutDrinkingWater": 616,
+      "schoolsWithoutFunctionalDrinkingWater": 847
+    },
+    {
+      "state": "Telangana",
+      "totalSchools": 42901,
+      "schoolsWithDrinkingWater": 41800,
+      "schoolsWithFunctionalDrinkingWater": 39762,
+      "drinkingWaterCoveragePct": 97.4,
+      "functionalDrinkingWaterPct": 92.7,
+      "schoolsWithoutDrinkingWater": 1101,
+      "schoolsWithoutFunctionalDrinkingWater": 3139
+    },
+    {
+      "state": "Tripura",
+      "totalSchools": 4923,
+      "schoolsWithDrinkingWater": 4603,
+      "schoolsWithFunctionalDrinkingWater": 4277,
+      "drinkingWaterCoveragePct": 93.5,
+      "functionalDrinkingWaterPct": 86.9,
+      "schoolsWithoutDrinkingWater": 320,
+      "schoolsWithoutFunctionalDrinkingWater": 646
+    },
+    {
+      "state": "Uttar Pradesh",
+      "totalSchools": 255087,
+      "schoolsWithDrinkingWater": 253303,
+      "schoolsWithFunctionalDrinkingWater": 245753,
+      "drinkingWaterCoveragePct": 99.3,
+      "functionalDrinkingWaterPct": 96.3,
+      "schoolsWithoutDrinkingWater": 1784,
+      "schoolsWithoutFunctionalDrinkingWater": 9334
+    },
+    {
+      "state": "Uttarakhand",
+      "totalSchools": 22551,
+      "schoolsWithDrinkingWater": 21958,
+      "schoolsWithFunctionalDrinkingWater": 20937,
+      "drinkingWaterCoveragePct": 97.4,
+      "functionalDrinkingWaterPct": 92.8,
+      "schoolsWithoutDrinkingWater": 593,
+      "schoolsWithoutFunctionalDrinkingWater": 1614
+    },
+    {
+      "state": "West Bengal",
+      "totalSchools": 93945,
+      "schoolsWithDrinkingWater": 93573,
+      "schoolsWithFunctionalDrinkingWater": 93271,
+      "drinkingWaterCoveragePct": 99.6,
+      "functionalDrinkingWaterPct": 99.3,
+      "schoolsWithoutDrinkingWater": 372,
+      "schoolsWithoutFunctionalDrinkingWater": 674
+    }
+  ]
+}
