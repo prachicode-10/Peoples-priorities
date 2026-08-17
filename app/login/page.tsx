@@ -313,7 +313,7 @@ function LoginContent() {
                   placeholder="name@example.com"
                   required
                   disabled={isPending}
-                  className="w-full px-5 py-3.5 rounded-2xl bg-[#f5f7f4] text-sm text-[#17221b] placeholder-[#8ea093]/70 border-0 outline-none shadow-[inset_4px_4px_8px_#d2d7d1,inset_-4px_-4px_8px_#ffffff] transition-all duration-300 focus:shadow-[inset_6px_6px_10px_#cbd0ca,inset_-6px_-6px_10px_#ffffff] focus:ring-1 focus:ring-[#173f2a]/15 disabled:opacity-60"
+                  className="w-full px-5 py-3.5 rounded-2xl bg-[#f5f7f4] text-sm text-[#17221b] placeholder-[#8ea093]/70 border border-transparent hover:border-[#397149]/60 hover:shadow-[inset_4px_4px_8px_#d2d7d1,inset_-4px_-4px_8px_#ffffff,0_0_12px_rgba(57,113,73,0.25)] focus:border-[#173f2a] outline-none shadow-[inset_4px_4px_8px_#d2d7d1,inset_-4px_-4px_8px_#ffffff] transition-all duration-300 focus:shadow-[inset_6px_6px_10px_#cbd0ca,inset_-6px_-6px_10px_#ffffff] focus:ring-1 focus:ring-[#173f2a]/15 disabled:opacity-60"
                 />
               </div>
 
@@ -330,7 +330,7 @@ function LoginContent() {
                     placeholder="••••••••"
                     required
                     disabled={isPending}
-                    className="w-full pl-5 pr-12 py-3.5 rounded-2xl bg-[#f5f7f4] text-sm text-[#17221b] placeholder-[#8ea093]/70 border-0 outline-none shadow-[inset_4px_4px_8px_#d2d7d1,inset_-4px_-4px_8px_#ffffff] transition-all duration-300 focus:shadow-[inset_6px_6px_10px_#cbd0ca,inset_-6px_-6px_10px_#ffffff] focus:ring-1 focus:ring-[#173f2a]/15 disabled:opacity-60"
+                    className="w-full pl-5 pr-12 py-3.5 rounded-2xl bg-[#f5f7f4] text-sm text-[#17221b] placeholder-[#8ea093]/70 border border-transparent hover:border-[#397149]/60 hover:shadow-[inset_4px_4px_8px_#d2d7d1,inset_-4px_-4px_8px_#ffffff,0_0_12px_rgba(57,113,73,0.25)] focus:border-[#173f2a] outline-none shadow-[inset_4px_4px_8px_#d2d7d1,inset_-4px_-4px_8px_#ffffff] transition-all duration-300 focus:shadow-[inset_6px_6px_10px_#cbd0ca,inset_-6px_-6px_10px_#ffffff] focus:ring-1 focus:ring-[#173f2a]/15 disabled:opacity-60"
                   />
                   <button
                     type="button"
@@ -455,7 +455,7 @@ function LoginContent() {
                   onChange={(e) => handleOtpChange(idx, e.target.value)}
                   onKeyDown={(e) => handleOtpKeyDown(idx, e)}
                   disabled={isPending}
-                  className="w-12 h-14 bg-[#f5f7f4] rounded-2xl text-center text-xl font-extrabold text-[#173f2a] border-0 outline-none shadow-[inset_4px_4px_8px_#d2d7d1,inset_-4px_-4px_8px_#ffffff] transition-all duration-300 focus:shadow-[inset_6px_6px_10px_#cbd0ca,inset_-6px_-6px_10px_#ffffff] disabled:opacity-50"
+                  className="w-12 h-14 bg-[#f5f7f4] rounded-2xl text-center text-xl font-extrabold text-[#173f2a] border border-transparent hover:border-[#397149]/60 hover:shadow-[inset_4px_4px_8px_#d2d7d1,inset_-4px_-4px_8px_#ffffff,0_0_12px_rgba(57,113,73,0.25)] focus:border-[#173f2a] outline-none shadow-[inset_4px_4px_8px_#d2d7d1,inset_-4px_-4px_8px_#ffffff] transition-all duration-300 focus:shadow-[inset_6px_6px_10px_#cbd0ca,inset_-6px_-6px_10px_#ffffff] disabled:opacity-50"
                 />
               ))}
             </div>
