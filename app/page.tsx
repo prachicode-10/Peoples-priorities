@@ -1414,7 +1414,7 @@ export default function Home() {
             <div className="mt-10 grid gap-6 lg:grid-cols-2">
               {/* ISSUE DISTRIBUTION */}
 
-              <div className="rounded-[2rem] border border-[#d9e1d9] bg-[#f8faf8] p-6 shadow-sm sm:p-8">
+              <div className="rounded-[2rem] border border-[#d9e1d9] bg-[#f8faf8] p-6 shadow-sm sm:p-8 hover:shadow-[0_20px_40px_rgba(34,197,94,0.2)] hover:border-[#22c55e] hover:scale-[1.015] transition-all duration-500 ease-out">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#397149]">
@@ -1494,7 +1494,7 @@ export default function Home() {
 
               {/* PRIORITY RANKING */}
 
-              <div className="rounded-[2rem] border border-[#d9e1d9] bg-white p-6 shadow-sm sm:p-8">
+              <div className="rounded-[2rem] border border-[#d9e1d9] bg-white p-6 shadow-sm sm:p-8 hover:shadow-[0_20px_40px_rgba(34,197,94,0.2)] hover:border-[#22c55e] hover:scale-[1.015] transition-all duration-500 ease-out">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#397149]">
@@ -1525,7 +1525,7 @@ export default function Home() {
                           key={
                             category.name
                           }
-                          className="rounded-2xl border border-[#e3e9e3] bg-[#f8faf8] p-4 transition hover:-translate-y-0.5 hover:shadow-md"
+                          className="rounded-2xl border border-[#e3e9e3] bg-[#f8faf8] p-4 hover:border-[#22c55e]/40 hover:bg-[#eafaea]/30 hover:shadow-[0_4px_12px_rgba(34,197,94,0.12)] transition-all duration-300 hover:-translate-y-0.5"
                         >
                           <div className="flex items-center gap-4">
                             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white font-bold text-[#397149]">
@@ -1593,7 +1593,7 @@ export default function Home() {
 
               {/* EVIDENCE */}
 
-              <div className="rounded-[2rem] border border-[#d9e1d9] bg-white p-6 shadow-sm sm:p-8">
+              <div className="rounded-[2rem] border border-[#d9e1d9] bg-white p-6 shadow-sm sm:p-8 hover:shadow-[0_20px_40px_rgba(34,197,94,0.2)] hover:border-[#22c55e] hover:scale-[1.015] transition-all duration-500 ease-out">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#397149]">
@@ -1661,7 +1661,7 @@ export default function Home() {
 
               {/* LANGUAGE */}
 
-              <div className="rounded-[2rem] border border-[#d9e1d9] bg-white p-6 shadow-sm sm:p-8">
+              <div className="rounded-[2rem] border border-[#d9e1d9] bg-white p-6 shadow-sm sm:p-8 hover:shadow-[0_20px_40px_rgba(34,197,94,0.2)] hover:border-[#22c55e] hover:scale-[1.015] transition-all duration-500 ease-out">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#397149]">
