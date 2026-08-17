@@ -277,8 +277,8 @@ function LoginContent() {
                 }}
                 className={`flex-1 text-xs font-extrabold py-3 rounded-full transition-all duration-300 ${
                   activeTab === "signin"
-                    ? "bg-[#f5f7f4] text-[#173f2a] shadow-[4px_4px_8px_#d2d7d1,-4px_-4px_8px_#ffffff]"
-                    : "text-[#66736a] hover:text-[#173f2a]"
+                    ? "bg-[#f5f7f4] text-[#173f2a] shadow-[4px_4px_8px_#d2d7d1,-4px_-4px_8px_#ffffff] hover:shadow-[4px_4px_8px_#d2d7d1,-4px_-4px_8px_#ffffff,0_0_16px_rgba(34,197,94,0.45)]"
+                    : "text-[#66736a] hover:text-[#22c55e] hover:bg-[#eafaea]/60 hover:shadow-[inset_2px_2px_4px_#d2d7d1,inset_-2px_-2px_4px_#ffffff]"
                 }`}
               >
                 Admin Login
@@ -292,8 +292,8 @@ function LoginContent() {
                 }}
                 className={`flex-1 text-xs font-extrabold py-3 rounded-full transition-all duration-300 ${
                   activeTab === "signup"
-                    ? "bg-[#f5f7f4] text-[#173f2a] shadow-[4px_4px_8px_#d2d7d1,-4px_-4px_8px_#ffffff]"
-                    : "text-[#66736a] hover:text-[#173f2a]"
+                    ? "bg-[#f5f7f4] text-[#173f2a] shadow-[4px_4px_8px_#d2d7d1,-4px_-4px_8px_#ffffff] hover:shadow-[4px_4px_8px_#d2d7d1,-4px_-4px_8px_#ffffff,0_0_16px_rgba(34,197,94,0.45)]"
+                    : "text-[#66736a] hover:text-[#22c55e] hover:bg-[#eafaea]/60 hover:shadow-[inset_2px_2px_4px_#d2d7d1,inset_-2px_-2px_4px_#ffffff]"
                 }`}
               >
                 Admin Register
@@ -313,7 +313,7 @@ function LoginContent() {
                   placeholder="name@example.com"
                   required
                   disabled={isPending}
-                  className="w-full px-5 py-3.5 rounded-2xl bg-[#f5f7f4] text-sm text-[#17221b] placeholder-[#8ea093]/70 border border-transparent hover:border-[#397149]/60 hover:shadow-[inset_4px_4px_8px_#d2d7d1,inset_-4px_-4px_8px_#ffffff,0_0_12px_rgba(57,113,73,0.25)] focus:border-[#173f2a] outline-none shadow-[inset_4px_4px_8px_#d2d7d1,inset_-4px_-4px_8px_#ffffff] transition-all duration-300 focus:shadow-[inset_6px_6px_10px_#cbd0ca,inset_-6px_-6px_10px_#ffffff] focus:ring-1 focus:ring-[#173f2a]/15 disabled:opacity-60"
+                  className="w-full px-5 py-3.5 rounded-2xl bg-[#f5f7f4] text-sm text-[#17221b] placeholder-[#8ea093]/70 border border-transparent hover:border-[#22c55e] hover:shadow-[inset_4px_4px_8px_#d2d7d1,inset_-4px_-4px_8px_#ffffff,0_0_16px_rgba(34,197,94,0.45)] focus:border-[#22c55e] focus:shadow-[inset_6px_6px_10px_#cbd0ca,inset_-6px_-6px_10px_#ffffff,0_0_16px_rgba(34,197,94,0.45)] outline-none shadow-[inset_4px_4px_8px_#d2d7d1,inset_-4px_-4px_8px_#ffffff] transition-all duration-300 focus:ring-1 focus:ring-[#22c55e]/25 disabled:opacity-60"
                 />
               </div>
 
@@ -330,7 +330,7 @@ function LoginContent() {
                     placeholder="••••••••"
                     required
                     disabled={isPending}
-                    className="w-full pl-5 pr-12 py-3.5 rounded-2xl bg-[#f5f7f4] text-sm text-[#17221b] placeholder-[#8ea093]/70 border border-transparent hover:border-[#397149]/60 hover:shadow-[inset_4px_4px_8px_#d2d7d1,inset_-4px_-4px_8px_#ffffff,0_0_12px_rgba(57,113,73,0.25)] focus:border-[#173f2a] outline-none shadow-[inset_4px_4px_8px_#d2d7d1,inset_-4px_-4px_8px_#ffffff] transition-all duration-300 focus:shadow-[inset_6px_6px_10px_#cbd0ca,inset_-6px_-6px_10px_#ffffff] focus:ring-1 focus:ring-[#173f2a]/15 disabled:opacity-60"
+                    className="w-full pl-5 pr-12 py-3.5 rounded-2xl bg-[#f5f7f4] text-sm text-[#17221b] placeholder-[#8ea093]/70 border border-transparent hover:border-[#22c55e] hover:shadow-[inset_4px_4px_8px_#d2d7d1,inset_-4px_-4px_8px_#ffffff,0_0_16px_rgba(34,197,94,0.45)] focus:border-[#22c55e] focus:shadow-[inset_6px_6px_10px_#cbd0ca,inset_-6px_-6px_10px_#ffffff,0_0_16px_rgba(34,197,94,0.45)] outline-none shadow-[inset_4px_4px_8px_#d2d7d1,inset_-4px_-4px_8px_#ffffff] transition-all duration-300 focus:ring-1 focus:ring-[#22c55e]/25 disabled:opacity-60"
                   />
                   <button
                     type="button"
@@ -455,7 +455,7 @@ function LoginContent() {
                   onChange={(e) => handleOtpChange(idx, e.target.value)}
                   onKeyDown={(e) => handleOtpKeyDown(idx, e)}
                   disabled={isPending}
-                  className="w-12 h-14 bg-[#f5f7f4] rounded-2xl text-center text-xl font-extrabold text-[#173f2a] border border-transparent hover:border-[#397149]/60 hover:shadow-[inset_4px_4px_8px_#d2d7d1,inset_-4px_-4px_8px_#ffffff,0_0_12px_rgba(57,113,73,0.25)] focus:border-[#173f2a] outline-none shadow-[inset_4px_4px_8px_#d2d7d1,inset_-4px_-4px_8px_#ffffff] transition-all duration-300 focus:shadow-[inset_6px_6px_10px_#cbd0ca,inset_-6px_-6px_10px_#ffffff] disabled:opacity-50"
+                  className="w-12 h-14 bg-[#f5f7f4] rounded-2xl text-center text-xl font-extrabold text-[#173f2a] border border-transparent hover:border-[#22c55e] hover:shadow-[inset_4px_4px_8px_#d2d7d1,inset_-4px_-4px_8px_#ffffff,0_0_16px_rgba(34,197,94,0.45)] focus:border-[#22c55e] focus:shadow-[inset_6px_6px_10px_#cbd0ca,inset_-6px_-6px_10px_#ffffff,0_0_16px_rgba(34,197,94,0.45)] outline-none shadow-[inset_4px_4px_8px_#d2d7d1,inset_-4px_-4px_8px_#ffffff] transition-all duration-300 disabled:opacity-50"
                 />
               ))}
             </div>
