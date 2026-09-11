@@ -220,6 +220,12 @@ export default function DashboardPage() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("admin-auth-token");
+    localStorage.removeItem("admin-email");
+    router.replace("/");
+  };
+
   /*
    * ==========================================================
    * CATEGORY + PRIORITY ENGINE
@@ -575,6 +581,14 @@ export default function DashboardPage() {
               className="rounded-full border border-[#cbd8cd] bg-white px-4 py-2 text-xs font-bold text-[#397149] transition hover:bg-[#f0f8f1]"
             >
               ↻ Refresh
+            </button>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded-full border border-[#b81d1d] bg-white px-4 py-2 text-xs font-bold text-[#b81d1d] transition hover:bg-[#fdf2f2]"
+            >
+              Logout
             </button>
 
           </div>

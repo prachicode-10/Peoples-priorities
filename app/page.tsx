@@ -5,6 +5,8 @@ import LanguageSwitcher from "../components/LanguageSwitcher";
 import Coverflow from "../components/Coverflow";
 import { getCategory } from "@/lib/category";
 import { calculatePriority } from "@/lib/priority";
+import { developmentImages } from "@/src/data/images";
+import { motion } from "framer-motion";
 
 type Language = "en" | "hi" | "or";
 
@@ -1083,14 +1085,14 @@ export default function Home() {
 
             <a
               href="/login?redirect=/dashboard"
-              className="hidden rounded-full border border-[#cbd5cc] px-5 py-2.5 text-sm font-semibold text-[#314038] transition hover:border-[#173f2a] hover:bg-white sm:block"
+              className="hidden rounded-full neu-button-secondary px-5 py-2.5 text-sm font-semibold text-[#314038] sm:block"
             >
               {t.admin}
             </a>
 
             <a
               href="/citizen"
-              className="rounded-full bg-[#173f2a] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0f2f1e]"
+              className="rounded-full neu-button-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm"
             >
               {t.shareNeed}
             </a>
@@ -1129,14 +1131,14 @@ export default function Home() {
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <a
                 href="/citizen"
-                className="rounded-full bg-[#173f2a] px-7 py-3.5 text-center text-sm font-bold text-white shadow-lg shadow-[#173f2a]/10 transition hover:-translate-y-0.5 hover:bg-[#0f2f1e]"
+                className="rounded-full neu-button-primary px-7 py-3.5 text-center text-sm font-bold text-white"
               >
                 {t.tellCommunity}
               </a>
 
               <a
                 href="#live-intelligence"
-                className="rounded-full border border-[#cbd5cc] bg-white px-7 py-3.5 text-center text-sm font-bold text-[#314038] transition hover:bg-[#eef3ee]"
+                className="rounded-full neu-button-secondary px-7 py-3.5 text-center text-sm font-bold text-[#314038]"
               >
                 {t.seeHow}
               </a>
@@ -1170,7 +1172,7 @@ export default function Home() {
           <div className="relative flex items-center">
             <div
               key={pulseKey}
-              className="w-full rounded-[2rem] border border-[#d6ded6] bg-white p-5 shadow-[0_30px_80px_rgba(32,57,40,0.10)] hover:shadow-[0_20px_50px_rgba(34,197,94,0.25)] hover:border-[#22c55e] hover:scale-[1.015] transition-all duration-500 ease-out sm:p-7"
+              className="w-full rounded-[2rem] neu-flat shadow-[12px_12px_24px_#d2d9d1,-12px_-12px_24px_#ffffff] p-5 hover:shadow-[16px_16px_32px_#cbd5cb,-16px_-16px_32px_#ffffff] hover:scale-[1.015] transition-all duration-500 ease-out sm:p-7"
             >
               <div className="flex items-center justify-between border-b border-[#e5eae5] pb-5">
                 <div>
@@ -1192,7 +1194,7 @@ export default function Home() {
               <div className="mt-6 grid grid-cols-2 gap-3">
                 {/* SUBMISSIONS */}
 
-                <div className="rounded-2xl bg-[#f5f7f4] p-4 border border-transparent hover:border-[#22c55e]/40 hover:bg-[#eafaea]/30 hover:shadow-[0_4px_12px_rgba(34,197,94,0.15)] transition-all duration-300 hover:-translate-y-0.5">
+                <div className="rounded-2xl neu-inset-hover p-4 hover:scale-[1.02]">
                   <p className="text-2xl font-bold tracking-tight text-[#173f2a]">
                     <AnimatedNumber
                       value={
@@ -1208,7 +1210,7 @@ export default function Home() {
 
                 {/* HOTSPOTS */}
 
-                <div className="rounded-2xl bg-[#f5f7f4] p-4 border border-transparent hover:border-[#22c55e]/40 hover:bg-[#eafaea]/30 hover:shadow-[0_4px_12px_rgba(34,197,94,0.15)] transition-all duration-300 hover:-translate-y-0.5">
+                <div className="rounded-2xl neu-inset-hover p-4 hover:scale-[1.02]">
                   <p className="text-2xl font-bold tracking-tight text-[#173f2a]">
                     <AnimatedNumber
                       value={
@@ -1224,7 +1226,7 @@ export default function Home() {
 
                 {/* CRITICAL */}
 
-                <div className="rounded-2xl bg-[#f5f7f4] p-4 border border-transparent hover:border-[#22c55e]/40 hover:bg-[#eafaea]/30 hover:shadow-[0_4px_12px_rgba(34,197,94,0.15)] transition-all duration-300 hover:-translate-y-0.5">
+                <div className="rounded-2xl neu-inset-hover p-4 hover:scale-[1.02]">
                   <p className="text-2xl font-bold tracking-tight text-[#173f2a]">
                     <AnimatedNumber
                       value={
@@ -1240,7 +1242,7 @@ export default function Home() {
 
                 {/* EVIDENCE */}
 
-                <div className="rounded-2xl bg-[#f5f7f4] p-4 border border-transparent hover:border-[#22c55e]/40 hover:bg-[#eafaea]/30 hover:shadow-[0_4px_12px_rgba(34,197,94,0.15)] transition-all duration-300 hover:-translate-y-0.5">
+                <div className="rounded-2xl neu-inset-hover p-4 hover:scale-[1.02]">
                   <p className="text-2xl font-bold tracking-tight text-[#173f2a]">
                     <AnimatedNumber
                       value={
@@ -1257,7 +1259,7 @@ export default function Home() {
 
               {/* TOP NEED */}
 
-              <div className="mt-6 rounded-2xl border border-[#e1e7e1] hover:border-[#22c55e]/40 hover:bg-[#eafaea]/10 hover:shadow-[0_4px_12px_rgba(34,197,94,0.12)] transition-all duration-300 p-4">
+              <div className="mt-6 rounded-2xl neu-inset p-4">
                 {topPriority ? (
                   <>
                     <div className="flex items-center justify-between">
@@ -1293,7 +1295,7 @@ export default function Home() {
                       </div>
                     </div>
 
-                    <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#e5eae5]">
+                    <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#dfe8e0] shadow-inner">
                       <div
                         className="h-full rounded-full bg-[#397149] transition-all duration-1000"
                         style={{
@@ -1334,7 +1336,7 @@ export default function Home() {
                 )}
               </div>
 
-              <div className="mt-4 flex items-center gap-3 rounded-2xl bg-[#173f2a] p-4 text-white">
+              <div className="mt-4 flex items-center gap-3 rounded-2xl neu-dark-flat p-4 text-white">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10">
                   ✓
                 </div>
@@ -1354,13 +1356,15 @@ export default function Home() {
         </div>
       </section>
 
+
+
       {/* =====================================================
           LIVE INTELLIGENCE
       ====================================================== */}
 
       <section
         id="live-intelligence"
-        className="border-y border-[#dce3dc] bg-white"
+        className="border-y border-[#dce3dc] bg-[#f5f7f4]"
       >
         <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
           <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
@@ -1378,7 +1382,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="flex items-center gap-2 rounded-full border border-[#cfe0d1] bg-[#f5faf5] px-4 py-2 text-xs font-bold text-[#397149]">
+            <div className="flex items-center gap-2 rounded-full neu-inset px-4 py-2 text-xs font-bold text-[#397149]">
               <span className="h-2 w-2 animate-pulse rounded-full bg-[#397149]" />
               {submissions.length}{" "}
               {t.submissions}
@@ -1386,7 +1390,7 @@ export default function Home() {
           </div>
 
           {submissions.length === 0 ? (
-            <div className="mt-10 rounded-[2rem] border-2 border-dashed border-[#d4ded5] bg-[#f8faf8] p-14 text-center">
+            <div className="mt-10 rounded-[2rem] border-2 border-dashed border-[#d4ded5] neu-inset p-14 text-center">
               <div className="text-6xl">
                 📊
               </div>
@@ -1405,7 +1409,7 @@ export default function Home() {
 
               <a
                 href="/citizen"
-                className="mt-6 inline-flex rounded-full bg-[#173f2a] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#0f2f1e]"
+                className="mt-6 inline-flex rounded-full neu-button-primary px-6 py-3 text-sm font-bold text-white shadow-sm"
               >
                 {t.tellCommunity}
               </a>
@@ -1414,7 +1418,7 @@ export default function Home() {
             <div className="mt-10 grid gap-6 lg:grid-cols-2">
               {/* ISSUE DISTRIBUTION */}
 
-              <div className="rounded-[2rem] border border-[#d9e1d9] bg-[#f8faf8] p-6 shadow-sm sm:p-8 hover:shadow-[0_20px_40px_rgba(34,197,94,0.2)] hover:border-[#22c55e] hover:scale-[1.015] transition-all duration-500 ease-out">
+              <div className="rounded-[2rem] neu-flat shadow-[10px_10px_20px_#d2d9d1,-10px_-10px_20px_#ffffff] p-6 sm:p-8 hover:shadow-[14px_14px_28px_#cbd5cb,-14px_-14px_28px_#ffffff] hover:scale-[1.01] transition-all duration-500 ease-out">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#397149]">
@@ -1444,7 +1448,7 @@ export default function Home() {
                       >
                         <div className="flex items-center justify-between text-sm">
                           <div className="flex items-center gap-3">
-                            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white">
+                            <span className="flex h-8 w-8 items-center justify-center rounded-xl neu-inset bg-transparent">
                               {
                                 category.icon
                               }
@@ -1474,7 +1478,7 @@ export default function Home() {
                           </div>
                         </div>
 
-                        <div className="mt-2 h-3 overflow-hidden rounded-full bg-[#dfe8e0]">
+                        <div className="mt-2 h-3 overflow-hidden rounded-full bg-[#dfe8e0] shadow-inner">
                           <div
                             className="h-full origin-left rounded-full bg-[#397149] transition-all duration-1000 ease-out group-hover:bg-[#28623c]"
                             style={{
@@ -1494,7 +1498,7 @@ export default function Home() {
 
               {/* PRIORITY RANKING */}
 
-              <div className="rounded-[2rem] border border-[#d9e1d9] bg-white p-6 shadow-sm sm:p-8 hover:shadow-[0_20px_40px_rgba(34,197,94,0.2)] hover:border-[#22c55e] hover:scale-[1.015] transition-all duration-500 ease-out">
+              <div className="rounded-[2rem] neu-flat shadow-[10px_10px_20px_#d2d9d1,-10px_-10px_20px_#ffffff] p-6 sm:p-8 hover:shadow-[14px_14px_28px_#cbd5cb,-14px_-14px_28px_#ffffff] hover:scale-[1.01] transition-all duration-500 ease-out">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#397149]">
@@ -1525,10 +1529,10 @@ export default function Home() {
                           key={
                             category.name
                           }
-                          className="rounded-2xl border border-[#e3e9e3] bg-[#f8faf8] p-4 hover:border-[#22c55e]/40 hover:bg-[#eafaea]/30 hover:shadow-[0_4px_12px_rgba(34,197,94,0.12)] transition-all duration-300 hover:-translate-y-0.5"
+                          className="rounded-2xl neu-inset p-4 hover:scale-[1.01] transition-all duration-300"
                         >
                           <div className="flex items-center gap-4">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white font-bold text-[#397149]">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl neu-flat font-bold text-[#397149]">
                               #
                               {index + 1}
                             </div>
@@ -1557,7 +1561,7 @@ export default function Home() {
                                 </span>
                               </div>
 
-                              <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#dfe8e0]">
+                              <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#dfe8e0] shadow-inner">
                                 <div
                                   className="h-full rounded-full bg-[#397149] transition-all duration-1000"
                                   style={{
@@ -1593,7 +1597,7 @@ export default function Home() {
 
               {/* EVIDENCE */}
 
-              <div className="rounded-[2rem] border border-[#d9e1d9] bg-white p-6 shadow-sm sm:p-8 hover:shadow-[0_20px_40px_rgba(34,197,94,0.2)] hover:border-[#22c55e] hover:scale-[1.015] transition-all duration-500 ease-out">
+              <div className="rounded-[2rem] neu-flat shadow-[10px_10px_20px_#d2d9d1,-10px_-10px_20px_#ffffff] p-6 sm:p-8 hover:shadow-[14px_14px_28px_#cbd5cb,-14px_-14px_28px_#ffffff] hover:scale-[1.01] transition-all duration-500 ease-out">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#397149]">
@@ -1619,7 +1623,7 @@ export default function Home() {
                       background: `conic-gradient(#397149 ${evidencePercentage}%, #e1e9e2 ${evidencePercentage}% 100%)`,
                     }}
                   >
-                    <div className="flex h-28 w-28 items-center justify-center rounded-full bg-white">
+                    <div className="flex h-28 w-28 items-center justify-center rounded-full neu-flat shadow-[4px_4px_8px_#d2d9d1,-4px_-4px_8px_#ffffff]">
                       <div className="text-center">
                         <p className="text-3xl font-bold text-[#173f2a]">
                           {
@@ -1661,7 +1665,7 @@ export default function Home() {
 
               {/* LANGUAGE */}
 
-              <div className="rounded-[2rem] border border-[#d9e1d9] bg-white p-6 shadow-sm sm:p-8 hover:shadow-[0_20px_40px_rgba(34,197,94,0.2)] hover:border-[#22c55e] hover:scale-[1.015] transition-all duration-500 ease-out">
+              <div className="rounded-[2rem] neu-flat shadow-[10px_10px_20px_#d2d9d1,-10px_-10px_20px_#ffffff] p-6 sm:p-8 hover:shadow-[14px_14px_28px_#cbd5cb,-14px_-14px_28px_#ffffff] hover:scale-[1.01] transition-all duration-500 ease-out">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#397149]">
@@ -1708,7 +1712,7 @@ export default function Home() {
                           </span>
                         </div>
 
-                        <div className="mt-2 h-3 overflow-hidden rounded-full bg-[#e0e8e1]">
+                        <div className="mt-2 h-3 overflow-hidden rounded-full bg-[#e0e8e1] shadow-inner">
                           <div
                             className="h-full rounded-full bg-[#397149] transition-all duration-1000"
                             style={{
@@ -1759,12 +1763,12 @@ export default function Home() {
                 (step, index) => (
                   <div
                     key={step.title}
-                    className="relative rounded-3xl border border-[#d9e2da] bg-white p-6 shadow-sm hover:shadow-[0_12px_24px_rgba(34,197,94,0.2)] hover:border-[#22c55e] hover:scale-[1.03] transition-all duration-500 ease-out"
+                    className="relative rounded-3xl neu-flat-hover p-6 shadow-[8px_8px_16px_#d2d9d1,-8px_-8px_16px_#ffffff] hover:scale-[1.03] transition-all duration-500 ease-out"
                     style={{
                       animationDelay: `${index * 120}ms`,
                     }}
                   >
-                    <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#e9f4ea] text-2xl shadow-sm">
+                    <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-2xl neu-inset text-2xl">
                       {step.icon}
                     </div>
 
@@ -1794,7 +1798,7 @@ export default function Home() {
 
       <section
         id="how-it-works"
-        className="border-y border-[#dce3dc] bg-white"
+        className="border-y border-[#dce3dc] bg-[#f5f7f4]"
       >
         <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
           <div className="max-w-2xl">
@@ -1816,6 +1820,129 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* =====================================================
+          SECTION 2 — DEVELOPMENT PRIORITIES (3-Card Grid)
+      ====================================================== */}
+      <section className="bg-[#f5f7f4] border-b border-[#dce3dc]">
+        <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
+          <div className="max-w-2xl mb-12">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#397149]">
+              DEVELOPMENT PRIORITIES
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[#17221b] sm:text-4xl">
+              Transforming reports into action categories.
+            </h2>
+            <p className="mt-4 leading-7 text-[#66736a]">
+              Visualizing the key public infrastructure sectors where citizen demand demands immediate prioritization and budget optimization.
+            </p>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-3">
+            {/* Card 1: Roads */}
+            <motion.div
+              whileHover={{ y: -8 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="group relative flex flex-col overflow-hidden rounded-3xl neu-flat-hover shadow-[8px_8px_16px_#d2d9d1,-8px_-8px_16px_#ffffff] hover:shadow-[12px_12px_24px_#cbd5cb,-12px_-12px_24px_#ffffff]"
+            >
+              <div className="relative h-60 w-full overflow-hidden">
+                <img
+                  src={developmentImages.roadsCategory}
+                  alt="Road construction and repairs"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </div>
+              <div className="flex flex-1 flex-col justify-between p-6">
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#397149]">Roads</span>
+                  <h3 className="mt-2 text-xl font-bold text-[#17221b]">Roads</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-[#66736a]">
+                    Repairing potholes, expanding rural connector roads, and finishing pending arterial route maintenance.
+                  </p>
+                </div>
+                <div className="mt-6 flex items-center justify-between border-t border-[#e5eae5] pt-4">
+                  <span className="text-xs text-[#7b877f]">1,284 citizen requests</span>
+                  <a href="#priorities" className="text-sm font-bold text-[#173f2a] group-hover:underline flex items-center gap-1">
+                    View Priority <span className="transition-transform group-hover:translate-x-1">→</span>
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Card 2: Healthcare */}
+            <motion.div
+              whileHover={{ y: -8 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="group relative flex flex-col overflow-hidden rounded-3xl neu-flat-hover shadow-[8px_8px_16px_#d2d9d1,-8px_-8px_16px_#ffffff] hover:shadow-[12px_12px_24px_#cbd5cb,-12px_-12px_24px_#ffffff]"
+            >
+              <div className="relative h-60 w-full overflow-hidden">
+                <img
+                  src={developmentImages.healthcareCategory}
+                  alt="Healthcare clinic infrastructure"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </div>
+              <div className="flex flex-1 flex-col justify-between p-6">
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#397149]">Healthcare</span>
+                  <h3 className="mt-2 text-xl font-bold text-[#17221b]">Healthcare</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-[#66736a]">
+                    Upgrading primary health centers, improving basic diagnostics, and ensuring direct medical supply lines.
+                  </p>
+                </div>
+                <div className="mt-6 flex items-center justify-between border-t border-[#e5eae5] pt-4">
+                  <span className="text-xs text-[#7b877f]">842 citizen requests</span>
+                  <a href="#priorities" className="text-sm font-bold text-[#173f2a] group-hover:underline flex items-center gap-1">
+                    View Priority <span className="transition-transform group-hover:translate-x-1">→</span>
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Card 3: Education */}
+            <motion.div
+              whileHover={{ y: -8 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="group relative flex flex-col overflow-hidden rounded-3xl neu-flat-hover shadow-[8px_8px_16px_#d2d9d1,-8px_-8px_16px_#ffffff] hover:shadow-[12px_12px_24px_#cbd5cb,-12px_-12px_24px_#ffffff]"
+            >
+              <div className="relative h-60 w-full overflow-hidden">
+                <img
+                  src={developmentImages.educationCategory}
+                  alt="Rural school development"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </div>
+              <div className="flex flex-1 flex-col justify-between p-6">
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#397149]">Education</span>
+                  <h3 className="mt-2 text-xl font-bold text-[#17221b]">Education</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-[#66736a]">
+                    Rehabilitating classroom infrastructure, supplying modern learning aids, and repairing school sanitation blocks.
+                  </p>
+                </div>
+                <div className="mt-6 flex items-center justify-between border-t border-[#e5eae5] pt-4">
+                  <span className="text-xs text-[#7b877f]">915 citizen requests</span>
+                  <a href="#priorities" className="text-sm font-bold text-[#173f2a] group-hover:underline flex items-center gap-1">
+                    View Priority <span className="transition-transform group-hover:translate-x-1">→</span>
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+
+
+
+
+
 
       {/* =====================================================
           REAL PRIORITIES
@@ -1867,10 +1994,10 @@ export default function Home() {
                   (item, index) => (
                     <div
                       key={item.name}
-                      className="rounded-3xl border border-[#d9e1d9] bg-white p-6 shadow-sm hover:shadow-[0_12px_24px_rgba(34,197,94,0.2)] hover:border-[#22c55e] hover:scale-[1.03] transition-all duration-500 ease-out"
+                      className="rounded-3xl neu-flat-hover p-6 shadow-[8px_8px_16px_#d2d9d1,-8px_-8px_16px_#ffffff] hover:scale-[1.03] transition-all duration-500 ease-out"
                     >
                       <div className="flex items-start justify-between">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#eef4ee] text-xl">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl neu-inset text-xl">
                           {item.icon}
                         </div>
 
@@ -1913,7 +2040,7 @@ export default function Home() {
                         </div>
                       </div>
 
-                      <div className="mt-5 h-2 rounded-full bg-[#e8ede8]">
+                      <div className="mt-5 h-2 rounded-full bg-[#e8ede8] shadow-inner">
                         <div
                           className="h-full rounded-full bg-[#397149] transition-all duration-1000"
                           style={{
@@ -1952,11 +2079,11 @@ export default function Home() {
           DATA INTEGRITY NOTICE
       ====================================================== */}
 
-      <section className="bg-white">
+      <section className="bg-[#f5f7f4]">
         <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-          <div className="rounded-[2rem] border border-[#cfe0d1] bg-[#f5faf5] p-7 sm:p-9 hover:border-[#22c55e] hover:shadow-[0_20px_40px_rgba(34,197,94,0.2)] hover:scale-[1.01] transition-all duration-500 ease-out">
+          <div className="rounded-[2rem] neu-flat shadow-[10px_10px_20px_#d2d9d1,-10px_-10px_20px_#ffffff] p-7 sm:p-9 hover:scale-[1.01] transition-all duration-500 ease-out">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#173f2a] text-xl text-white">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl neu-button-primary text-xl text-white shadow-none">
                 🛡️
               </div>
 
@@ -1986,7 +2113,7 @@ export default function Home() {
                 </p>
 
                 <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-2xl bg-white p-4 border border-transparent hover:border-[#22c55e]/40 hover:shadow-[0_4px_12px_rgba(34,197,94,0.12)] transition-all duration-300 hover:-translate-y-0.5">
+                  <div className="rounded-2xl neu-inset p-4 hover:scale-[1.01] transition-all duration-300">
                     <p className="text-xs font-bold text-[#397149]">
                       {t.locationVerified}
                     </p>
@@ -1996,7 +2123,7 @@ export default function Home() {
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-white p-4 border border-transparent hover:border-[#22c55e]/40 hover:shadow-[0_4px_12px_rgba(34,197,94,0.12)] transition-all duration-300 hover:-translate-y-0.5">
+                  <div className="rounded-2xl neu-inset p-4 hover:scale-[1.01] transition-all duration-300">
                     <p className="text-xs font-bold text-[#397149]">
                       {t.evidenceFirst}
                     </p>
@@ -2006,7 +2133,7 @@ export default function Home() {
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-white p-4 border border-transparent hover:border-[#22c55e]/40 hover:shadow-[0_4px_12px_rgba(34,197,94,0.12)] transition-all duration-300 hover:-translate-y-0.5">
+                  <div className="rounded-2xl neu-inset p-4 hover:scale-[1.01] transition-all duration-300">
                     <p className="text-xs font-bold text-[#397149]">
                       {t.noBudgetData}
                     </p>
@@ -2046,8 +2173,8 @@ export default function Home() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-6 hover:bg-white/[0.12] hover:border-[#22c55e] hover:shadow-[0_12px_24px_rgba(34,197,94,0.4)] hover:scale-[1.03] transition-all duration-300">
-              <div className="text-2xl">
+            <div className="rounded-3xl neu-dark-flat p-6 hover:scale-[1.03] transition-all duration-300">
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl neu-dark-inset text-2xl">
                 📍
               </div>
 
@@ -2060,8 +2187,8 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-6 hover:bg-white/[0.12] hover:border-[#22c55e] hover:shadow-[0_12px_24px_rgba(34,197,94,0.4)] hover:scale-[1.03] transition-all duration-300">
-              <div className="text-2xl">
+            <div className="rounded-3xl neu-dark-flat p-6 hover:scale-[1.03] transition-all duration-300">
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl neu-dark-inset text-2xl">
                 🧠
               </div>
 
@@ -2074,8 +2201,8 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-6 hover:bg-white/[0.12] hover:border-[#22c55e] hover:shadow-[0_12px_24px_rgba(34,197,94,0.4)] hover:scale-[1.03] transition-all duration-300">
-              <div className="text-2xl">
+            <div className="rounded-3xl neu-dark-flat p-6 hover:scale-[1.03] transition-all duration-300">
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl neu-dark-inset text-2xl">
                 📷
               </div>
 
@@ -2088,8 +2215,8 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-6 hover:bg-white/[0.12] hover:border-[#22c55e] hover:shadow-[0_12px_24px_rgba(34,197,94,0.4)] hover:scale-[1.03] transition-all duration-300">
-              <div className="text-2xl">
+            <div className="rounded-3xl neu-dark-flat p-6 hover:scale-[1.03] transition-all duration-300">
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl neu-dark-inset text-2xl">
                 🇮🇳
               </div>
 

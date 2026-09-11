@@ -148,10 +148,10 @@ export default function Coverflow({ items, language }: CoverflowProps) {
             <div
               key={item.number}
               onClick={() => setActiveIndex(idx)}
-              className={`absolute w-[300px] sm:w-[420px] h-[360px] rounded-3xl p-8 border transition-all duration-500 ease-out cursor-pointer flex flex-col justify-between select-none ${
+              className={`absolute w-[300px] sm:w-[420px] h-[360px] rounded-3xl p-8 transition-all duration-500 ease-out cursor-pointer flex flex-col justify-between select-none ${
                 offset === 0
-                  ? "bg-white border-[#173f2a] shadow-[0_25px_60px_rgba(23,63,42,0.15)] ring-1 ring-[#173f2a]/10"
-                  : "bg-white/85 border-[#dfe6df]/85 shadow-md backdrop-blur-sm"
+                  ? "neu-flat shadow-[10px_10px_20px_#c5cdc3,-10px_-10px_20px_#ffffff] border-2 border-[#173f2a]/15"
+                  : "neu-flat opacity-70 border border-[#dfe6df]/40"
               }`}
               style={{
                 transform: `translateX(${translateX}px) scale(${scale}) rotateY(${rotateY}deg) translateZ(${translateZ}px)`,
@@ -163,16 +163,16 @@ export default function Coverflow({ items, language }: CoverflowProps) {
             >
               {/* Card Header */}
               <div className="flex items-center justify-between">
-                <span className={`text-xs font-extrabold tracking-[0.2em] px-2.5 py-1 rounded-full ${
+                <span className={`text-xs font-extrabold tracking-[0.2em] px-3 py-1 rounded-full ${
                   offset === 0 
-                    ? "bg-[#e9f4ea] text-[#173f2a]" 
-                    : "bg-[#f0f3f0] text-[#7b877f]"
+                    ? "neu-inset text-[#173f2a]" 
+                    : "bg-[#eef1ee] text-[#7b877f]"
                 }`}>
                   {item.number}
                 </span>
 
                 <div className={`flex h-12 w-12 items-center justify-center rounded-2xl text-2xl transition-colors duration-500 ${
-                  offset === 0 ? "bg-[#e9f4ea] shadow-sm" : "bg-[#f5faf5]/40"
+                  offset === 0 ? "neu-inset text-[#173f2a]" : "bg-[#f5faf5]/40"
                 }`}>
                   {item.icon}
                 </div>
@@ -209,13 +209,13 @@ export default function Coverflow({ items, language }: CoverflowProps) {
           onClick={handlePrev}
           disabled={activeIndex === 0}
           aria-label="Previous layer"
-          className="h-11 w-11 rounded-full border border-[#cbd5cc] bg-white flex items-center justify-center text-sm text-[#173f2a] transition duration-300 hover:bg-[#eef3ee] active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
+          className="h-11 w-11 rounded-full neu-button-secondary flex items-center justify-center text-sm font-bold text-[#173f2a] disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
         >
           ←
         </button>
 
         {/* Dynamic dot indicators */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 p-2 rounded-full neu-inset">
           {items.map((_, idx) => (
             <button
               key={idx}
@@ -232,7 +232,7 @@ export default function Coverflow({ items, language }: CoverflowProps) {
           onClick={handleNext}
           disabled={activeIndex === items.length - 1}
           aria-label="Next layer"
-          className="h-11 w-11 rounded-full border border-[#cbd5cc] bg-white flex items-center justify-center text-sm text-[#173f2a] transition duration-300 hover:bg-[#eef3ee] active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
+          className="h-11 w-11 rounded-full neu-button-secondary flex items-center justify-center text-sm font-bold text-[#173f2a] disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
         >
           →
         </button>
