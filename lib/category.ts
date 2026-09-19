@@ -1,3 +1,5 @@
+import { analyzeIssueContext, CATEGORY_ICONS } from "./issueClassifier";
+
 export type IssueCategory = {
   name:
     | "Roads"
@@ -7,6 +9,10 @@ export type IssueCategory = {
     | "Healthcare"
     | "Education"
     | "Flooding"
+    | "Food Safety"
+    | "Health & Hygiene"
+    | "Waste Management"
+    | "Roads & Infrastructure"
     | "Other";
   icon: string;
 };
@@ -479,68 +485,34 @@ const FLOODING_WORDS = [
 export function getCategory(
   issue: string
 ): IssueCategory {
-  const text = normalizeText(issue);
+  const analysis = analyzeIssueContext(issue);
+  let name: IssueCategory["name"] = "Other";
 
-  /*
-   * Flooding is checked before Water because:
-   *
-   * "There is waterlogging"
-   *
-   * should become Flooding, not Water.
-   */
-
-  if (containsAny(text, FLOODING_WORDS)) {
-    return {
-      name: "Flooding",
-      icon: "🌊",
-    };
-  }
-
-  if (containsAny(text, ROAD_WORDS)) {
-    return {
-      name: "Roads",
-      icon: "🛣️",
-    };
-  }
-
-  if (containsAny(text, WATER_WORDS)) {
-    return {
-      name: "Water",
-      icon: "💧",
-    };
-  }
-
-  if (containsAny(text, ELECTRICITY_WORDS)) {
-    return {
-      name: "Electricity",
-      icon: "⚡",
-    };
-  }
-
-  if (containsAny(text, SANITATION_WORDS)) {
-    return {
-      name: "Sanitation",
-      icon: "🗑️",
-    };
-  }
-
-  if (containsAny(text, HEALTHCARE_WORDS)) {
-    return {
-      name: "Healthcare",
-      icon: "🏥",
-    };
-  }
-
-  if (containsAny(text, EDUCATION_WORDS)) {
-    return {
-      name: "Education",
-      icon: "🎓",
-    };
+  if (analysis.primaryCategory === "Food Safety") {
+    name = "Food Safety";
+  } else if (analysis.primaryCategory === "Health & Hygiene") {
+    name = "Health & Hygiene";
+  } else if (analysis.primaryCategory === "Waste Management" || analysis.primaryCategory === "Sanitation") {
+    name = "Waste Management";
+  } else if (analysis.primaryCategory === "Water & Sanitation") {
+    name = "Water";
+  } else if (analysis.primaryCategory === "Roads & Infrastructure" || analysis.primaryCategory === "Roads & Transport") {
+    name = "Roads";
+  } else if (analysis.primaryCategory === "Healthcare") {
+    name = "Healthcare";
+  } else if (analysis.primaryCategory === "Education") {
+    name = "Education";
+  } else if (analysis.primaryCategory === "Electricity") {
+    name = "Electricity";
+  } else if (analysis.primaryCategory === "Flooding") {
+    name = "Flooding";
+  } else {
+    name = "Other";
   }
 
   return {
-    name: "Other",
-    icon: "📌",
+    name,
+    icon: CATEGORY_ICONS[analysis.primaryCategory] || "📌",
   };
 }
 

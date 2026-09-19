@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useLanguage } from "@/lib/LanguageContext";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { analyzeIssueContext, CATEGORY_ICONS } from "@/lib/issueClassifier";
 
 type Submission = {
   id: string;
@@ -15,7 +19,10 @@ type Submission = {
   issue: string;
   photos?: string[];
   status?: string;
+  language?: string;
   voiceLanguage?: string;
+  voiceAudioUrl?: string;
+  voiceTranslatedText?: string;
   writingLanguages?: {
     name: string;
     village: string;
@@ -31,320 +38,48 @@ type CategoryInfo = {
 
 const STORAGE_KEY = "peoples-priorities-submissions";
 
-/*
- * =========================================================
- * CATEGORY DETECTION
- * English + Hindi + Odia
- * =========================================================
- */
-
+/* CATEGORY DETECTION */
 function getCategory(issue: string): CategoryInfo {
-  const text = issue.toLowerCase();
-
-  // ROADS
-  if (
-    text.includes("road") ||
-    text.includes("street") ||
-    text.includes("pothole") ||
-    text.includes("highway") ||
-    text.includes("রাস্তা") ||
-    text.includes("ରାସ୍ତା") ||
-    text.includes("ସଡକ") ||
-    text.includes("सड़क") ||
-    text.includes("सड़क") ||
-    text.includes("गड्ढा") ||
-    text.includes("गड्ढे")
-  ) {
-    return {
-      name: "Roads",
-      icon: "🛣️",
-    };
-  }
-
-  // WATER
-  if (
-    text.includes("water") ||
-    text.includes("drinking water") ||
-    text.includes("tap water") ||
-    text.includes("water supply") ||
-    text.includes("पानी") ||
-    text.includes("पीने का पानी") ||
-    text.includes("जल") ||
-    text.includes("ଜଳ") ||
-    text.includes("ପାଣି") ||
-    text.includes("ପିଇବା ପାଣି")
-  ) {
-    return {
-      name: "Water",
-      icon: "💧",
-    };
-  }
-
-  // ELECTRICITY
-  if (
-    text.includes("electric") ||
-    text.includes("electricity") ||
-    text.includes("power") ||
-    text.includes("light") ||
-    text.includes("बिजली") ||
-    text.includes("बिजली नहीं") ||
-    text.includes("विद्युत") ||
-    text.includes("ବିଦ୍ୟୁତ") ||
-    text.includes("ବିଜୁଳି") ||
-    text.includes("ଲାଇଟ")
-  ) {
-    return {
-      name: "Electricity",
-      icon: "⚡",
-    };
-  }
-
-  // SANITATION
-  if (
-    text.includes("garbage") ||
-    text.includes("waste") ||
-    text.includes("drain") ||
-    text.includes("drainage") ||
-    text.includes("toilet") ||
-    text.includes("sewage") ||
-    text.includes("कचरा") ||
-    text.includes("नाली") ||
-    text.includes("नाला") ||
-    text.includes("शौचालय") ||
-    text.includes("गंदगी") ||
-    text.includes("आवर्जना") ||
-    text.includes("ଆବର୍ଜନା") ||
-    text.includes("ନାଳ") ||
-    text.includes("ଶୌଚାଳୟ") ||
-    text.includes("ଡ୍ରେନ")
-  ) {
-    return {
-      name: "Sanitation",
-      icon: "🗑️",
-    };
-  }
-
-  // HEALTHCARE
-  if (
-    text.includes("hospital") ||
-    text.includes("health") ||
-    text.includes("doctor") ||
-    text.includes("medicine") ||
-    text.includes("clinic") ||
-    text.includes("ambulance") ||
-    text.includes("अस्पताल") ||
-    text.includes("स्वास्थ्य") ||
-    text.includes("डॉक्टर") ||
-    text.includes("दवा") ||
-    text.includes("दवाई") ||
-    text.includes("एम्बुलेंस") ||
-    text.includes("ହସ୍ପିଟାଲ") ||
-    text.includes("ସ୍ୱାସ୍ଥ୍ୟ") ||
-    text.includes("ଡାକ୍ତର") ||
-    text.includes("ଔଷଧ") ||
-    text.includes("ଆମ୍ବୁଲାନ୍ସ")
-  ) {
-    return {
-      name: "Healthcare",
-      icon: "🏥",
-    };
-  }
-
-  // EDUCATION
-  if (
-    text.includes("school") ||
-    text.includes("education") ||
-    text.includes("teacher") ||
-    text.includes("college") ||
-    text.includes("student") ||
-    text.includes("स्कूल") ||
-    text.includes("शिक्षा") ||
-    text.includes("शिक्षक") ||
-    text.includes("कॉलेज") ||
-    text.includes("छात्र") ||
-    text.includes("ସ୍କୁଲ") ||
-    text.includes("ଶିକ୍ଷା") ||
-    text.includes("ଶିକ୍ଷକ") ||
-    text.includes("କଲେଜ") ||
-    text.includes("ଛାତ୍ର")
-  ) {
-    return {
-      name: "Education",
-      icon: "🎓",
-    };
-  }
-
-  // FLOODING
-  if (
-    text.includes("flood") ||
-    text.includes("flooding") ||
-    text.includes("waterlogging") ||
-    text.includes("water logging") ||
-    text.includes("जलभराव") ||
-    text.includes("बाढ़") ||
-    text.includes("ବନ୍ୟା") ||
-    text.includes("ଜଳବନ୍ଦୀ") ||
-    text.includes("ଜଳ ଜମିବା")
-  ) {
-    return {
-      name: "Flooding",
-      icon: "🌊",
-    };
-  }
-
-  // PUBLIC TRANSPORT
-  if (
-    text.includes("bus") ||
-    text.includes("transport") ||
-    text.includes("public transport") ||
-    text.includes("बस") ||
-    text.includes("परिवहन") ||
-    text.includes("ବସ") ||
-    text.includes("ପରିବହନ")
-  ) {
-    return {
-      name: "Public Transport",
-      icon: "🚌",
-    };
-  }
-
-  // SAFETY
-  if (
-    text.includes("safety") ||
-    text.includes("crime") ||
-    text.includes("police") ||
-    text.includes("street light") ||
-    text.includes("security") ||
-    text.includes("सुरक्षा") ||
-    text.includes("पुलिस") ||
-    text.includes("अपराध") ||
-    text.includes("ଷୁରକ୍ଷା") ||
-    text.includes("ପୋଲିସ")
-  ) {
-    return {
-      name: "Public Safety",
-      icon: "🛡️",
-    };
-  }
-
+  const analysis = analyzeIssueContext(issue);
   return {
-    name: "Other",
-    icon: "📌",
+    name: analysis.primaryCategory,
+    icon: CATEGORY_ICONS[analysis.primaryCategory] || "📌",
   };
 }
 
-/*
- * =========================================================
- * STATUS FLOW
- *
- * Must match the ADMIN page exactly.
- * =========================================================
- */
-
-const STATUS_STEPS = [
-  {
-    key: "Submitted",
-    title: "Submitted",
-    description:
-      "Your community need has been received.",
-  },
-  {
-    key: "Under Review",
-    title: "Under Review",
-    description:
-      "Your report is being reviewed and assessed.",
-  },
-  {
-    key: "Verified",
-    title: "Verified",
-    description:
-      "The reported community need has been verified.",
-  },
-  {
-    key: "Resolved",
-    title: "Resolved",
-    description:
-      "The reported issue has been marked as resolved.",
-  },
-];
-
-/*
- * =========================================================
- * STATUS NORMALISATION
- * =========================================================
- */
-
 function getStatusStep(status?: string) {
   if (!status) return 0;
+  const normalized = status.trim().toLowerCase();
 
-  const normalized = status
-    .trim()
-    .toLowerCase();
-
-  if (
-    normalized === "resolved" ||
-    normalized === "completed" ||
-    normalized.includes("resolved")
-  ) {
+  if (normalized === "resolved" || normalized === "completed" || normalized.includes("resolved")) {
     return 3;
   }
-
-  if (
-    normalized === "verified" ||
-    normalized.includes("verified")
-  ) {
+  if (normalized === "verified" || normalized.includes("verified")) {
     return 2;
   }
-
-  if (
-    normalized === "under review" ||
-    normalized.includes("review") ||
-    normalized.includes("progress")
-  ) {
+  if (normalized === "under review" || normalized.includes("review") || normalized.includes("progress")) {
     return 1;
   }
-
   return 0;
 }
-
-/*
- * =========================================================
- * STATUS COLOR
- * =========================================================
- */
 
 function getStatusColor(status?: string) {
   switch (status) {
     case "Verified":
       return "bg-green-100 text-green-700";
-
     case "Resolved":
       return "bg-blue-100 text-blue-700";
-
     case "Under Review":
-      return "bg-yellow-100 text-yellow-700";
-
+      return "bg-amber-100 text-amber-800";
     default:
-      return "bg-gray-100 text-gray-700";
+      return "bg-[#edf5ee] text-[#28623c]";
   }
 }
 
-/*
- * =========================================================
- * DATE
- * =========================================================
- */
-
 function formatDate(date?: string) {
-  if (!date) {
-    return "Unknown date";
-  }
-
+  if (!date) return "Unknown date";
   const parsed = new Date(date);
-
-  if (Number.isNaN(parsed.getTime())) {
-    return date;
-  }
+  if (Number.isNaN(parsed.getTime())) return date;
 
   return new Intl.DateTimeFormat("en-IN", {
     dateStyle: "medium",
@@ -352,1157 +87,451 @@ function formatDate(date?: string) {
   }).format(parsed);
 }
 
-/*
- * =========================================================
- * PRIORITY
- *
- * Local/demo priority calculation.
- * =========================================================
- */
-
-function calculateLocalPriority(
-  submission: Submission,
-  allSubmissions: Submission[]
-) {
+function calculateLocalPriority(submission: Submission, allSubmissions: Submission[]) {
   let score = 25;
+  const category = getCategory(submission.issue || "");
 
-  const category = getCategory(
-    submission.issue || ""
-  );
-
-  /*
-   * Frequency
-   */
-
-  const sameCategoryCount =
-    allSubmissions.filter(
-      (item) =>
-        getCategory(item.issue || "").name ===
-        category.name
-    ).length;
+  const sameCategoryCount = allSubmissions.filter(
+    (item) => getCategory(item.issue || "").name === category.name
+  ).length;
 
   if (allSubmissions.length > 0) {
-    const frequencyRatio =
-      sameCategoryCount /
-      allSubmissions.length;
-
-    score += Math.round(
-      frequencyRatio * 30
-    );
+    const frequencyRatio = sameCategoryCount / allSubmissions.length;
+    score += Math.round(frequencyRatio * 30);
   }
 
-  /*
-   * Evidence
-   */
-
-  if (
-    submission.photos &&
-    submission.photos.length > 0
-  ) {
+  if (submission.photos && submission.photos.length > 0) {
     score += 15;
   }
 
-  /*
-   * Serious issue keywords
-   */
-
-  const issue = (
-    submission.issue || ""
-  ).toLowerCase();
-
+  const issue = (submission.issue || "").toLowerCase();
   const seriousWords = [
-    "emergency",
-    "danger",
-    "dangerous",
-    "death",
-    "accident",
-    "hospital",
-    "ambulance",
-    "flood",
-    "fire",
-    "unsafe",
-    "critical",
-
-    "आपात",
-    "खतरा",
-    "दुर्घटना",
-    "अस्पताल",
-    "बाढ़",
-    "आग",
-
-    "ଜରୁରୀ",
-    "ବିପଦ",
-    "ଦୁର୍ଘଟଣା",
-    "ବନ୍ୟା",
+    "emergency", "danger", "dangerous", "death", "accident", "hospital",
+    "ambulance", "flood", "fire", "unsafe", "critical", "आपात", "खतरा",
+    "दुर्घटना", "अस्पताल", "बाढ़", "ଜରୁରୀ", "ବିପଦ", "ଦୁର୍ଘଟଣା",
   ];
 
-  if (
-    seriousWords.some((word) =>
-      issue.includes(word)
-    )
-  ) {
+  if (seriousWords.some((word) => issue.includes(word))) {
     score += 20;
   }
 
-  /*
-   * Recency
-   */
+  score = Math.min(score, 98);
+  const level = score >= 75 ? "High" : score >= 50 ? "Medium" : "Low";
 
-  const created = new Date(
-    submission.createdAt
-  ).getTime();
-
-  if (!Number.isNaN(created)) {
-    const now = Date.now();
-
-    const days =
-      (now - created) /
-      (1000 * 60 * 60 * 24);
-
-    if (days <= 7) {
-      score += 10;
-    } else if (days <= 30) {
-      score += 5;
-    }
-  }
-
-  score = Math.min(
-    100,
-    Math.max(0, score)
-  );
-
-  let level:
-    | "Low"
-    | "Medium"
-    | "High"
-    | "Critical";
-
-  if (score >= 80) {
-    level = "Critical";
-  } else if (score >= 60) {
-    level = "High";
-  } else if (score >= 40) {
-    level = "Medium";
-  } else {
-    level = "Low";
-  }
-
-  return {
-    score,
-    level,
-    category,
-    sameCategoryCount,
-  };
+  return { score, level, category, sameCategoryCount };
 }
 
-/*
- * =========================================================
- * PAGE
- * =========================================================
- */
-
 export default function TrackPage() {
-  const [
-    submissions,
-    setSubmissions,
-  ] = useState<Submission[]>([]);
+  const { t, getCategoryName, getStatusName } = useLanguage();
 
-  const [
-    searchId,
-    setSearchId,
-  ] = useState("");
-
-  const [
-    selectedSubmission,
-    setSelectedSubmission,
-  ] = useState<Submission | null>(null);
-
-  const [
-    error,
-    setError,
-  ] = useState("");
-
-  /*
-   * =======================================================
-   * LOAD SUBMISSIONS
-   * =======================================================
-   */
+  const [searchId, setSearchId] = useState("");
+  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
+  const [error, setError] = useState("");
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
 
   const loadSubmissions = () => {
     try {
-      const saved = JSON.parse(
-        localStorage.getItem(
-          STORAGE_KEY
-        ) || "[]"
-      );
-
-      if (Array.isArray(saved)) {
-        setSubmissions(saved);
-      } else {
-        setSubmissions([]);
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const parsed = JSON.parse(saved || "[]");
+      if (Array.isArray(parsed)) {
+        setSubmissions(parsed);
       }
-    } catch (error) {
-      console.error(
-        "Could not load submissions:",
-        error
-      );
-
+    } catch {
       setSubmissions([]);
     }
   };
 
-  /*
-   * Initial load
-   */
-
   useEffect(() => {
     loadSubmissions();
-  }, []);
 
-  /*
-   * =======================================================
-   * URL ID
-   * =======================================================
-   */
-
-  useEffect(() => {
-    const params =
-      new URLSearchParams(
-        window.location.search
-      );
-
-    const id = params.get("id");
-
-    if (id) {
-      setSearchId(id);
+    if (typeof window !== "undefined") {
+      const parameters = new URLSearchParams(window.location.search);
+      const idParameter = parameters.get("id");
+      if (idParameter) {
+        setSearchId(idParameter);
+      }
     }
-  }, []);
 
-  /*
-   * =======================================================
-   * KEEP TRACK PAGE UPDATED
-   *
-   * This lets Track respond when another browser tab
-   * updates localStorage.
-   * =======================================================
-   */
-
-  useEffect(() => {
-    const handleStorage = (
-      event: StorageEvent
-    ) => {
-      if (
-        event.key === STORAGE_KEY
-      ) {
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === STORAGE_KEY) {
         loadSubmissions();
       }
     };
 
-    window.addEventListener(
-      "storage",
-      handleStorage
-    );
-
-    return () => {
-      window.removeEventListener(
-        "storage",
-        handleStorage
-      );
-    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
   }, []);
 
-  /*
-   * =======================================================
-   * FIND SUBMISSION
-   * =======================================================
-   */
-
   const findSubmission = () => {
-    const cleaned =
-      searchId.trim().toUpperCase();
-
+    const cleaned = searchId.trim().toUpperCase();
     setError("");
     setSelectedSubmission(null);
 
     if (!cleaned) {
-      setError(
-        "Please enter your Submission ID."
-      );
+      setError(t.track.errorEmpty);
       return;
     }
 
-    const found =
-      submissions.find(
-        (submission) =>
-          submission.id
-            .toUpperCase() ===
-          cleaned
-      );
+    const found = submissions.find(
+      (submission) => submission.id.toUpperCase() === cleaned
+    );
 
     if (!found) {
-      setError(
-        "Submission not found. Please check your Submission ID."
-      );
+      setError(t.track.errorNotFound);
       return;
     }
 
     setSelectedSubmission(found);
-
-    window.history.replaceState(
-      null,
-      "",
-      `/track?id=${encodeURIComponent(
-        found.id
-      )}`
-    );
+    window.history.replaceState(null, "", `/track?id=${encodeURIComponent(found.id)}`);
   };
-
-  /*
-   * =======================================================
-   * RESET SEARCH
-   * =======================================================
-   */
 
   const resetSearch = () => {
     setSearchId("");
     setSelectedSubmission(null);
     setError("");
-
-    window.history.replaceState(
-      null,
-      "",
-      "/track"
-    );
+    window.history.replaceState(null, "", "/track");
   };
 
-  /*
-   * =======================================================
-   * AUTO-SEARCH FROM URL
-   *
-   * Handles /track?id=PP-XXXX
-   * =======================================================
-   */
-
   useEffect(() => {
-    if (
-      searchId &&
-      submissions.length > 0 &&
-      !selectedSubmission
-    ) {
-      const cleaned =
-        searchId.trim().toUpperCase();
-
-      const found =
-        submissions.find(
-          (submission) =>
-            submission.id
-              .toUpperCase() ===
-            cleaned
-        );
-
+    if (searchId && submissions.length > 0 && !selectedSubmission) {
+      const cleaned = searchId.trim().toUpperCase();
+      const found = submissions.find(
+        (submission) => submission.id.toUpperCase() === cleaned
+      );
       if (found) {
         setSelectedSubmission(found);
         setError("");
       }
     }
-  }, [
-    searchId,
-    submissions,
-    selectedSubmission,
-  ]);
-
-  /*
-   * =======================================================
-   * REFRESH SELECTED SUBMISSION
-   *
-   * If Admin changes the status, this keeps the selected
-   * Track result synchronized.
-   * =======================================================
-   */
+  }, [searchId, submissions, selectedSubmission]);
 
   useEffect(() => {
-    if (!selectedSubmission) {
-      return;
-    }
-
-    const latest =
-      submissions.find(
-        (submission) =>
-          submission.id ===
-          selectedSubmission.id
-      );
-
+    if (!selectedSubmission) return;
+    const latest = submissions.find((s) => s.id === selectedSubmission.id);
     if (latest) {
       setSelectedSubmission(latest);
     }
   }, [submissions]);
 
-  /*
-   * =======================================================
-   * PRIORITY
-   * =======================================================
-   */
-
   const priority = useMemo(() => {
-    if (!selectedSubmission) {
-      return null;
-    }
+    if (!selectedSubmission) return null;
+    return calculateLocalPriority(selectedSubmission, submissions);
+  }, [selectedSubmission, submissions]);
 
-    return calculateLocalPriority(
-      selectedSubmission,
-      submissions
-    );
-  }, [
-    selectedSubmission,
-    submissions,
-  ]);
+  const currentStatus = selectedSubmission?.status || "Submitted";
+  const currentStep = getStatusStep(currentStatus);
 
-  /*
-   * =======================================================
-   * STATUS
-   * =======================================================
-   */
-
-  const currentStatus =
-    selectedSubmission?.status ||
-    "Submitted";
-
-  const currentStep =
-    getStatusStep(currentStatus);
-
-  /*
-   * =======================================================
-   * PAGE
-   * =======================================================
-   */
+  const statusSteps = [
+    {
+      key: "Submitted",
+      title: t.track.step1,
+      description: "Community need recorded in the system.",
+    },
+    {
+      key: "Under Review",
+      title: t.track.step2,
+      description: "Indian PIN code and locality verified.",
+    },
+    {
+      key: "Verified",
+      title: t.track.step3,
+      description: "Sector classification and evidence confirmed.",
+    },
+    {
+      key: "Resolved",
+      title: t.track.step4,
+      description: "Priority scoring applied for administrative intervention.",
+    },
+  ];
 
   return (
-    <main className="min-h-screen bg-[#f5f7f4] text-[#17221b]">
-
-      {/* ===================================================
-          HEADER
-      =================================================== */}
-
-      <header className="border-b border-[#dce3dc] bg-white">
-
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-5 sm:px-8">
-
-          <a
-            href="/"
-            className="text-sm font-bold tracking-[0.18em] text-[#173f2a]"
-          >
-            PEOPLE'S PRIORITIES
-          </a>
+    <main className="min-h-screen bg-[#f8faf5] text-[#17221b]">
+      {/* HEADER */}
+      <header className="border-b border-[#e2e8df] bg-white sticky top-0 z-30">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4 sm:px-8">
+          <Link href="/" className="text-sm font-black tracking-wider text-[#173f2a] flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded bg-[#173f2a] text-white text-xs font-bold">PP</span>
+            {t.common.siteName}
+          </Link>
 
           <div className="flex items-center gap-3">
-
-            <a
+            <LanguageSwitcher compact />
+            <Link
               href="/citizen"
-              className="rounded-full border border-[#397149] bg-white px-4 py-2 text-xs font-bold text-[#397149] transition hover:bg-[#f0f8f1]"
+              className="rounded-lg bg-[#173f2a] px-4 py-2 text-xs font-bold text-white hover:bg-[#0f2a1c] transition"
             >
-              + Share a Need
-            </a>
-
-            <div className="hidden rounded-full bg-[#e9f4ea] px-4 py-2 text-xs font-bold text-[#397149] sm:block">
-              India • Citizen Voice
-            </div>
-
+              + {t.common.shareNeed}
+            </Link>
           </div>
-
         </div>
-
       </header>
 
-      {/* ===================================================
-          MAIN
-      =================================================== */}
-
-      <section className="mx-auto max-w-5xl px-5 py-10 sm:px-8">
-
-        {/* =================================================
-            TITLE
-        ================================================= */}
-
+      {/* MAIN CONTENT */}
+      <section className="mx-auto max-w-4xl px-5 py-10 sm:px-8">
+        {/* TITLE */}
         <div className="text-center">
-
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#397149]">
-            Citizen Services
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#28623c]">
+            {t.common.citizenServices}
           </p>
-
-          <h1 className="mt-3 text-3xl font-bold text-[#173f2a] sm:text-4xl">
-            Track Your Submission
+          <h1 className="mt-2 text-3xl font-black text-[#173f2a] sm:text-4xl">
+            {t.track.heading}
           </h1>
-
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[#66736a]">
-            Enter the Submission ID you received
-            after reporting your community need.
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-[#556458]">
+            {t.track.description}
           </p>
-
         </div>
 
-        {/* =================================================
-            SEARCH
-        ================================================= */}
-
+        {/* SEARCH BOX */}
         {!selectedSubmission && (
-
-          <div className="mx-auto mt-8 max-w-2xl rounded-3xl border border-[#d9e2da] bg-white p-6 shadow-sm sm:p-8">
-
-            <label className="text-sm font-bold text-[#173f2a]">
-              Submission ID
+          <div className="mx-auto mt-8 max-w-xl rounded-3xl border border-[#d9e2da] bg-white p-6 sm:p-8 shadow-sm">
+            <label className="text-sm font-bold text-[#173f2a] block">
+              {t.track.inputLabel}
             </label>
 
             <div className="mt-3 flex flex-col gap-3 sm:flex-row">
-
               <input
                 type="text"
                 value={searchId}
                 onChange={(event) => {
-                  setSearchId(
-                    event.target.value
-                  );
+                  setSearchId(event.target.value);
                   setError("");
                 }}
                 onKeyDown={(event) => {
-                  if (
-                    event.key === "Enter"
-                  ) {
-                    findSubmission();
-                  }
+                  if (event.key === "Enter") findSubmission();
                 }}
-                placeholder="Example: PP-MSTHPC1F"
-                className="min-w-0 flex-1 rounded-2xl border border-[#d5ded6] bg-white px-5 py-4 font-semibold uppercase tracking-wider text-[#173f2a] outline-none focus:border-[#397149]"
+                placeholder={t.track.inputPlaceholder}
+                className="min-w-0 flex-1 rounded-xl border border-[#d5ded6] bg-white px-4 py-3.5 text-sm font-semibold uppercase tracking-wider text-[#173f2a] outline-none focus:border-[#28623c]"
               />
 
               <button
                 type="button"
                 onClick={findSubmission}
-                className="rounded-2xl bg-[#173f2a] px-7 py-4 text-sm font-bold text-white transition hover:bg-[#0f2f1e]"
+                className="rounded-xl bg-[#173f2a] px-6 py-3.5 text-sm font-bold text-white transition hover:bg-[#0f2a1c]"
               >
-                🔎 Track
+                🔎 {t.track.checkBtn}
               </button>
-
             </div>
 
             {error && (
-
-              <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
+              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">
                 ⚠ {error}
               </div>
-
             )}
 
-            <div className="mt-5 rounded-2xl bg-[#f5faf5] p-4">
-
-              <p className="text-xs leading-5 text-[#66736a]">
-                Your Submission ID is shown on
-                the confirmation screen after
-                you submit a community need.
+            <div className="mt-5 rounded-xl bg-[#f8faf5] border border-[#e2e8df] p-3.5">
+              <p className="text-xs leading-relaxed text-[#556458]">
+                {t.track.description}
               </p>
-
             </div>
-
           </div>
-
         )}
 
-        {/* =================================================
-            RESULT
-        ================================================= */}
-
+        {/* RESULT CARD */}
         {selectedSubmission && (
-
-          <div className="mt-8">
-
-            <div className="rounded-[2rem] border border-[#d9e2da] bg-white p-6 shadow-sm sm:p-10">
-
-              {/* =========================================
-                  HEADER
-              ========================================= */}
-
-              <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-
-                <div>
-
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#397149]">
-                    Submission Found
-                  </p>
-
-                  <h2 className="mt-3 text-3xl font-bold text-[#173f2a]">
-                    Your community need
-                  </h2>
-
-                </div>
-
-                <span
-                  className={`self-start rounded-full px-4 py-2 text-xs font-bold ${getStatusColor(
-                    currentStatus
-                  )}`}
-                >
-                  ✓ {currentStatus}
-                </span>
-
-              </div>
-
-              {/* =========================================
-                  ID
-              ========================================= */}
-
-              <div className="mt-8 rounded-2xl bg-[#f5faf5] p-6">
-
-                <p className="text-xs font-semibold uppercase tracking-wider text-[#66736a]">
-                  Submission ID
+          <div className="mt-8 rounded-3xl border border-[#d9e2da] bg-white p-6 sm:p-10 shadow-sm">
+            {/* CARD HEADER */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between border-b border-[#e2e8df] pb-6">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#28623c]">
+                  ✓ {t.track.foundBadge}
                 </p>
-
-                <p className="mt-2 break-all text-2xl font-bold tracking-wider text-[#173f2a]">
+                <h2 className="mt-1 text-2xl font-black text-[#173f2a]">
                   {selectedSubmission.id}
+                </h2>
+                <p className="text-xs text-[#556458] mt-1">
+                  Recorded: {formatDate(selectedSubmission.createdAt)}
                 </p>
-
               </div>
 
-              {/* =========================================
-                  BASIC INFORMATION
-              ========================================= */}
-
-              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-
-                <div className="rounded-2xl bg-[#f8faf8] p-5">
-
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[#66736a]">
-                    Citizen
-                  </p>
-
-                  <p className="mt-2 text-base font-bold text-[#173f2a]">
-                    {selectedSubmission.name ||
-                      "Not provided"}
-                  </p>
-
-                </div>
-
-                <div className="rounded-2xl bg-[#f8faf8] p-5">
-
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[#66736a]">
-                    Submitted
-                  </p>
-
-                  <p className="mt-2 text-base font-bold text-[#173f2a]">
-                    {formatDate(
-                      selectedSubmission.createdAt
-                    )}
-                  </p>
-
-                </div>
-
-                <div className="rounded-2xl bg-[#f8faf8] p-5">
-
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[#66736a]">
-                    Village / Locality
-                  </p>
-
-                  <p className="mt-2 text-base font-bold text-[#173f2a]">
-                    {selectedSubmission.village ||
-                      "Not provided"}
-                  </p>
-
-                </div>
-
-                <div className="rounded-2xl bg-[#f8faf8] p-5">
-
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[#66736a]">
-                    Location
-                  </p>
-
-                  <p className="mt-2 text-base font-bold text-[#173f2a]">
-                    {selectedSubmission.location ||
-                      "Not provided"}
-                  </p>
-
-                </div>
-
-                {selectedSubmission.district && (
-
-                  <div className="rounded-2xl bg-[#f8faf8] p-5">
-
-                    <p className="text-xs font-semibold uppercase tracking-wider text-[#66736a]">
-                      District
-                    </p>
-
-                    <p className="mt-2 text-base font-bold text-[#173f2a]">
-                      {
-                        selectedSubmission.district
-                      }
-                    </p>
-
-                  </div>
-
-                )}
-
-                {selectedSubmission.state && (
-
-                  <div className="rounded-2xl bg-[#f8faf8] p-5">
-
-                    <p className="text-xs font-semibold uppercase tracking-wider text-[#66736a]">
-                      State
-                    </p>
-
-                    <p className="mt-2 text-base font-bold text-[#173f2a]">
-                      {selectedSubmission.state}
-                    </p>
-
-                  </div>
-
-                )}
-
-              </div>
-
-              {/* =========================================
-                  CATEGORY + PRIORITY
-              ========================================= */}
-
-              {priority && (
-
-                <div className="mt-6 rounded-2xl border border-[#cfe0d1] bg-[#f5faf5] p-5">
-
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
-                    <div>
-
-                      <p className="text-xs font-bold uppercase tracking-wider text-[#397149]">
-                        Detected Category
-                      </p>
-
-                      <p className="mt-2 text-xl font-bold text-[#173f2a]">
-                        {priority.category.icon}{" "}
-                        {priority.category.name}
-                      </p>
-
-                      <p className="mt-2 text-xs text-[#66736a]">
-                        {
-                          priority.sameCategoryCount
-                        }{" "}
-                        report
-                        {priority.sameCategoryCount ===
-                        1
-                          ? ""
-                          : "s"}{" "}
-                        in this category
-                      </p>
-
-                    </div>
-
-                    <div className="rounded-xl bg-white px-5 py-3">
-
-                      <p className="text-xs font-semibold text-[#66736a]">
-                        Priority
-                      </p>
-
-                      <p className="mt-1 text-lg font-bold text-[#397149]">
-                        {priority.level}{" "}
-                        <span className="text-sm">
-                          ({priority.score}/100)
-                        </span>
-                      </p>
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-              )}
-
-              {/* =========================================
-                  ISSUE
-              ========================================= */}
-
-              <div className="mt-6 rounded-2xl border border-[#d9e2da] p-6">
-
-                <p className="text-xs font-bold uppercase tracking-wider text-[#397149]">
-                  Reported Issue
-                </p>
-
-                <p className="mt-4 whitespace-pre-wrap text-base leading-7 text-[#39463d]">
-                  {selectedSubmission.issue ||
-                    "No issue description"}
-                </p>
-
-              </div>
-
-              {/* =========================================
-                  EVIDENCE
-              ========================================= */}
-
-              {selectedSubmission.photos &&
-                selectedSubmission.photos.length >
-                  0 && (
-
-                  <div className="mt-6">
-
-                    <p className="text-xs font-bold uppercase tracking-wider text-[#397149]">
-                      Evidence
-                    </p>
-
-                    <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
-
-                      {selectedSubmission.photos.map(
-                        (photo, index) => (
-
-                          <div
-                            key={`${photo}-${index}`}
-                            className="overflow-hidden rounded-2xl border border-[#d9e2da] bg-[#f8faf8]"
-                          >
-
-                            <img
-                              src={photo}
-                              alt={`Evidence ${
-                                index + 1
-                              }`}
-                              className="h-40 w-full object-cover"
-                            />
-
-                          </div>
-
-                        )
-                      )}
-
-                    </div>
-
-                  </div>
-
-                )}
-
-              {/* =========================================
-                  ADDITIONAL INFORMATION
-              ========================================= */}
-
-              {(selectedSubmission.pincode ||
-                selectedSubmission.verifiedArea ||
-                selectedSubmission.voiceLanguage) && (
-
-                <div className="mt-6 rounded-2xl border border-[#d9e2da] p-6">
-
-                  <p className="text-xs font-bold uppercase tracking-wider text-[#397149]">
-                    Additional Information
-                  </p>
-
-                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
-
-                    {selectedSubmission.pincode && (
-
-                      <div>
-
-                        <p className="text-xs text-[#66736a]">
-                          PIN Code
-                        </p>
-
-                        <p className="mt-1 text-sm font-bold text-[#173f2a]">
-                          {
-                            selectedSubmission.pincode
-                          }
-                        </p>
-
-                      </div>
-
-                    )}
-
-                    {selectedSubmission.verifiedArea && (
-
-                      <div>
-
-                        <p className="text-xs text-[#66736a]">
-                          Verified Area
-                        </p>
-
-                        <p className="mt-1 text-sm font-bold text-[#173f2a]">
-                          {
-                            selectedSubmission.verifiedArea
-                          }
-                        </p>
-
-                      </div>
-
-                    )}
-
-                    {selectedSubmission.voiceLanguage && (
-
-                      <div>
-
-                        <p className="text-xs text-[#66736a]">
-                          Voice Language
-                        </p>
-
-                        <p className="mt-1 text-sm font-bold text-[#173f2a]">
-                          {
-                            selectedSubmission.voiceLanguage
-                          }
-                        </p>
-
-                      </div>
-
-                    )}
-
-                  </div>
-
-                </div>
-
-              )}
-
-              {/* =========================================
-                  PROGRESS
-              ========================================= */}
-
-              <div className="mt-10">
-
-                <div className="flex items-center justify-between gap-4">
-
-                  <div>
-
-                    <p className="text-xs font-bold uppercase tracking-wider text-[#397149]">
-                      Report Progress
-                    </p>
-
-                    <p className="mt-1 text-xs text-[#66736a]">
-                      Current status:{" "}
-                      <strong className="text-[#173f2a]">
-                        {currentStatus}
-                      </strong>
-                    </p>
-
-                  </div>
-
-                  {currentStatus ===
-                    "Resolved" && (
-
-                    <span className="rounded-full bg-blue-100 px-3 py-2 text-xs font-bold text-blue-700">
-                      ✓ Completed
-                    </span>
-
-                  )}
-
-                </div>
-
-                <div className="mt-7 space-y-6">
-
-                  {STATUS_STEPS.map(
-                    (step, index) => {
-
-                      const completed =
-                        index <=
-                        currentStep;
-
-                      const active =
-                        index ===
-                        currentStep;
-
-                      return (
-
-                        <div
-                          key={step.key}
-                          className="flex gap-4"
-                        >
-
-                          {/* CIRCLE + LINE */}
-
-                          <div className="flex flex-col items-center">
-
-                            <div
-                              className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-                                completed
-                                  ? "bg-[#e9f4ea] text-[#397149]"
-                                  : "bg-[#f0f2f0] text-[#66736a]"
-                              }`}
-                            >
-                              {completed
-                                ? "✓"
-                                : index + 1}
-                            </div>
-
-                            {index <
-                              STATUS_STEPS.length -
-                                1 && (
-
-                              <div
-                                className={`mt-2 h-10 w-0.5 ${
-                                  index <
-                                  currentStep
-                                    ? "bg-[#397149]"
-                                    : "bg-[#dce3dc]"
-                                }`}
-                              />
-
-                            )}
-
-                          </div>
-
-                          {/* DESCRIPTION */}
-
-                          <div className="pb-2">
-
-                            <p
-                              className={`text-base font-bold ${
-                                active ||
-                                completed
-                                  ? "text-[#173f2a]"
-                                  : "text-[#66736a]"
-                              }`}
-                            >
-                              {step.title}
-
-                              {active && (
-                                <span className="ml-2 rounded-full bg-[#e9f4ea] px-2 py-1 text-[10px] text-[#397149]">
-                                  CURRENT
-                                </span>
-                              )}
-
-                            </p>
-
-                            <p className="mt-1 text-sm leading-6 text-[#66736a]">
-                              {step.description}
-                            </p>
-
-                          </div>
-
-                        </div>
-
-                      );
-                    }
-                  )}
-
-                </div>
-
-              </div>
-
-              {/* =========================================
-                  STATUS EXPLANATION
-              ========================================= */}
-
-              <div className="mt-8 rounded-2xl bg-[#f5faf5] p-5">
-
-                <p className="text-sm font-bold text-[#173f2a]">
-                  What happens next?
-                </p>
-
-                <p className="mt-2 text-sm leading-6 text-[#66736a]">
-
-                  {currentStatus ===
-                    "Submitted" &&
-                    "Your report has been submitted successfully and is awaiting review."}
-
-                  {currentStatus ===
-                    "Under Review" &&
-                    "Your report is currently being reviewed. The administration can verify the issue and determine the appropriate priority."}
-
-                  {currentStatus ===
-                    "Verified" &&
-                    "Your reported community need has been verified and is ready for further action."}
-
-                  {currentStatus ===
-                    "Resolved" &&
-                    "This report has been marked as resolved by the administration."}
-
-                </p>
-
-              </div>
-
-              {/* =========================================
-                  ACTIONS
-              ========================================= */}
-
-              <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-
-                <button
-                  type="button"
-                  onClick={resetSearch}
-                  className="rounded-2xl border border-[#397149] px-6 py-4 text-sm font-bold text-[#173f2a] transition hover:bg-[#f5faf5]"
-                >
-                  ← Track Another Submission
-                </button>
-
-                <button
-                  type="button"
-                  onClick={loadSubmissions}
-                  className="rounded-2xl border border-[#cbd8cd] bg-white px-6 py-4 text-sm font-bold text-[#397149] transition hover:bg-[#f5faf5]"
-                >
-                  ↻ Refresh Status
-                </button>
-
-                <a
-                  href="/citizen"
-                  className="rounded-2xl bg-[#173f2a] px-6 py-4 text-center text-sm font-bold text-white transition hover:bg-[#0f2f1e]"
-                >
-                  + Submit Another Need
-                </a>
-
-              </div>
-
+              <span className={`self-start rounded-full px-4 py-1.5 text-xs font-bold ${getStatusColor(currentStatus)}`}>
+                ✓ {getStatusName(currentStatus)}
+              </span>
             </div>
 
-          </div>
+            {/* CITIZEN & GEOGRAPHY */}
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="rounded-xl bg-[#f8faf5] border border-[#e2e8df] p-4">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-[#556458]">Citizen</p>
+                <p className="mt-1 text-sm font-bold text-[#173f2a]">{selectedSubmission.name || "Anonymous"}</p>
+              </div>
 
+              <div className="rounded-xl bg-[#f8faf5] border border-[#e2e8df] p-4">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-[#556458]">Locality / PIN</p>
+                <p className="mt-1 text-sm font-bold text-[#173f2a]">
+                  {selectedSubmission.village || "—"} ({selectedSubmission.pincode || "—"})
+                </p>
+              </div>
+
+              <div className="rounded-xl bg-[#f8faf5] border border-[#e2e8df] p-4">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-[#556458]">District / State</p>
+                <p className="mt-1 text-sm font-bold text-[#173f2a]">
+                  {selectedSubmission.district || "—"}, {selectedSubmission.state || "India"}
+                </p>
+              </div>
+            </div>
+
+            {/* DETECTED CATEGORY & PRIORITY */}
+            {priority && (
+              <div className="mt-6 rounded-2xl border border-[#cfe0d1] bg-[#f8faf5] p-5">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wider text-[#28623c]">
+                      {t.track.categoryTitle}
+                    </p>
+                    <p className="mt-1 text-lg font-bold text-[#173f2a] flex items-center gap-2">
+                      <span>{priority.category.icon}</span>
+                      <span>{getCategoryName(priority.category.name)}</span>
+                    </p>
+                    <p className="mt-1 text-xs text-[#556458]">
+                      {priority.sameCategoryCount} reports cluster in this sector
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl bg-white border border-[#d9e2da] px-4 py-2.5">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-[#556458]">
+                      {t.track.priorityScoreTitle}
+                    </p>
+                    <p className="mt-0.5 text-base font-black text-[#28623c]">
+                      {priority.level} ({priority.score}/100)
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* RAW REPORTED TEXT */}
+            <div className="mt-6 rounded-2xl border border-[#e2e8df] p-5">
+              <p className="text-xs font-bold uppercase tracking-wider text-[#28623c]">
+                Reported Problem (Original Citizen Transcript)
+              </p>
+              <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-[#17221b]">
+                {selectedSubmission.issue || "No description provided."}
+              </p>
+            </div>
+
+            {/* RECORDED VOICE EVIDENCE AUDIO */}
+            {selectedSubmission.voiceAudioUrl && (
+              <div className="mt-6 rounded-2xl border border-[#cfe0d1] bg-[#edf5ee] p-5">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#28623c] mb-2 flex items-center gap-1.5">
+                  <span>🎙️</span> Recorded Voice Evidence
+                  {selectedSubmission.voiceLanguage && (
+                    <span className="text-[11px] font-medium text-[#485b4d]">
+                      ({selectedSubmission.voiceLanguage})
+                    </span>
+                  )}
+                </p>
+                <audio controls src={selectedSubmission.voiceAudioUrl} className="w-full h-9" />
+              </div>
+            )}
+
+            {/* EVIDENCE PHOTOS */}
+            {selectedSubmission.photos && selectedSubmission.photos.length > 0 && (
+              <div className="mt-6">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#28623c]">
+                  {t.track.evidenceTitle} ({selectedSubmission.photos.length})
+                </p>
+                <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {selectedSubmission.photos.map((photo, index) => (
+                    <div key={`${photo}-${index}`} className="overflow-hidden rounded-xl border border-[#d9e2da]">
+                      <img src={photo} alt={`Evidence ${index + 1}`} className="h-32 w-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* PROGRESS TIMELINE */}
+            <div className="mt-8 border-t border-[#e2e8df] pt-6">
+              <p className="text-xs font-bold uppercase tracking-wider text-[#28623c]">
+                {t.track.timelineTitle}
+              </p>
+
+              <div className="mt-6 space-y-6">
+                {statusSteps.map((step, index) => {
+                  const completed = index <= currentStep;
+                  const active = index === currentStep;
+
+                  return (
+                    <div key={step.key} className="flex gap-4">
+                      <div className="flex flex-col items-center">
+                        <div
+                          className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                            completed ? "bg-[#edf5ee] text-[#28623c] ring-2 ring-[#28623c]/20" : "bg-[#f0f2f0] text-[#718276]"
+                          }`}
+                        >
+                          {completed ? "✓" : index + 1}
+                        </div>
+                        {index < statusSteps.length - 1 && (
+                          <div className={`mt-2 h-8 w-0.5 ${index < currentStep ? "bg-[#28623c]" : "bg-[#e2e8df]"}`} />
+                        )}
+                      </div>
+
+                      <div className="pb-1">
+                        <p className={`text-sm font-bold ${active || completed ? "text-[#173f2a]" : "text-[#718276]"}`}>
+                          {step.title}
+                          {active && (
+                            <span className="ml-2 rounded-full bg-[#edf5ee] px-2 py-0.5 text-[10px] font-bold text-[#28623c]">
+                              ACTIVE
+                            </span>
+                          )}
+                        </p>
+                        <p className="mt-0.5 text-xs text-[#556458] leading-relaxed">
+                          {step.description}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ACTION BUTTONS */}
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row border-t border-[#e2e8df] pt-6">
+              <button
+                type="button"
+                onClick={resetSearch}
+                className="rounded-xl border border-[#28623c] px-5 py-3 text-xs font-bold text-[#173f2a] hover:bg-[#edf5ee] transition"
+              >
+                {t.track.backBtn}
+              </button>
+
+              <button
+                type="button"
+                onClick={loadSubmissions}
+                className="rounded-xl border border-[#cbd8cd] bg-white px-5 py-3 text-xs font-bold text-[#28623c] hover:bg-[#edf5ee] transition"
+              >
+                ↻ {t.common.refresh}
+              </button>
+
+              <Link
+                href="/citizen"
+                className="rounded-xl bg-[#173f2a] px-5 py-3 text-center text-xs font-bold text-white hover:bg-[#0f2a1c] transition sm:ml-auto"
+              >
+                + {t.common.shareNeed}
+              </Link>
+            </div>
+          </div>
         )}
 
-        {/* =================================================
-            NO SUBMISSIONS
-        ================================================= */}
-
-        {!selectedSubmission &&
-          submissions.length === 0 && (
-
-            <div className="mx-auto mt-8 max-w-2xl rounded-3xl border border-dashed border-[#cbd8cd] bg-white p-10 text-center">
-
-              <div className="text-5xl">
-                📋
-              </div>
-
-              <h2 className="mt-4 text-xl font-bold text-[#173f2a]">
-                No submissions on this browser
-              </h2>
-
-              <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-[#66736a]">
-                Submit a community need first.
-                Your Submission ID will then
-                be available for tracking on
-                this browser.
-              </p>
-
-              <a
-                href="/citizen"
-                className="mt-6 inline-block rounded-2xl bg-[#173f2a] px-6 py-3 text-sm font-bold text-white"
-              >
-                Share a Need
-              </a>
-
-            </div>
-
-          )}
-
-        {/* =================================================
-            LOCAL DATA NOTE
-        ================================================= */}
-
-        {!selectedSubmission &&
-          submissions.length > 0 && (
-
-            <div className="mx-auto mt-8 max-w-2xl rounded-2xl border border-[#d9e2da] bg-white p-5">
-
-              <p className="text-xs leading-6 text-[#66736a]">
-
-                <strong className="text-[#173f2a]">
-                  Demo data note:
-                </strong>{" "}
-                This prototype currently stores
-                submissions locally in the browser.
-                Tracking therefore works for
-                submissions created on this browser.
-
-              </p>
-
-            </div>
-
-          )}
-
+        {/* EMPTY BROWSER STATE */}
+        {!selectedSubmission && submissions.length === 0 && (
+          <div className="mx-auto mt-8 max-w-xl rounded-3xl border border-dashed border-[#cbd8cd] bg-white p-8 text-center">
+            <span className="text-4xl">📋</span>
+            <h2 className="mt-3 text-lg font-black text-[#173f2a]">
+              No submissions on this browser
+            </h2>
+            <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-[#556458]">
+              {t.track.description}
+            </p>
+            <Link
+              href="/citizen"
+              className="mt-5 inline-block rounded-xl bg-[#173f2a] px-6 py-2.5 text-xs font-bold text-white hover:bg-[#0f2a1c] transition"
+            >
+              + {t.common.shareNeed}
+            </Link>
+          </div>
+        )}
       </section>
-
     </main>
   );
 }

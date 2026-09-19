@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import Coverflow from "../components/Coverflow";
 import { getCategory } from "@/lib/category";
 import { calculatePriority } from "@/lib/priority";
 import { developmentImages } from "@/src/data/images";
-import { motion } from "framer-motion";
-
-type Language = "en" | "hi" | "or";
+import { useLanguage } from "@/lib/LanguageContext";
+import { CATEGORY_NAMES, SupportedLanguage } from "@/lib/translations";
+import { createAudioRecorder, AudioRecorder } from "@/lib/audioRecorder";
+import { ODIA_GRIEVANCE_TEMPLATES } from "@/lib/odiaGrievances";
 
 type Submission = {
   id: string;
@@ -48,350 +49,6 @@ type CategoryInsight = {
   locations: number;
 };
 
-type Translation = {
-  howItWorks: string;
-  priorities: string;
-  about: string;
-  admin: string;
-  shareNeed: string;
-
-  badge: string;
-  heroTitle1: string;
-  heroTitle2: string;
-  heroDescription: string;
-
-  tellCommunity: string;
-  seeHow: string;
-  citizenInputs: string;
-
-  intelligence: string;
-  developmentPulse: string;
-  live: string;
-
-  submissions: string;
-  hotspots: string;
-  critical: string;
-  evidenceReports: string;
-
-  highestNeed: string;
-  priority: string;
-  requests: string;
-  evidence: string;
-  demand: string;
-
-  liveIntelligence: string;
-  realCitizenData: string;
-  whatSystem: string;
-  noDataYet: string;
-
-  issueDistribution: string;
-  issueDistributionDescription: string;
-
-  priorityRanking: string;
-  priorityRankingDescription: string;
-
-  evidenceCoverage: string;
-  evidenceCoverageDescription: string;
-
-  languageInsights: string;
-  languageInsightsDescription: string;
-
-  decisionPipeline: string;
-  decisionPipelineDescription: string;
-
-  fromVoice: string;
-  sixLayers: string;
-  sixDescription: string;
-
-  ourDifference: string;
-  notComplaint: string;
-  differenceDescription: string;
-
-  realityCheck: string;
-  realityText: string;
-
-  explainableAI: string;
-  explainableText: string;
-
-  evidenceFirst: string;
-  evidenceFirstText: string;
-
-  locationVerified: string;
-  locationVerifiedText: string;
-
-  noBudgetData: string;
-  noBudgetDataText: string;
-};
-
-const translations: Record<Language, Translation> = {
-  en: {
-    howItWorks: "How it works",
-    priorities: "Priorities",
-    about: "About",
-    admin: "Admin Dashboard",
-    shareNeed: "Share a Need",
-
-    badge: "AI FOR CONSTITUENCY DEVELOPMENT",
-    heroTitle1: "Turn citizen voice into",
-    heroTitle2: "better decisions.",
-    heroDescription:
-      "A data-driven platform that transforms multilingual citizen feedback into evidence-backed development priorities using transparent, explainable signals.",
-
-    tellCommunity: "Tell us what your community needs →",
-    seeHow: "See how it works",
-    citizenInputs: "Voice • Text • Photos • Multiple languages",
-
-    intelligence: "CONSTITUENCY INTELLIGENCE",
-    developmentPulse: "Development Pulse",
-    live: "LIVE",
-
-    submissions: "Citizen submissions",
-    hotspots: "Demand hotspots",
-    critical: "Critical priorities",
-    evidenceReports: "Evidence reports",
-
-    highestNeed: "Highest emerging need",
-    priority: "PRIORITY",
-    requests: "citizen requests",
-    evidence: "Evidence-backed ranking",
-    demand:
-      "Frequency + severity + location + evidence + recency",
-
-    liveIntelligence: "LIVE CITIZEN INTELLIGENCE",
-    realCitizenData: "Real data from this prototype",
-    whatSystem: "What the system can surface.",
-    noDataYet: "No citizen submissions yet.",
-
-    issueDistribution: "Issue distribution",
-    issueDistributionDescription:
-      "Live distribution of the problems citizens have actually submitted.",
-
-    priorityRanking: "Priority ranking",
-    priorityRankingDescription:
-      "Transparent ranking generated from the current citizen reports.",
-
-    evidenceCoverage: "Evidence coverage",
-    evidenceCoverageDescription:
-      "How many submitted reports currently include photographic evidence.",
-
-    languageInsights: "Citizen language insights",
-    languageInsightsDescription:
-      "Languages recorded from actual citizen submissions.",
-
-    decisionPipeline: "Live decision pipeline",
-    decisionPipelineDescription:
-      "How a citizen report moves through the system.",
-
-    fromVoice: "FROM VOICE TO ACTION",
-    sixLayers: "Six layers of civic intelligence.",
-    sixDescription:
-      "People's Priorities connects citizen reports with verification, classification, evidence and transparent prioritisation.",
-
-    ourDifference: "OUR DIFFERENCE",
-    notComplaint: "Not another complaint portal.",
-    differenceDescription:
-      "People's Priorities closes the gap between what citizens report and what decision-makers can understand from structured evidence.",
-
-    realityCheck: "Reality Check",
-    realityText:
-      "Reports are connected to verified Indian PIN-code information before they are accepted.",
-
-    explainableAI: "Explainable AI",
-    explainableText:
-      "Every priority score exposes the factors behind the ranking instead of hiding the decision logic.",
-
-    evidenceFirst: "Evidence First",
-    evidenceFirstText:
-      "Citizens can attach photographs so decision-makers can see supporting evidence alongside the report.",
-
-    locationVerified: "Location Verified",
-    locationVerifiedText:
-      "Indian PIN codes are checked and connected to state, district and area information.",
-
-    noBudgetData: "No budget data",
-    noBudgetDataText:
-      "Budget optimisation is not displayed until a real budget dataset is connected.",
-  },
-
-  hi: {
-    howItWorks: "यह कैसे काम करता है",
-    priorities: "प्राथमिकताएँ",
-    about: "हमारे बारे में",
-    admin: "एडमिन डैशबोर्ड",
-    shareNeed: "समस्या बताएं",
-
-    badge: "निर्वाचन क्षेत्र के विकास के लिए AI",
-    heroTitle1: "नागरिकों की आवाज़ को",
-    heroTitle2: "बेहतर निर्णयों में बदलें।",
-    heroDescription:
-      "एक डेटा-संचालित प्लेटफ़ॉर्म जो बहुभाषी नागरिक रिपोर्टों को सत्यापन, प्रमाण और पारदर्शी प्राथमिकता स्कोर में बदलता है।",
-
-    tellCommunity: "अपने समुदाय की ज़रूरत बताएं →",
-    seeHow: "यह कैसे काम करता है",
-    citizenInputs: "आवाज़ • टेक्स्ट • फोटो • कई भाषाएँ",
-
-    intelligence: "निर्वाचन क्षेत्र की जानकारी",
-    developmentPulse: "विकास स्थिति",
-    live: "लाइव",
-
-    submissions: "नागरिक रिपोर्ट",
-    hotspots: "मांग वाले क्षेत्र",
-    critical: "महत्वपूर्ण प्राथमिकताएँ",
-    evidenceReports: "प्रमाण वाली रिपोर्ट",
-
-    highestNeed: "सबसे उभरती आवश्यकता",
-    priority: "प्राथमिकता",
-    requests: "नागरिक अनुरोध",
-    evidence: "प्रमाण-आधारित रैंकिंग",
-    demand:
-      "आवृत्ति + गंभीरता + स्थान + प्रमाण + नवीनता",
-
-    liveIntelligence: "लाइव नागरिक जानकारी",
-    realCitizenData: "इस प्रोटोटाइप का वास्तविक डेटा",
-    whatSystem: "सिस्टम क्या सामने ला सकता है।",
-    noDataYet: "अभी कोई नागरिक रिपोर्ट नहीं है।",
-
-    issueDistribution: "समस्या वितरण",
-    issueDistributionDescription:
-      "नागरिकों द्वारा वास्तव में भेजी गई समस्याओं का लाइव वितरण।",
-
-    priorityRanking: "प्राथमिकता रैंकिंग",
-    priorityRankingDescription:
-      "वर्तमान नागरिक रिपोर्टों से बनी पारदर्शी रैंकिंग।",
-
-    evidenceCoverage: "प्रमाण कवरेज",
-    evidenceCoverageDescription:
-      "कितनी रिपोर्टों में फोटो प्रमाण मौजूद है।",
-
-    languageInsights: "नागरिक भाषा जानकारी",
-    languageInsightsDescription:
-      "वास्तविक नागरिक रिपोर्टों में दर्ज भाषाएँ।",
-
-    decisionPipeline: "लाइव निर्णय प्रक्रिया",
-    decisionPipelineDescription:
-      "एक नागरिक रिपोर्ट सिस्टम में कैसे आगे बढ़ती है।",
-
-    fromVoice: "आवाज़ से कार्रवाई तक",
-    sixLayers: "नागरिक जानकारी की छह परतें।",
-    sixDescription:
-      "People's Priorities नागरिक रिपोर्टों को सत्यापन, वर्गीकरण, प्रमाण और पारदर्शी प्राथमिकता से जोड़ता है।",
-
-    ourDifference: "हमारी विशेषता",
-    notComplaint: "सिर्फ एक शिकायत पोर्टल नहीं।",
-    differenceDescription:
-      "People's Priorities नागरिकों की रिपोर्ट को संरचित प्रमाण और निर्णय सहायता में बदलता है।",
-
-    realityCheck: "वास्तविकता जाँच",
-    realityText:
-      "रिपोर्ट स्वीकार करने से पहले भारतीय PIN कोड की जानकारी सत्यापित की जाती है।",
-
-    explainableAI: "समझने योग्य AI",
-    explainableText:
-      "हर प्राथमिकता स्कोर के पीछे के कारक स्पष्ट रूप से दिखाई देते हैं।",
-
-    evidenceFirst: "प्रमाण पहले",
-    evidenceFirstText:
-      "नागरिक अपनी समस्या के साथ फोटो प्रमाण भी जोड़ सकते हैं।",
-
-    locationVerified: "स्थान सत्यापित",
-    locationVerifiedText:
-      "भारतीय PIN कोड को राज्य, जिला और क्षेत्र की जानकारी से जोड़ा जाता है।",
-
-    noBudgetData: "बजट डेटा उपलब्ध नहीं",
-    noBudgetDataText:
-      "वास्तविक बजट डेटासेट जुड़ने तक बजट अनुकूलन प्रदर्शित नहीं किया जाएगा।",
-  },
-
-  or: {
-    howItWorks: "ଏହା କିପରି କାମ କରେ",
-    priorities: "ପ୍ରାଥମିକତା",
-    about: "ଆମ ବିଷୟରେ",
-    admin: "ଆଡମିନ୍ ଡ୍ୟାସବୋର୍ଡ",
-    shareNeed: "ଆପଣଙ୍କ ସମସ୍ୟା ଜଣାନ୍ତୁ",
-
-    badge: "ନିର୍ବାଚନମଣ୍ଡଳୀ ବିକାଶ ପାଇଁ AI",
-    heroTitle1: "ନାଗରିକଙ୍କ ସ୍ୱରକୁ",
-    heroTitle2: "ଉନ୍ନତ ନିଷ୍ପତ୍ତିରେ ପରିଣତ କରନ୍ତୁ।",
-    heroDescription:
-      "ଏକ ଡାଟା-ଆଧାରିତ ପ୍ଲାଟଫର୍ମ ଯାହା ନାଗରିକ ରିପୋର୍ଟକୁ ଯାଞ୍ଚ, ପ୍ରମାଣ ଏବଂ ସ୍ୱଚ୍ଛ ପ୍ରାଥମିକତା ସ୍କୋର ସହିତ ଯୋଡ଼େ।",
-
-    tellCommunity: "ଆପଣଙ୍କ ସମ୍ପ୍ରଦାୟର ଆବଶ୍ୟକତା ଜଣାନ୍ତୁ →",
-    seeHow: "ଏହା କିପରି କାମ କରେ",
-    citizenInputs: "ସ୍ୱର • ଟେକ୍ସଟ୍ • ଫଟୋ • ଏକାଧିକ ଭାଷା",
-
-    intelligence: "ନିର୍ବାଚନମଣ୍ଡଳୀ ସୂଚନା",
-    developmentPulse: "ବିକାଶ ସ୍ଥିତି",
-    live: "ଲାଇଭ୍",
-
-    submissions: "ନାଗରିକ ରିପୋର୍ଟ",
-    hotspots: "ଚାହିଦା ଅଞ୍ଚଳ",
-    critical: "ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ ପ୍ରାଥମିକତା",
-    evidenceReports: "ପ୍ରମାଣ ରିପୋର୍ଟ",
-
-    highestNeed: "ସର୍ବାଧିକ ଉଦୀୟମାନ ଆବଶ୍ୟକତା",
-    priority: "ପ୍ରାଥମିକତା",
-    requests: "ନାଗରିକ ଅନୁରୋଧ",
-    evidence: "ପ୍ରମାଣ-ଆଧାରିତ ରାଙ୍କିଙ୍ଗ୍",
-    demand:
-      "ଆବୃତ୍ତି + ଗୁରୁତ୍ୱ + ସ୍ଥାନ + ପ୍ରମାଣ + ସାମ୍ପ୍ରତିକତା",
-
-    liveIntelligence: "ଲାଇଭ୍ ନାଗରିକ ସୂଚନା",
-    realCitizenData: "ଏହି ପ୍ରୋଟୋଟାଇପର ବାସ୍ତବ ତଥ୍ୟ",
-    whatSystem: "ସିଷ୍ଟମ୍ କଣ ଦେଖାଇପାରିବ।",
-    noDataYet: "ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ନାଗରିକ ରିପୋର୍ଟ ନାହିଁ।",
-
-    issueDistribution: "ସମସ୍ୟା ବଣ୍ଟନ",
-    issueDistributionDescription:
-      "ନାଗରିକମାନେ ପଠାଇଥିବା ପ୍ରକୃତ ସମସ୍ୟାର ଲାଇଭ୍ ବଣ୍ଟନ।",
-
-    priorityRanking: "ପ୍ରାଥମିକତା ରାଙ୍କିଙ୍ଗ୍",
-    priorityRankingDescription:
-      "ବର୍ତ୍ତମାନ ନାଗରିକ ରିପୋର୍ଟ ଆଧାରରେ ସ୍ୱଚ୍ଛ ରାଙ୍କିଙ୍ଗ୍।",
-
-    evidenceCoverage: "ପ୍ରମାଣ କଭରେଜ୍",
-    evidenceCoverageDescription:
-      "କେତେ ରିପୋର୍ଟରେ ଫଟୋ ପ୍ରମାଣ ରହିଛି।",
-
-    languageInsights: "ନାଗରିକ ଭାଷା ସୂଚନା",
-    languageInsightsDescription:
-      "ପ୍ରକୃତ ନାଗରିକ ରିପୋର୍ଟରେ ରେକର୍ଡ ହୋଇଥିବା ଭାଷା।",
-
-    decisionPipeline: "ଲାଇଭ୍ ନିଷ୍ପତ୍ତି ପ୍ରକ୍ରିୟା",
-    decisionPipelineDescription:
-      "ଏକ ନାଗରିକ ରିପୋର୍ଟ ସିଷ୍ଟମ୍ ମଧ୍ୟରେ କିପରି ଆଗକୁ ବଢ଼େ।",
-
-    fromVoice: "ସ୍ୱରରୁ କାର୍ଯ୍ୟ ପର୍ଯ୍ୟନ୍ତ",
-    sixLayers: "ନାଗରିକ ସୂଚନାର ଛଅଟି ସ୍ତର।",
-    sixDescription:
-      "People's Priorities ନାଗରିକ ରିପୋର୍ଟକୁ ଯାଞ୍ଚ, ବର୍ଗୀକରଣ, ପ୍ରମାଣ ଏବଂ ସ୍ୱଚ୍ଛ ପ୍ରାଥମିକତା ସହିତ ଯୋଡ଼େ।",
-
-    ourDifference: "ଆମର ବିଶେଷତା",
-    notComplaint: "କେବଳ ଆଉ ଏକ ଅଭିଯୋଗ ପୋର୍ଟାଲ୍ ନୁହେଁ।",
-    differenceDescription:
-      "People's Priorities ନାଗରିକ ରିପୋର୍ଟକୁ ଗଠିତ ପ୍ରମାଣ ଏବଂ ନିଷ୍ପତ୍ତି ସହାୟତାରେ ପରିଣତ କରେ।",
-
-    realityCheck: "ବାସ୍ତବତା ଯାଞ୍ଚ",
-    realityText:
-      "ରିପୋର୍ଟ ଗ୍ରହଣ ପୂର୍ବରୁ ଭାରତୀୟ PIN କୋଡ୍ ତଥ୍ୟ ଯାଞ୍ଚ କରାଯାଏ।",
-
-    explainableAI: "ବୁଝିହେଉଥିବା AI",
-    explainableText:
-      "ପ୍ରତ୍ୟେକ ପ୍ରାଥମିକତା ସ୍କୋର ପଛରେ ଥିବା କାରକଗୁଡ଼ିକ ସ୍ପଷ୍ଟ ଭାବରେ ଦେଖାଯାଏ।",
-
-    evidenceFirst: "ପ୍ରମାଣ ପ୍ରଥମେ",
-    evidenceFirstText:
-      "ନାଗରିକମାନେ ସମସ୍ୟା ସହିତ ଫଟୋ ପ୍ରମାଣ ମଧ୍ୟ ଯୋଡ଼ିପାରିବେ।",
-
-    locationVerified: "ସ୍ଥାନ ଯାଞ୍ଚିତ",
-    locationVerifiedText:
-      "ଭାରତୀୟ PIN କୋଡକୁ ରାଜ୍ୟ, ଜିଲ୍ଲା ଏବଂ ଅଞ୍ଚଳ ତଥ୍ୟ ସହିତ ଯୋଡ଼ାଯାଏ।",
-
-    noBudgetData: "ବଜେଟ୍ ତଥ୍ୟ ନାହିଁ",
-    noBudgetDataText:
-      "ପ୍ରକୃତ ବଜେଟ୍ ଡାଟାସେଟ୍ ଯୋଡ଼ାଯିବା ପର୍ଯ୍ୟନ୍ତ ବଜେଟ୍ ଅପ୍ଟିମାଇଜେସନ୍ ଦେଖାଯିବ ନାହିଁ।",
-  },
-};
-
 const CATEGORY_ORDER: CategoryName[] = [
   "Roads",
   "Water",
@@ -403,110 +60,16 @@ const CATEGORY_ORDER: CategoryName[] = [
   "Other",
 ];
 
-const CATEGORY_TITLES: Record<
-  CategoryName,
-  Record<Language, string>
-> = {
-  Roads: {
-    en: "Roads",
-    hi: "सड़कें",
-    or: "ସଡ଼କ",
-  },
-  Water: {
-    en: "Water",
-    hi: "पानी",
-    or: "ଜଳ",
-  },
-  Electricity: {
-    en: "Electricity",
-    hi: "बिजली",
-    or: "ବିଦ୍ୟୁତ",
-  },
-  Sanitation: {
-    en: "Sanitation",
-    hi: "स्वच्छता",
-    or: "ପରିମଳ",
-  },
-  Healthcare: {
-    en: "Healthcare",
-    hi: "स्वास्थ्य सेवा",
-    or: "ସ୍ୱାସ୍ଥ୍ୟସେବା",
-  },
-  Education: {
-    en: "Education",
-    hi: "शिक्षा",
-    or: "ଶିକ୍ଷା",
-  },
-  Flooding: {
-    en: "Flooding",
-    hi: "बाढ़ / जलभराव",
-    or: "ବନ୍ୟା / ଜଳବନ୍ଦୀ",
-  },
-  Other: {
-    en: "Other",
-    hi: "अन्य",
-    or: "ଅନ୍ୟ",
-  },
-};
-
 function readSubmissions(): Submission[] {
   try {
-    const saved = localStorage.getItem(
-      "peoples-priorities-submissions"
-    );
-
-    if (!saved) {
-      return [];
-    }
-
+    const saved = localStorage.getItem("peoples-priorities-submissions");
+    if (!saved) return [];
     const parsed = JSON.parse(saved);
-
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-
+    if (!Array.isArray(parsed)) return [];
     return parsed;
   } catch {
     return [];
   }
-}
-
-function getLanguageLabel(
-  language: string | undefined,
-  currentLanguage: Language
-): string {
-  if (language === "hi-IN") {
-    return currentLanguage === "hi"
-      ? "हिन्दी"
-      : currentLanguage === "or"
-        ? "ହିନ୍ଦୀ"
-        : "Hindi";
-  }
-
-  if (language === "or-IN") {
-    return currentLanguage === "hi"
-      ? "ओड़िया"
-      : currentLanguage === "or"
-        ? "ଓଡ଼ିଆ"
-        : "Odia";
-  }
-
-  if (language === "en-IN") {
-    return "English";
-  }
-
-  return currentLanguage === "hi"
-    ? "अन्य"
-    : currentLanguage === "or"
-      ? "ଅନ୍ୟ"
-      : "Other";
-}
-
-function getCategoryTitle(
-  category: CategoryName,
-  language: Language
-) {
-  return CATEGORY_TITLES[category][language];
 }
 
 function AnimatedNumber({
@@ -516,126 +79,82 @@ function AnimatedNumber({
   value: number;
   duration?: number;
 }) {
-  const [displayValue, setDisplayValue] =
-    useState(value);
+  const [displayValue, setDisplayValue] = useState(value);
 
   useEffect(() => {
     const startValue = displayValue;
     const difference = value - startValue;
-
-    if (difference === 0) {
-      return;
-    }
+    if (difference === 0) return;
 
     const startTime = performance.now();
-
     let animationFrame = 0;
 
     const animate = (currentTime: number) => {
-      const progress = Math.min(
-        (currentTime - startTime) / duration,
-        1
-      );
-
-      const eased =
-        1 - Math.pow(1 - progress, 3);
-
-      setDisplayValue(
-        Math.round(
-          startValue + difference * eased
-        )
-      );
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayValue(Math.round(startValue + difference * eased));
 
       if (progress < 1) {
-        animationFrame =
-          requestAnimationFrame(animate);
+        animationFrame = requestAnimationFrame(animate);
       }
     };
 
-    animationFrame =
-      requestAnimationFrame(animate);
-
-    return () => {
-      cancelAnimationFrame(
-        animationFrame
-      );
-    };
+    animationFrame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrame);
   }, [value]);
 
-  return (
-    <>
-      {displayValue.toLocaleString("en-IN")}
-    </>
-  );
+  return <>{displayValue.toLocaleString("en-IN")}</>;
 }
 
 export default function Home() {
-  const [language, setLanguage] =
-    useState<Language>("en");
+  const { language, setLanguage, t, speechLang, getCategoryName, languages } =
+    useLanguage();
 
-  const [submissions, setSubmissions] =
-    useState<Submission[]>([]);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [pulseKey, setPulseKey] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [fontSize, setFontSize] = useState<"normal" | "large" | "xlarge">(
+    "normal"
+  );
 
-  const [pulseKey, setPulseKey] =
-    useState(0);
-
-  const t = translations[language];
+  // Voice Grievance Assistant State
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const [audioVolume, setAudioVolume] = useState(0);
+  const [voiceTranscript, setVoiceTranscript] = useState("");
+  const [translatedTranscript, setTranslatedTranscript] = useState("");
+  const [extractedAudioUrl, setExtractedAudioUrl] = useState<string | null>(null);
+  const [extractedAudioBlob, setExtractedAudioBlob] = useState<Blob | null>(null);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [voiceError, setVoiceError] = useState("");
+  const [translationPreference, setTranslationPreference] = useState<"combined" | "original" | "translated">("combined");
+  const audioRecorderRef = useRef<AudioRecorder | null>(null);
+  const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   /*
    * =========================================================
-   * LOAD REAL CITIZEN DATA
+   * LOAD REAL CITIZEN DATA (POLLING)
    * =========================================================
    */
-
   useEffect(() => {
     const load = () => {
       const next = readSubmissions();
-
       setSubmissions((previous) => {
-        if (
-          previous.length !==
-          next.length
-        ) {
-          setPulseKey(
-            (value) => value + 1
-          );
+        if (previous.length !== next.length) {
+          setPulseKey((value) => value + 1);
         }
-
         return next;
       });
     };
 
     load();
-
-    /*
-     * The citizen page currently stores
-     * submissions in localStorage.
-     *
-     * Polling makes this landing page
-     * update while the demo is running.
-     */
-
-    const interval = window.setInterval(
-      load,
-      1000
-    );
-
-    const handleStorage = () => {
-      load();
-    };
-
-    window.addEventListener(
-      "storage",
-      handleStorage
-    );
+    const interval = window.setInterval(load, 1000);
+    const handleStorage = () => load();
+    window.addEventListener("storage", handleStorage);
 
     return () => {
       window.clearInterval(interval);
-
-      window.removeEventListener(
-        "storage",
-        handleStorage
-      );
+      window.removeEventListener("storage", handleStorage);
     };
   }, []);
 
@@ -644,118 +163,20 @@ export default function Home() {
    * LIVE CATEGORY INTELLIGENCE
    * =========================================================
    */
+  const categoryInsights = useMemo<CategoryInsight[]>(() => {
+    const total = submissions.length;
 
-  const categoryInsights =
-    useMemo<CategoryInsight[]>(() => {
-      const total =
-        submissions.length;
+    return CATEGORY_ORDER.map((categoryName) => {
+      const categorySubmissions = submissions.filter((submission) => {
+        const category = getCategory(submission.issue || "");
+        return category.name === categoryName;
+      });
 
-      return CATEGORY_ORDER.map(
-        (categoryName) => {
-          const categorySubmissions =
-            submissions.filter(
-              (submission) => {
-                const category =
-                  getCategory(
-                    submission.issue || ""
-                  );
+      const count = categorySubmissions.length;
+      const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
+      const uniqueLocations = new Set<string>();
 
-                return (
-                  category.name ===
-                  categoryName
-                );
-              }
-            );
-
-          const count =
-            categorySubmissions.length;
-
-          const percentage =
-            total > 0
-              ? Math.round(
-                  (count / total) *
-                    100
-                )
-              : 0;
-
-          const uniqueLocations =
-            new Set<string>();
-
-          categorySubmissions.forEach(
-            (submission) => {
-              const location =
-                submission.village?.trim() ||
-                submission.location?.trim() ||
-                submission.pincode?.trim() ||
-                submission.district?.trim();
-
-              if (location) {
-                uniqueLocations.add(
-                  location.toLowerCase()
-                );
-              }
-            }
-          );
-
-          const reportsWithEvidence =
-            categorySubmissions.filter(
-              (submission) =>
-                Array.isArray(
-                  submission.photos
-                ) &&
-                submission.photos.length >
-                  0
-            ).length;
-
-          const evidence =
-            count > 0
-              ? Math.round(
-                  (reportsWithEvidence /
-                    count) *
-                    100
-                )
-              : 0;
-
-          const priority =
-            calculatePriority(
-              categorySubmissions,
-              total
-            );
-
-          return {
-            name: categoryName,
-            icon:
-              getCategory(
-                categorySubmissions[0]
-                  ?.issue || categoryName
-              ).icon,
-            count,
-            percentage,
-            priority: priority.score,
-            level: priority.level,
-            evidence,
-            locations:
-              uniqueLocations.size,
-          };
-        }
-      ).filter(
-        (category) =>
-          category.count > 0
-      );
-    }, [submissions]);
-
-  /*
-   * =========================================================
-   * REAL METRICS
-   * =========================================================
-   */
-
-  const uniqueHotspots = useMemo(() => {
-    const locations =
-      new Set<string>();
-
-    submissions.forEach(
-      (submission) => {
+      categorySubmissions.forEach((submission) => {
         const location =
           submission.village?.trim() ||
           submission.location?.trim() ||
@@ -763,46 +184,70 @@ export default function Home() {
           submission.district?.trim();
 
         if (location) {
-          locations.add(
-            location.toLowerCase()
-          );
+          uniqueLocations.add(location.toLowerCase());
         }
-      }
-    );
+      });
 
+      const reportsWithEvidence = categorySubmissions.filter(
+        (submission) =>
+          Array.isArray(submission.photos) && submission.photos.length > 0
+      ).length;
+
+      const evidence =
+        count > 0 ? Math.round((reportsWithEvidence / count) * 100) : 0;
+      const priority = calculatePriority(categorySubmissions, total);
+
+      return {
+        name: categoryName,
+        icon: getCategory(categorySubmissions[0]?.issue || categoryName).icon,
+        count,
+        percentage,
+        priority: priority.score,
+        level: priority.level,
+        evidence,
+        locations: uniqueLocations.size,
+      };
+    }).filter((category) => category.count > 0);
+  }, [submissions]);
+
+  /*
+   * =========================================================
+   * REAL METRICS
+   * =========================================================
+   */
+  const uniqueHotspots = useMemo(() => {
+    const locations = new Set<string>();
+    submissions.forEach((submission) => {
+      const location =
+        submission.village?.trim() ||
+        submission.location?.trim() ||
+        submission.pincode?.trim() ||
+        submission.district?.trim();
+
+      if (location) {
+        locations.add(location.toLowerCase());
+      }
+    });
     return locations.size;
   }, [submissions]);
 
-  const criticalPriorities =
-    useMemo(() => {
-      return categoryInsights.filter(
-        (category) =>
-          category.level ===
-          "Critical"
-      ).length;
-    }, [categoryInsights]);
+  const criticalPriorities = useMemo(() => {
+    return categoryInsights.filter((category) => category.level === "Critical")
+      .length;
+  }, [categoryInsights]);
 
-  const evidenceReports =
-    useMemo(() => {
-      return submissions.filter(
-        (submission) =>
-          Array.isArray(
-            submission.photos
-          ) &&
-          submission.photos.length > 0
-      ).length;
-    }, [submissions]);
+  const evidenceReports = useMemo(() => {
+    return submissions.filter(
+      (submission) =>
+        Array.isArray(submission.photos) && submission.photos.length > 0
+    ).length;
+  }, [submissions]);
 
-  const topPriority =
-    categoryInsights[0] || null;
+  const topPriority = categoryInsights[0] || null;
 
   const evidencePercentage =
     submissions.length > 0
-      ? Math.round(
-          (evidenceReports /
-            submissions.length) *
-            100
-        )
+      ? Math.round((evidenceReports / submissions.length) * 100)
       : 0;
 
   /*
@@ -810,130 +255,70 @@ export default function Home() {
    * LANGUAGE INTELLIGENCE
    * =========================================================
    */
+  const languageInsights = useMemo(() => {
+    const counts: Record<string, number> = {};
 
-  const languageInsights =
-    useMemo(() => {
-      const counts: Record<
-        string,
-        number
-      > = {};
+    submissions.forEach((submission) => {
+      const lang =
+        submission.voiceLanguage ||
+        submission.writingLanguages?.issue ||
+        "en-IN";
+      counts[lang] = (counts[lang] || 0) + 1;
+    });
 
-      submissions.forEach(
-        (submission) => {
-          const language =
-            submission.voiceLanguage ||
-            submission.writingLanguages
-              ?.issue ||
-            "en-IN";
-
-          counts[language] =
-            (counts[language] || 0) +
-            1;
-        }
-      );
-
-      return Object.entries(counts)
-        .map(
-          ([language, count]) => ({
-            language,
-            count,
-            percentage:
-              submissions.length > 0
-                ? Math.round(
-                    (count /
-                      submissions.length) *
-                      100
-                  )
-                : 0,
-          })
-        )
-        .sort(
-          (a, b) =>
-            b.count - a.count
+    return Object.entries(counts)
+      .map(([lang, count]) => {
+        const langObj = languages.find(
+          (l) => l.speechLang === lang || l.code === lang
         );
-    }, [submissions]);
+        return {
+          languageCode: lang,
+          label: langObj ? langObj.nativeName : lang,
+          count,
+          percentage:
+            submissions.length > 0
+              ? Math.round((count / submissions.length) * 100)
+              : 0,
+        };
+      })
+      .sort((a, b) => b.count - a.count);
+  }, [submissions, languages]);
 
   /*
    * =========================================================
-   * LIVE PIPELINE
+   * LIVE PIPELINE STEPS
    * =========================================================
    */
-
   const pipelineSteps = [
     {
+      step: "01",
       icon: "🗣️",
-      title:
-        language === "hi"
-          ? "नागरिक आवाज़"
-          : language === "or"
-            ? "ନାଗରିକ ସ୍ୱର"
-            : "Citizen Voice",
-      text:
-        language === "hi"
-          ? "रिपोर्ट प्राप्त"
-          : language === "or"
-            ? "ରିପୋର୍ଟ ଗ୍ରହଣ"
-            : "Report received",
+      title: t.pipeline.step1Title,
+      text: t.pipeline.step1Desc,
     },
     {
+      step: "02",
       icon: "🧩",
-      title:
-        language === "hi"
-          ? "वर्गीकरण"
-          : language === "or"
-            ? "ବର୍ଗୀକରଣ"
-            : "Classification",
-      text:
-        language === "hi"
-          ? "समस्या की श्रेणी"
-          : language === "or"
-            ? "ସମସ୍ୟା ବର୍ଗ"
-            : "Issue category",
+      title: t.pipeline.step2Title,
+      text: t.pipeline.step2Desc,
     },
     {
+      step: "03",
       icon: "📍",
-      title:
-        language === "hi"
-          ? "स्थान सत्यापन"
-          : language === "or"
-            ? "ସ୍ଥାନ ଯାଞ୍ଚ"
-            : "Location verification",
-      text:
-        language === "hi"
-          ? "PIN आधारित"
-          : language === "or"
-            ? "PIN ଆଧାରିତ"
-            : "PIN verified",
+      title: t.pipeline.step3Title,
+      text: t.pipeline.step3Desc,
     },
     {
+      step: "04",
       icon: "📷",
-      title:
-        language === "hi"
-          ? "प्रमाण"
-          : language === "or"
-            ? "ପ୍ରମାଣ"
-            : "Evidence",
-      text:
-        language === "hi"
-          ? "फोटो उपलब्ध"
-          : language === "or"
-            ? "ଫଟୋ ଉପଲବ୍ଧ"
-            : "Photos available",
+      title: t.pipeline.step4Title,
+      text: t.pipeline.step4Desc,
     },
     {
+      step: "05",
       icon: "📊",
-      title:
-        language === "hi"
-          ? "प्राथमिकता"
-          : language === "or"
-            ? "ପ୍ରାଥମିକତା"
-            : "Priority",
-      text:
-        language === "hi"
-          ? "स्कोर तैयार"
-          : language === "or"
-            ? "ସ୍କୋର ପ୍ରସ୍ତୁତ"
-            : "Score generated",
+      title: t.pipeline.step5Title,
+      text: t.pipeline.step5Desc,
     },
   ];
 
@@ -942,1312 +327,2038 @@ export default function Home() {
    * HOW IT WORKS
    * =========================================================
    */
-
   const howItWorks = [
     {
       number: "01",
       icon: "🗣️",
       title: {
-        en: "Listen",
-        hi: "सुनें",
-        or: "ଶୁଣନ୍ତୁ",
+        en: t.howItWorks.step1Title,
+        [language]: t.howItWorks.step1Title,
       },
       text: {
-        en: "Collect voice, text, photos and multilingual submissions from citizens.",
-        hi: "नागरिकों से आवाज़, टेक्स्ट, फोटो और बहुभाषी रिपोर्ट एकत्र करें।",
-        or: "ନାଗରିକଙ୍କଠାରୁ ସ୍ୱର, ଟେକ୍ସଟ୍, ଫଟୋ ଏବଂ ବହୁଭାଷୀ ରିପୋର୍ଟ ସଂଗ୍ରହ କରନ୍ତୁ।",
+        en: t.howItWorks.step1Desc,
+        [language]: t.howItWorks.step1Desc,
       },
     },
     {
       number: "02",
       icon: "🧩",
       title: {
-        en: "Classify",
-        hi: "वर्गीकृत करें",
-        or: "ବର୍ଗୀକରଣ କରନ୍ତୁ",
+        en: t.howItWorks.step2Title,
+        [language]: t.howItWorks.step2Title,
       },
       text: {
-        en: "Group reports into roads, water, electricity, sanitation, healthcare, education and flooding.",
-        hi: "रिपोर्ट को सड़क, पानी, बिजली, स्वच्छता, स्वास्थ्य, शिक्षा और बाढ़ जैसी श्रेणियों में समूहित करें।",
-        or: "ରିପୋର୍ଟଗୁଡ଼ିକୁ ସଡ଼କ, ଜଳ, ବିଦ୍ୟୁତ, ପରିମଳ, ସ୍ୱାସ୍ଥ୍ୟ, ଶିକ୍ଷା ଏବଂ ବନ୍ୟା ଭାବେ ବର୍ଗୀକରଣ କରନ୍ତୁ।",
+        en: t.howItWorks.step2Desc,
+        [language]: t.howItWorks.step2Desc,
       },
     },
     {
       number: "03",
       icon: "📍",
       title: {
-        en: "Verify",
-        hi: "सत्यापित करें",
-        or: "ଯାଞ୍ଚ କରନ୍ତୁ",
+        en: t.howItWorks.step3Title,
+        [language]: t.howItWorks.step3Title,
       },
       text: {
-        en: "Connect each accepted report with verified Indian PIN-code location information.",
-        hi: "हर स्वीकार की गई रिपोर्ट को सत्यापित भारतीय PIN कोड स्थान जानकारी से जोड़ें।",
-        or: "ପ୍ରତ୍ୟେକ ଗ୍ରହଣ କରାଯାଇଥିବା ରିପୋର୍ଟକୁ ଯାଞ୍ଚିତ ଭାରତୀୟ PIN କୋଡ୍ ସ୍ଥାନ ତଥ୍ୟ ସହିତ ଯୋଡ଼ନ୍ତୁ।",
+        en: t.howItWorks.step3Desc,
+        [language]: t.howItWorks.step3Desc,
       },
     },
     {
       number: "04",
       icon: "📷",
       title: {
-        en: "Support",
-        hi: "प्रमाण जोड़ें",
-        or: "ପ୍ରମାଣ ଯୋଡ଼ନ୍ତୁ",
+        en: t.howItWorks.step4Title,
+        [language]: t.howItWorks.step4Title,
       },
       text: {
-        en: "Use citizen-uploaded photographs as supporting evidence.",
-        hi: "नागरिकों द्वारा अपलोड की गई तस्वीरों को सहायक प्रमाण के रूप में उपयोग करें।",
-        or: "ନାଗରିକଙ୍କ ଦ୍ୱାରା ଅପଲୋଡ୍ ହୋଇଥିବା ଫଟୋକୁ ସହାୟକ ପ୍ରମାଣ ଭାବେ ବ୍ୟବହାର କରନ୍ତୁ।",
+        en: t.howItWorks.step4Desc,
+        [language]: t.howItWorks.step4Desc,
       },
     },
     {
       number: "05",
       icon: "📊",
       title: {
-        en: "Prioritize",
-        hi: "प्राथमिकता दें",
-        or: "ପ୍ରାଥମିକତା ଦିଅନ୍ତୁ",
+        en: t.howItWorks.step5Title,
+        [language]: t.howItWorks.step5Title,
       },
       text: {
-        en: "Rank categories using frequency, severity, geographic concentration, evidence and recency.",
-        hi: "आवृत्ति, गंभीरता, भौगोलिक एकाग्रता, प्रमाण और नवीनता के आधार पर रैंकिंग करें।",
-        or: "ଆବୃତ୍ତି, ଗୁରୁତ୍ୱ, ଭୌଗୋଳିକ ଏକାଗ୍ରତା, ପ୍ରମାଣ ଏବଂ ସାମ୍ପ୍ରତିକତା ଆଧାରରେ ରାଙ୍କ କରନ୍ତୁ।",
+        en: t.howItWorks.step5Desc,
+        [language]: t.howItWorks.step5Desc,
       },
     },
     {
       number: "06",
       icon: "🎯",
       title: {
-        en: "Decide",
-        hi: "निर्णय लें",
-        or: "ନିଷ୍ପତ୍ତି ନିଅନ୍ତୁ",
+        en: t.howItWorks.step6Title,
+        [language]: t.howItWorks.step6Title,
       },
       text: {
-        en: "Give decision-makers a transparent view of where citizen attention is concentrated.",
-        hi: "निर्णयकर्ताओं को दिखाएं कि नागरिकों की प्राथमिकता कहाँ केंद्रित है।",
-        or: "ନିଷ୍ପତ୍ତି ନେଉଥିବା ବ୍ୟକ୍ତିଙ୍କୁ ନାଗରିକଙ୍କ ପ୍ରାଥମିକତା କେଉଁଠାରେ ରହିଛି ଦେଖାନ୍ତୁ।",
+        en: t.howItWorks.step6Desc,
+        [language]: t.howItWorks.step6Desc,
       },
     },
   ];
 
-  return (
-    <main className="min-h-screen bg-[#f5f7f4] text-[#17221b]">
-      {/* =====================================================
-          NAVIGATION
-      ====================================================== */}
+  /*
+   * =========================================================
+   * VOICE COMPLAINT RECORDING & TRANSLATION ENGINE
+   * =========================================================
+   */
+  const startVoiceRecording = async () => {
+    setVoiceError("");
+    setVoiceTranscript("");
+    setTranslatedTranscript("");
+    if (extractedAudioUrl) {
+      URL.revokeObjectURL(extractedAudioUrl);
+      setExtractedAudioUrl(null);
+    }
+    setExtractedAudioBlob(null);
+    setRecordingDuration(0);
 
-      <nav className="border-b border-[#dce3dc] bg-[#f5f7f4]/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-8">
+    try {
+      const recorder = createAudioRecorder();
+      audioRecorderRef.current = recorder;
+
+      await recorder.start({
+        language: speechLang,
+        onVolumeChange: (vol) => setAudioVolume(vol),
+        onInterimTranscript: (text) => setVoiceTranscript(text),
+        onError: (err) => setVoiceError(err),
+      });
+
+      setIsRecording(true);
+
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingDuration((prev) => {
+          if (prev >= 120) {
+            // Auto stop at 2 minutes
+            stopVoiceRecording();
+            return 120;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+    } catch (err: any) {
+      setIsRecording(false);
+      setVoiceError(err.message || "Failed to access microphone. Please grant permission.");
+    }
+  };
+
+  const stopVoiceRecording = async () => {
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
+
+    const recorder = audioRecorderRef.current;
+    if (!recorder) {
+      setIsRecording(false);
+      return;
+    }
+
+    try {
+      setIsRecording(false);
+      setIsTranscribing(true);
+
+      const result = await recorder.stop();
+      setExtractedAudioUrl(result.audioUrl);
+      setExtractedAudioBlob(result.blob);
+
+      // Call /api/transcribe with extracted audio & captured text
+      const formData = new FormData();
+      formData.append("audio", result.blob, "voice-recording.webm");
+      formData.append("language", speechLang);
+      formData.append("interimText", result.transcript || voiceTranscript);
+      formData.append("targetLanguage", "en");
+
+      const response = await fetch("/api/transcribe", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          const orig = data.originalText || result.transcript || voiceTranscript;
+          const trans = data.translatedText || "";
+          if (orig) {
+            setVoiceTranscript(orig);
+          }
+          if (trans) {
+            setTranslatedTranscript(trans);
+          }
+        }
+      }
+    } catch (err: any) {
+      console.error("Transcription error:", err);
+      setVoiceError("Audio extracted successfully, but translation service timed out.");
+    } finally {
+      setIsTranscribing(false);
+      setAudioVolume(0);
+    }
+  };
+
+  const toggleVoiceRecording = () => {
+    if (isRecording) {
+      stopVoiceRecording();
+    } else {
+      startVoiceRecording();
+    }
+  };
+
+  const handleContinueVoiceSubmission = () => {
+    let textToPass = "";
+    if (translationPreference === "combined" && voiceTranscript && translatedTranscript && voiceTranscript.toLowerCase() !== translatedTranscript.toLowerCase()) {
+      textToPass = `[Original]: ${voiceTranscript}\n[English Translation]: ${translatedTranscript}`;
+    } else if (translationPreference === "translated" && translatedTranscript) {
+      textToPass = translatedTranscript;
+    } else {
+      textToPass = voiceTranscript || translatedTranscript;
+    }
+
+    if (textToPass) {
+      try {
+        sessionStorage.setItem("peoples-priorities-voice-draft", textToPass);
+      } catch {}
+    }
+
+    if (extractedAudioBlob) {
+      try {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          try {
+            sessionStorage.setItem("peoples-priorities-voice-audio", reader.result as string);
+          } catch {}
+          window.location.href = "/citizen";
+        };
+        reader.readAsDataURL(extractedAudioBlob);
+        return;
+      } catch {}
+    }
+
+    window.location.href = "/citizen";
+  };
+
+  const fontSizeClass =
+    fontSize === "large"
+      ? "text-[105%]"
+      : fontSize === "xlarge"
+      ? "text-[112%]"
+      : "text-[100%]";
+
+  return (
+    <div
+      className={`min-h-screen bg-[#f8faf5] text-[#17221b] selection:bg-[#28623c] selection:text-white ${fontSizeClass}`}
+    >
+      {/* =====================================================
+          1. TOP UTILITY BAR (INDIAN GOVT ACCESSIBILITY HEADER)
+      ====================================================== */}
+      <div className="bg-[#f0f5ee] border-b border-[#e2eae2] text-[#48564c] text-xs py-1.5 px-4 sm:px-8">
+        <div className="mx-auto max-w-7xl flex flex-wrap items-center justify-between gap-2">
+          {/* Left: Accessibility & Civic ID */}
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#173f2a] text-lg text-white shadow-sm">
+            <span className="hidden sm:inline font-semibold text-[#173f2a] tracking-wide">
+              {t.common.govtInterface}
+            </span>
+            <span className="hidden sm:inline text-[#c4d2c4]">•</span>
+            <span className="text-[11px] text-[#5c6c60]">
+              {t.common.civicPortal}
+            </span>
+          </div>
+
+          {/* Right: Text Size Controls */}
+          <div className="flex items-center gap-3 sm:gap-4 ml-auto">
+            {/* Screen Reader Skip */}
+            <a
+              href="#main-content"
+              className="sr-only focus:not-sr-only focus:inline-block focus:bg-white focus:text-[#173f2a] focus:px-2 focus:py-1 focus:rounded text-xs font-bold"
+            >
+              {t.common.skipToContent}
+            </a>
+
+            {/* Font Size Adjuster (A- | A | A+) */}
+            <div className="flex items-center border border-[#cfdacd] rounded bg-white px-1.5 py-0.5 gap-1 shadow-2xs">
+              <span className="text-[10px] text-[#6d7f72] mr-0.5 font-semibold">
+                {t.common.font}:
+              </span>
+              <button
+                type="button"
+                onClick={() => setFontSize("normal")}
+                title="Default Font Size"
+                className={`px-1 rounded text-[10px] font-bold ${
+                  fontSize === "normal"
+                    ? "bg-[#173f2a] text-white"
+                    : "text-[#4d5e52] hover:bg-[#eaf1ea]"
+                }`}
+              >
+                A
+              </button>
+              <button
+                type="button"
+                onClick={() => setFontSize("large")}
+                title="Large Font Size"
+                className={`px-1 rounded text-[11px] font-bold ${
+                  fontSize === "large"
+                    ? "bg-[#173f2a] text-white"
+                    : "text-[#4d5e52] hover:bg-[#eaf1ea]"
+                }`}
+              >
+                A+
+              </button>
+              <button
+                type="button"
+                onClick={() => setFontSize("xlarge")}
+                title="Extra Large Font Size"
+                className={`px-1 rounded text-[12px] font-bold ${
+                  fontSize === "xlarge"
+                    ? "bg-[#173f2a] text-white"
+                    : "text-[#4d5e52] hover:bg-[#eaf1ea]"
+                }`}
+              >
+                A++
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* =====================================================
+          2. MAIN GOVERNMENT NAVIGATION HEADER
+      ====================================================== */}
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#dce3dc] shadow-xs">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
+          {/* Official Emblem & Branding */}
+          <a href="/" className="flex items-center gap-3 shrink-0 group">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#173f2a] text-white font-bold text-lg shadow-sm border border-[#0d2619] group-hover:bg-[#20573a] transition-colors">
               P
             </div>
 
             <div>
-              <div className="text-sm font-bold tracking-[0.18em] text-[#173f2a]">
-                PEOPLE&apos;S
+              <div className="flex items-center gap-2">
+                <span className="text-base font-extrabold tracking-wider text-[#173f2a]">
+                  {t.common.siteName}
+                </span>
+                <span className="hidden lg:inline text-[9px] font-bold uppercase tracking-wider bg-[#e5eee5] text-[#245436] px-2 py-0.5 rounded border border-[#cbdbcc]">
+                  Civic Portal
+                </span>
               </div>
-
-              <div className="text-xs font-semibold tracking-[0.28em] text-[#66736a]">
-                PRIORITIES
-              </div>
+              <p className="text-[11px] font-medium tracking-wide text-[#59695d]">
+                {t.common.portalSubtag}
+              </p>
             </div>
-          </div>
+          </a>
 
-          <div className="hidden items-center gap-8 text-sm font-medium text-[#536058] md:flex">
+          {/* Desktop Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-6 text-xs font-semibold text-[#415146]">
+            <a
+              href="#hero"
+              className="transition hover:text-[#173f2a] py-1 border-b-2 border-transparent hover:border-[#173f2a]"
+            >
+              {t.common.home}
+            </a>
+            <a
+              href="#citizen-services"
+              className="transition hover:text-[#173f2a] py-1 border-b-2 border-transparent hover:border-[#173f2a]"
+            >
+              {t.common.citizenServices}
+            </a>
             <a
               href="#how-it-works"
-              className="transition hover:text-[#173f2a]"
+              className="transition hover:text-[#173f2a] py-1 border-b-2 border-transparent hover:border-[#173f2a]"
             >
-              {t.howItWorks}
+              {t.common.howItWorks}
             </a>
-
             <a
-              href="#live-intelligence"
-              className="transition hover:text-[#173f2a]"
+              href="#priorities"
+              className="transition hover:text-[#173f2a] py-1 border-b-2 border-transparent hover:border-[#173f2a]"
             >
-              {t.priorities}
+              {t.common.priorities}
             </a>
-
+            <a
+              href="#decision-pipeline"
+              className="transition hover:text-[#173f2a] py-1 border-b-2 border-transparent hover:border-[#173f2a]"
+            >
+              {t.common.pipeline}
+            </a>
+            <a
+              href="/track"
+              className="transition hover:text-[#173f2a] py-1 border-b-2 border-transparent hover:border-[#173f2a]"
+            >
+              {t.common.trackComplaint}
+            </a>
             <a
               href="#about"
-              className="transition hover:text-[#173f2a]"
+              className="transition hover:text-[#173f2a] py-1 border-b-2 border-transparent hover:border-[#173f2a]"
             >
-              {t.about}
+              {t.common.about}
             </a>
-          </div>
+          </nav>
 
-          <div className="flex items-center gap-3">
-            <LanguageSwitcher
-              language={language}
-              setLanguage={setLanguage}
-            />
+          {/* Right Action Group */}
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            {/* Government Multilingual Dropdown */}
+            <LanguageSwitcher />
 
+            {/* Officer / Admin Login Button */}
             <a
               href="/login?redirect=/dashboard"
-              className="hidden rounded-full neu-button-secondary px-5 py-2.5 text-sm font-semibold text-[#314038] sm:block"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-[#cfdacf] bg-[#f8faf7] px-3.5 py-1.5 text-xs font-bold text-[#233f2d] hover:bg-[#ebf2ea] hover:border-[#b4c8b6] transition-all shadow-2xs"
             >
-              {t.admin}
+              <svg
+                className="w-3.5 h-3.5 text-[#3b6b49]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+              <span>{t.common.officerLogin}</span>
             </a>
 
+            {/* Primary Citizen Action Button */}
             <a
               href="/citizen"
-              className="rounded-full neu-button-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[#173f2a] hover:bg-[#205639] active:bg-[#123121] px-4 py-2 text-xs font-bold text-white shadow-sm transition-all focus:ring-2 focus:ring-[#28623c]/40"
             >
-              {t.shareNeed}
+              <span>{t.common.shareNeed}</span>
+              <span className="text-sm">→</span>
             </a>
-          </div>
-        </div>
-      </nav>
 
-      {/* =====================================================
-          HERO
-      ====================================================== */}
-
-      <section className="relative overflow-hidden">
-        <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-[#dcebdd] blur-3xl" />
-
-        <div className="absolute -left-32 top-48 h-72 w-72 rounded-full bg-[#e5eee4] blur-3xl" />
-
-        <div className="relative mx-auto grid max-w-7xl gap-14 px-6 pb-16 pt-16 lg:grid-cols-[1.15fr_0.85fr] lg:px-8 lg:pb-24 lg:pt-24">
-          <div className="flex flex-col justify-center">
-            <div className="mb-7 inline-flex w-fit items-center gap-2 rounded-full border border-[#cbdacb] bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-[#376147]">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-[#4d9a61]" />
-
-              {t.badge}
-            </div>
-
-            <h1 className="max-w-4xl text-5xl font-semibold leading-[1.02] tracking-[-0.045em] text-[#17221b] sm:text-6xl lg:text-7xl">
-              {t.heroTitle1}{" "}
-              <span className="text-[#28623c]">
-                {t.heroTitle2}
-              </span>
-            </h1>
-
-            <p className="mt-7 max-w-2xl text-lg leading-8 text-[#5b675f]">
-              {t.heroDescription}
-            </p>
-
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <a
-                href="/citizen"
-                className="rounded-full neu-button-primary px-7 py-3.5 text-center text-sm font-bold text-white"
-              >
-                {t.tellCommunity}
-              </a>
-
-              <a
-                href="#live-intelligence"
-                className="rounded-full neu-button-secondary px-7 py-3.5 text-center text-sm font-bold text-[#314038]"
-              >
-                {t.seeHow}
-              </a>
-            </div>
-
-            <div className="mt-10 flex items-center gap-3 text-sm text-[#66736a]">
-              <div className="flex -space-x-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#f5f7f4] bg-[#d8e5d9] text-xs">
-                  🇮🇳
-                </div>
-
-                <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#f5f7f4] bg-[#e7ddd0] text-xs">
-                  🎤
-                </div>
-
-                <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#f5f7f4] bg-[#dfe4ed] text-xs">
-                  📍
-                </div>
-              </div>
-
-              <span>
-                {t.citizenInputs}
-              </span>
-            </div>
-          </div>
-
-          {/* =================================================
-              LIVE DEVELOPMENT PULSE
-          ================================================== */}
-
-          <div className="relative flex items-center">
-            <div
-              key={pulseKey}
-              className="w-full rounded-[2rem] neu-flat shadow-[12px_12px_24px_#d2d9d1,-12px_-12px_24px_#ffffff] p-5 hover:shadow-[16px_16px_32px_#cbd5cb,-16px_-16px_32px_#ffffff] hover:scale-[1.015] transition-all duration-500 ease-out sm:p-7"
+            {/* Mobile Hamburger Menu Toggle */}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden rounded-lg p-2 text-[#2d3e33] hover:bg-[#edf3ed] border border-[#d6ded6]"
+              aria-label="Toggle navigation menu"
+              aria-expanded={mobileMenuOpen}
             >
-              <div className="flex items-center justify-between border-b border-[#e5eae5] pb-5">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#7b877f]">
-                    {t.intelligence}
-                  </p>
-
-                  <h2 className="mt-1 text-xl font-bold text-[#17221b]">
-                    {t.developmentPulse}
-                  </h2>
-                </div>
-
-                <div className="flex items-center gap-2 rounded-full bg-[#e9f4ea] px-3 py-1.5 text-xs font-bold text-[#397149]">
-                  <span className="h-2 w-2 animate-pulse rounded-full bg-[#397149]" />
-                  {t.live}
-                </div>
-              </div>
-
-              <div className="mt-6 grid grid-cols-2 gap-3">
-                {/* SUBMISSIONS */}
-
-                <div className="rounded-2xl neu-inset-hover p-4 hover:scale-[1.02]">
-                  <p className="text-2xl font-bold tracking-tight text-[#173f2a]">
-                    <AnimatedNumber
-                      value={
-                        submissions.length
-                      }
-                    />
-                  </p>
-
-                  <p className="mt-1 text-xs leading-5 text-[#6c776f]">
-                    {t.submissions}
-                  </p>
-                </div>
-
-                {/* HOTSPOTS */}
-
-                <div className="rounded-2xl neu-inset-hover p-4 hover:scale-[1.02]">
-                  <p className="text-2xl font-bold tracking-tight text-[#173f2a]">
-                    <AnimatedNumber
-                      value={
-                        uniqueHotspots
-                      }
-                    />
-                  </p>
-
-                  <p className="mt-1 text-xs leading-5 text-[#6c776f]">
-                    {t.hotspots}
-                  </p>
-                </div>
-
-                {/* CRITICAL */}
-
-                <div className="rounded-2xl neu-inset-hover p-4 hover:scale-[1.02]">
-                  <p className="text-2xl font-bold tracking-tight text-[#173f2a]">
-                    <AnimatedNumber
-                      value={
-                        criticalPriorities
-                      }
-                    />
-                  </p>
-
-                  <p className="mt-1 text-xs leading-5 text-[#6c776f]">
-                    {t.critical}
-                  </p>
-                </div>
-
-                {/* EVIDENCE */}
-
-                <div className="rounded-2xl neu-inset-hover p-4 hover:scale-[1.02]">
-                  <p className="text-2xl font-bold tracking-tight text-[#173f2a]">
-                    <AnimatedNumber
-                      value={
-                        evidenceReports
-                      }
-                    />
-                  </p>
-
-                  <p className="mt-1 text-xs leading-5 text-[#6c776f]">
-                    {t.evidenceReports}
-                  </p>
-                </div>
-              </div>
-
-              {/* TOP NEED */}
-
-              <div className="mt-6 rounded-2xl neu-inset p-4">
-                {topPriority ? (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-semibold text-[#6d786f]">
-                          {t.highestNeed}
-                        </p>
-
-                        <p className="mt-1 flex items-center gap-2 font-bold text-[#17221b]">
-                          <span>
-                            {
-                              topPriority.icon
-                            }
-                          </span>
-
-                          {getCategoryTitle(
-                            topPriority.name,
-                            language
-                          )}
-                        </p>
-                      </div>
-
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-[#28623c]">
-                          {
-                            topPriority.priority
-                          }
-                        </p>
-
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-[#7b877f]">
-                          {t.priority}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#dfe8e0] shadow-inner">
-                      <div
-                        className="h-full rounded-full bg-[#397149] transition-all duration-1000"
-                        style={{
-                          width: `${Math.max(
-                            topPriority.priority,
-                            3
-                          )}%`,
-                        }}
-                      />
-                    </div>
-
-                    <div className="mt-3 flex justify-between text-xs text-[#7b877f]">
-                      <span>
-                        {
-                          topPriority.count
-                        }{" "}
-                        {t.requests}
-                      </span>
-
-                      <span>
-                        {
-                          topPriority.locations
-                        }{" "}
-                        {t.hotspots}
-                      </span>
-                    </div>
-                  </>
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                {mobileMenuOpen ? (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 ) : (
-                  <div className="py-5 text-center">
-                    <p className="text-3xl">
-                      📊
-                    </p>
-
-                    <p className="mt-2 text-sm font-bold text-[#173f2a]">
-                      {t.noDataYet}
-                    </p>
-                  </div>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 )}
-              </div>
-
-              <div className="mt-4 flex items-center gap-3 rounded-2xl neu-dark-flat p-4 text-white">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10">
-                  ✓
-                </div>
-
-                <div>
-                  <p className="text-sm font-bold">
-                    {t.evidence}
-                  </p>
-
-                  <p className="mt-0.5 text-xs text-white/65">
-                    {t.demand}
-                  </p>
-                </div>
-              </div>
-            </div>
+              </svg>
+            </button>
           </div>
         </div>
-      </section>
 
-
-
-      {/* =====================================================
-          LIVE INTELLIGENCE
-      ====================================================== */}
-
-      <section
-        id="live-intelligence"
-        className="border-y border-[#dce3dc] bg-[#f5f7f4]"
-      >
-        <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
-          <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#397149]">
-                {t.liveIntelligence}
-              </p>
-
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[#17221b] sm:text-4xl">
-                {t.whatSystem}
-              </h2>
-
-              <p className="mt-4 max-w-2xl leading-7 text-[#66736a]">
-                {t.realCitizenData}
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2 rounded-full neu-inset px-4 py-2 text-xs font-bold text-[#397149]">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-[#397149]" />
-              {submissions.length}{" "}
-              {t.submissions}
-            </div>
-          </div>
-
-          {submissions.length === 0 ? (
-            <div className="mt-10 rounded-[2rem] border-2 border-dashed border-[#d4ded5] neu-inset p-14 text-center">
-              <div className="text-6xl">
-                📊
-              </div>
-
-              <h3 className="mt-5 text-2xl font-bold text-[#173f2a]">
-                {t.noDataYet}
-              </h3>
-
-              <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-[#68736b]">
-                {language === "hi"
-                  ? "नागरिक पोर्टल से पहली रिपोर्ट जमा होने के बाद यह पूरा सेक्शन वास्तविक डेटा से भर जाएगा।"
-                  : language === "or"
-                    ? "ନାଗରିକ ପୋର୍ଟାଲରୁ ପ୍ରଥମ ରିପୋର୍ଟ ଦାଖଲ ହେଲା ପରେ ଏହି ବିଭାଗ ପ୍ରକୃତ ତଥ୍ୟରେ ଭରିଯିବ।"
-                    : "Submit the first report through the citizen portal and this section will populate with real data."}
-              </p>
-
+        {/* Mobile Navigation Drawer */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden border-t border-[#dce3dc] bg-[#f8faf6] px-4 py-4 space-y-2 text-sm font-semibold">
+            <a
+              href="#hero"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block rounded-lg px-3 py-2 text-[#173f2a] hover:bg-[#e7eee7]"
+            >
+              {t.common.home}
+            </a>
+            <a
+              href="#citizen-services"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block rounded-lg px-3 py-2 text-[#173f2a] hover:bg-[#e7eee7]"
+            >
+              {t.common.citizenServices}
+            </a>
+            <a
+              href="/citizen"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block rounded-lg px-3 py-2 text-[#173f2a] hover:bg-[#e7eee7]"
+            >
+              {t.common.shareNeed}
+            </a>
+            <a
+              href="/track"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block rounded-lg px-3 py-2 text-[#173f2a] hover:bg-[#e7eee7]"
+            >
+              {t.common.trackComplaint}
+            </a>
+            <a
+              href="#how-it-works"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block rounded-lg px-3 py-2 text-[#173f2a] hover:bg-[#e7eee7]"
+            >
+              {t.common.howItWorks}
+            </a>
+            <a
+              href="#priorities"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block rounded-lg px-3 py-2 text-[#173f2a] hover:bg-[#e7eee7]"
+            >
+              {t.common.priorities}
+            </a>
+            <a
+              href="#decision-pipeline"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block rounded-lg px-3 py-2 text-[#173f2a] hover:bg-[#e7eee7]"
+            >
+              {t.common.pipeline}
+            </a>
+            <a
+              href="#about"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block rounded-lg px-3 py-2 text-[#173f2a] hover:bg-[#e7eee7]"
+            >
+              {t.common.about}
+            </a>
+            <div className="pt-2 border-t border-[#d8e2d8]">
               <a
-                href="/citizen"
-                className="mt-6 inline-flex rounded-full neu-button-primary px-6 py-3 text-sm font-bold text-white shadow-sm"
+                href="/login?redirect=/dashboard"
+                className="w-full text-center block rounded-lg border border-[#cfdacd] bg-white py-2 text-xs font-bold text-[#173f2a]"
               >
-                {t.tellCommunity}
+                {t.common.officerLogin}
               </a>
             </div>
-          ) : (
-            <div className="mt-10 grid gap-6 lg:grid-cols-2">
-              {/* ISSUE DISTRIBUTION */}
+          </div>
+        )}
+      </header>
 
-              <div className="rounded-[2rem] neu-flat shadow-[10px_10px_20px_#d2d9d1,-10px_-10px_20px_#ffffff] p-6 sm:p-8 hover:shadow-[14px_14px_28px_#cbd5cb,-14px_-14px_28px_#ffffff] hover:scale-[1.01] transition-all duration-500 ease-out">
-                <div className="flex items-start justify-between">
+      <main id="main-content">
+        {/* =====================================================
+            3. HERO SECTION (GOVERNMENT PORTAL LAYOUT)
+        ====================================================== */}
+        <section
+          id="hero"
+          className="relative overflow-hidden bg-[#f8faf5] border-b border-[#dce3dc]"
+        >
+          {/* Background Image: India Gate with prominent visibility */}
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.48] pointer-events-none"
+            style={{ backgroundImage: "url('/india-gate-hero.jpg')" }}
+          />
+          {/* Subtle gradient wash to preserve text legibility while displaying vibrant colors */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#f8faf5]/65 via-[#f8faf5]/15 to-[#f8faf5]/65 pointer-events-none" />
+
+          {/* Subtle light green background ambient fills */}
+          <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-[#e3efe4]/50 blur-3xl pointer-events-none" />
+          <div className="absolute -left-32 top-48 h-72 w-72 rounded-full bg-[#ebf3ea]/50 blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:px-8 py-12 lg:py-16 lg:grid-cols-[1.15fr_0.85fr]">
+            {/* Left Column: Official Messaging & CTAs */}
+            <div className="flex flex-col justify-center">
+              {/* Government Initiative Badge */}
+              <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-[#cbdacb] bg-white px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-[#2c5339] shadow-2xs">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-[#397149]" />
+                {t.hero.badge}
+              </div>
+
+              {/* Main Heading */}
+              <h1 className="max-w-3xl text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.08] tracking-tight text-[#17221b]">
+                {t.hero.title1}{" "}
+                <span className="text-[#28623c] underline decoration-[#a8caa8]/60 decoration-4 underline-offset-4">
+                  {t.hero.title2}
+                </span>
+              </h1>
+
+              {/* Description */}
+              <p className="mt-6 max-w-2xl text-base sm:text-lg leading-relaxed text-[#516155]">
+                {t.hero.description}
+              </p>
+
+              {/* CTAs */}
+              <div className="mt-8 flex flex-col sm:flex-row gap-3">
+                <a
+                  href="/citizen"
+                  className="rounded-lg bg-[#173f2a] hover:bg-[#205639] active:bg-[#123121] px-6 py-3.5 text-center text-sm font-bold text-white shadow-sm transition-all focus:ring-2 focus:ring-[#28623c]/40"
+                >
+                  {t.hero.tellCommunity}
+                </a>
+
+                <a
+                  href="#citizen-services"
+                  className="rounded-lg border border-[#cfdacd] bg-white hover:bg-[#f1f6f1] px-6 py-3.5 text-center text-sm font-bold text-[#20402b] shadow-2xs transition-all"
+                >
+                  {t.hero.exploreServices}
+                </a>
+              </div>
+
+              {/* Multi-modal inputs line */}
+              <div className="mt-8 flex flex-wrap items-center gap-3 text-xs text-[#5a6c60] font-medium border-t border-[#e2eae2] pt-4">
+                <div className="flex -space-x-1.5">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full border border-white bg-[#e0ece0] text-xs shadow-2xs">
+                    🇮🇳
+                  </div>
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full border border-white bg-[#ece8dd] text-xs shadow-2xs">
+                    🎤
+                  </div>
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full border border-white bg-[#dfe7ee] text-xs shadow-2xs">
+                    📍
+                  </div>
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full border border-white bg-[#e3ecdf] text-xs shadow-2xs">
+                    📸
+                  </div>
+                </div>
+
+                <span>{t.hero.citizenInputs}</span>
+              </div>
+            </div>
+
+            {/* Right Column: Official Development Pulse Card */}
+            <div className="flex items-center">
+              <div
+                key={pulseKey}
+                className="w-full rounded-2xl bg-white border border-[#d6e2d6] p-6 sm:p-7 shadow-sm transition-all duration-300"
+              >
+                {/* Card Header */}
+                <div className="flex items-center justify-between border-b border-[#e9efe9] pb-4">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#397149]">
-                      {t.issueDistribution}
+                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#697a6d]">
+                      {t.hero.intelligence}
                     </p>
+                    <h2 className="mt-0.5 text-lg sm:text-xl font-bold text-[#17221b]">
+                      {t.hero.developmentPulse}
+                    </h2>
+                  </div>
 
-                    <p className="mt-2 text-sm leading-6 text-[#68736b]">
-                      {
-                        t.issueDistributionDescription
-                      }
+                  <div className="flex items-center gap-1.5 rounded-full bg-[#eaf4eb] border border-[#cfe2d1] px-3 py-1 text-xs font-bold text-[#2d633b]">
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-[#2d633b]" />
+                    {t.common.live}
+                  </div>
+                </div>
+
+                {/* 4 Stats Tiles */}
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  {/* Submissions */}
+                  <div className="rounded-xl border border-[#e2ece2] bg-[#f8faf8] p-3.5 hover:border-[#b8cfb9] transition-colors">
+                    <p className="text-2xl font-extrabold text-[#173f2a]">
+                      <AnimatedNumber value={submissions.length} />
+                    </p>
+                    <p className="mt-0.5 text-xs text-[#5e6f62] font-medium">
+                      {t.hero.submissions}
                     </p>
                   </div>
 
-                  <div className="text-2xl">
+                  {/* Hotspots */}
+                  <div className="rounded-xl border border-[#e2ece2] bg-[#f8faf8] p-3.5 hover:border-[#b8cfb9] transition-colors">
+                    <p className="text-2xl font-extrabold text-[#173f2a]">
+                      <AnimatedNumber value={uniqueHotspots} />
+                    </p>
+                    <p className="mt-0.5 text-xs text-[#5e6f62] font-medium">
+                      {t.hero.hotspots}
+                    </p>
+                  </div>
+
+                  {/* Critical */}
+                  <div className="rounded-xl border border-[#e2ece2] bg-[#f8faf8] p-3.5 hover:border-[#b8cfb9] transition-colors">
+                    <p className="text-2xl font-extrabold text-[#96382e]">
+                      <AnimatedNumber value={criticalPriorities} />
+                    </p>
+                    <p className="mt-0.5 text-xs text-[#5e6f62] font-medium">
+                      {t.hero.critical}
+                    </p>
+                  </div>
+
+                  {/* Evidence Reports */}
+                  <div className="rounded-xl border border-[#e2ece2] bg-[#f8faf8] p-3.5 hover:border-[#b8cfb9] transition-colors">
+                    <p className="text-2xl font-extrabold text-[#173f2a]">
+                      <AnimatedNumber value={evidenceReports} />
+                    </p>
+                    <p className="mt-0.5 text-xs text-[#5e6f62] font-medium">
+                      {t.hero.evidenceReports}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Highest Need Indicator */}
+                <div className="mt-5 rounded-xl border border-[#dce8dc] bg-[#f4f8f4] p-4">
+                  {topPriority ? (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-[11px] font-semibold text-[#66776b]">
+                            {t.hero.highestNeed}
+                          </p>
+                          <p className="mt-0.5 flex items-center gap-2 font-bold text-[#17221b]">
+                            <span className="text-lg">{topPriority.icon}</span>
+                            <span>{getCategoryName(topPriority.name)}</span>
+                          </p>
+                        </div>
+
+                        <div className="text-right">
+                          <p className="text-2xl font-extrabold text-[#28623c]">
+                            {topPriority.priority}
+                          </p>
+                          <p className="text-[9px] font-bold uppercase tracking-wider text-[#697a6d]">
+                            {t.hero.priority}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#d8e4d8]">
+                        <div
+                          className="h-full rounded-full bg-[#2d633b] transition-all duration-1000"
+                          style={{
+                            width: `${Math.max(topPriority.priority, 4)}%`,
+                          }}
+                        />
+                      </div>
+
+                      <div className="mt-2.5 flex justify-between text-[11px] text-[#697a6d] font-medium">
+                        <span>
+                          {topPriority.count} {t.hero.requests}
+                        </span>
+                        <span>
+                          {topPriority.locations} {t.hero.hotspots}
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="py-4 text-center">
+                      <p className="text-2xl">📊</p>
+                      <p className="mt-1 text-xs font-bold text-[#173f2a]">
+                        {t.hero.noDataYet}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Evidence Ranking Guarantee Banner (Light Theme) */}
+                <div className="mt-4 flex items-center gap-3 rounded-xl bg-[#eaf4eb] border border-[#d2e4d4] p-3.5 text-[#173f2a]">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#173f2a] text-white font-bold text-sm shadow-2xs">
+                    ✓
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold leading-tight">
+                      {t.hero.rankingEvidence}
+                    </p>
+                    <p className="text-[11px] text-[#4f6b55] leading-snug mt-0.5">
+                      {t.hero.demandFormula}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* =====================================================
+            4. QUICK ACCESS / CITIZEN SERVICES (ODISHA ONE STYLE)
+        ====================================================== */}
+        <section
+          id="citizen-services"
+          className="bg-white py-16 px-4 sm:px-6 lg:px-8 border-b border-[#dce3dc]"
+        >
+          <div className="mx-auto max-w-7xl">
+            {/* Section Header */}
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#e9efe9] pb-6">
+              <div>
+                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#2d633b]">
+                  {t.services.badge}
+                </span>
+                <h2 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-[#17221b]">
+                  {t.services.heading}
+                </h2>
+                <p className="mt-1 text-sm text-[#5a6c60]">
+                  {t.services.description}
+                </p>
+              </div>
+
+              <div className="text-xs text-[#526356] font-medium bg-[#f2f7f2] border border-[#d5e2d5] px-3.5 py-1.5 rounded-lg">
+                {t.services.verifiedPinNotice}
+              </div>
+            </div>
+
+            {/* 4 Government Citizen Service Cards */}
+            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {/* Tile 1: Submit Complaint */}
+              <div className="flex flex-col justify-between rounded-xl border border-[#dce5dc] bg-[#fcfdfc] p-6 hover:border-[#28623c] hover:shadow-md transition-all group">
+                <div>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#edf5ed] text-2xl border border-[#cfe0cf] text-[#173f2a] group-hover:bg-[#173f2a] group-hover:text-white transition-colors">
+                    📝
+                  </div>
+                  <h3 className="mt-4 text-lg font-bold text-[#17221b] group-hover:text-[#173f2a]">
+                    {t.services.card1Title}
+                  </h3>
+                  <p className="mt-2 text-xs leading-relaxed text-[#5b6e60]">
+                    {t.services.card1Desc}
+                  </p>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-[#edf2ed]">
+                  <a
+                    href="/citizen"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#205639] group-hover:text-[#173f2a] group-hover:underline"
+                  >
+                    <span>{t.services.card1Cta}</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Tile 2: Track Complaint */}
+              <div className="flex flex-col justify-between rounded-xl border border-[#dce5dc] bg-[#fcfdfc] p-6 hover:border-[#28623c] hover:shadow-md transition-all group">
+                <div>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#edf5ed] text-2xl border border-[#cfe0cf] text-[#173f2a] group-hover:bg-[#173f2a] group-hover:text-white transition-colors">
+                    🔍
+                  </div>
+                  <h3 className="mt-4 text-lg font-bold text-[#17221b] group-hover:text-[#173f2a]">
+                    {t.services.card2Title}
+                  </h3>
+                  <p className="mt-2 text-xs leading-relaxed text-[#5b6e60]">
+                    {t.services.card2Desc}
+                  </p>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-[#edf2ed]">
+                  <a
+                    href="/track"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#205639] group-hover:text-[#173f2a] group-hover:underline"
+                  >
+                    <span>{t.services.card2Cta}</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Tile 3: Voice Complaint */}
+              <div className="flex flex-col justify-between rounded-xl border border-[#dce5dc] bg-[#fcfdfc] p-6 hover:border-[#28623c] hover:shadow-md transition-all group">
+                <div>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#edf5ed] text-2xl border border-[#cfe0cf] text-[#173f2a] group-hover:bg-[#173f2a] group-hover:text-white transition-colors">
+                    🎙️
+                  </div>
+                  <h3 className="mt-4 text-lg font-bold text-[#17221b] group-hover:text-[#173f2a]">
+                    {t.services.card3Title}
+                  </h3>
+                  <p className="mt-2 text-xs leading-relaxed text-[#5b6e60]">
+                    {t.services.card3Desc}
+                  </p>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-[#edf2ed]">
+                  <a
+                    href="#voice-assistant"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#205639] group-hover:text-[#173f2a] group-hover:underline"
+                  >
+                    <span>{t.services.card3Cta}</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Tile 4: Public Dashboard */}
+              <div className="flex flex-col justify-between rounded-xl border border-[#dce5dc] bg-[#fcfdfc] p-6 hover:border-[#28623c] hover:shadow-md transition-all group">
+                <div>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#edf5ed] text-2xl border border-[#cfe0cf] text-[#173f2a] group-hover:bg-[#173f2a] group-hover:text-white transition-colors">
                     📊
                   </div>
+                  <h3 className="mt-4 text-lg font-bold text-[#17221b] group-hover:text-[#173f2a]">
+                    {t.services.card4Title}
+                  </h3>
+                  <p className="mt-2 text-xs leading-relaxed text-[#5b6e60]">
+                    {t.services.card4Desc}
+                  </p>
                 </div>
 
-                <div className="mt-7 space-y-4">
-                  {categoryInsights.map(
-                    (category, index) => (
-                      <div
-                        key={
-                          category.name
-                        }
-                        className="group"
-                      >
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-3">
-                            <span className="flex h-8 w-8 items-center justify-center rounded-xl neu-inset bg-transparent">
-                              {
-                                category.icon
-                              }
-                            </span>
+                <div className="mt-6 pt-4 border-t border-[#edf2ed]">
+                  <a
+                    href="/dashboard"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#205639] group-hover:text-[#173f2a] group-hover:underline"
+                  >
+                    <span>{t.services.card4Cta}</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
+        {/* =====================================================
+            5. INTERACTIVE VOICE GRIEVANCE REDRESSAL WIDGET
+        ====================================================== */}
+        <section
+          id="voice-assistant"
+          className="bg-[#f2f7f2] py-14 px-4 sm:px-6 lg:px-8 border-b border-[#dce3dc]"
+        >
+          <div className="mx-auto max-w-7xl">
+            <div className="rounded-2xl bg-white border border-[#cfdfcf] p-6 sm:p-8 shadow-sm">
+              <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] items-center">
+                {/* Voice Information */}
+                <div>
+                  <div className="inline-flex items-center gap-2 rounded-md bg-[#eaf3ea] border border-[#d0e2d1] px-2.5 py-1 text-[11px] font-bold uppercase text-[#235332] tracking-wider">
+                    <span>🎙️</span> {t.voice.badge}
+                  </div>
+                  <h2 className="mt-3 text-2xl sm:text-3xl font-extrabold text-[#17221b]">
+                    {t.voice.title}
+                  </h2>
+                  <p className="mt-3 text-sm leading-relaxed text-[#526357]">
+                    {t.voice.description}
+                  </p>
+
+                  <div className="mt-6 flex flex-wrap gap-2 text-xs">
+                    <span className="bg-[#f5f8f5] border border-[#dbe6dc] text-[#334638] px-3 py-1.5 rounded-lg font-medium">
+                      ✓ Instant Voice Support
+                    </span>
+                    <span className="bg-[#f5f8f5] border border-[#dbe6dc] text-[#334638] px-3 py-1.5 rounded-lg font-medium">
+                      ✓ 12 Indian Languages
+                    </span>
+                    <span className="bg-[#f5f8f5] border border-[#dbe6dc] text-[#334638] px-3 py-1.5 rounded-lg font-medium">
+                      ✓ Zero Typing Needed
+                    </span>
+                  </div>
+                </div>
+
+                {/* Interactive Voice Recorder Box */}
+                <div className="rounded-xl border border-[#d7e5d7] bg-[#f8faf8] p-5 sm:p-6 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between border-b border-[#e5ede5] pb-3">
+                      <span className="text-xs font-bold text-[#173f2a]">
+                        {t.voice.langPrompt}
+                      </span>
+                      <LanguageSwitcher compact />
+                    </div>
+
+                    {/* Microphone Toggle Area */}
+                    <div className="mt-5 flex flex-col items-center justify-center gap-3">
+                      <div className="flex items-center gap-4">
+                        {isRecording && (
+                          <div className="flex items-center gap-1 h-8">
+                            {[0.4, 0.8, 1.0, 0.7, 0.9, 0.5].map((factor, i) => (
+                              <span
+                                key={i}
+                                className="w-1.5 bg-[#ba3427] rounded-full transition-all duration-75"
+                                style={{
+                                  height: `${Math.max(6, Math.min(32, audioVolume * factor * 0.8))}px`,
+                                }}
+                              />
+                            ))}
+                          </div>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={toggleVoiceRecording}
+                          disabled={isTranscribing}
+                          className={`relative flex items-center justify-center h-16 w-16 rounded-full text-2xl transition-all shadow-md focus:outline-none focus:ring-4 focus:ring-[#28623c]/30 ${
+                            isRecording
+                              ? "bg-[#ba3427] text-white animate-pulse"
+                              : isTranscribing
+                              ? "bg-[#6c7d71] text-white cursor-wait"
+                              : "bg-[#173f2a] text-white hover:bg-[#20583b]"
+                          }`}
+                          aria-label={
+                            isRecording ? "Stop recording" : "Start speaking"
+                          }
+                        >
+                          {isTranscribing ? "⏳" : isRecording ? "⏹" : "🎤"}
+                        </button>
+
+                        {isRecording && (
+                          <div className="flex items-center gap-1.5 rounded-full bg-[#faeae8] border border-[#f3c5c2] px-3 py-1 text-xs font-bold text-[#b42318]">
+                            <span className="h-2 w-2 rounded-full bg-[#b42318] animate-ping" />
+                            <span>
+                              {Math.floor(recordingDuration / 60)
+                                .toString()
+                                .padStart(2, "0")}
+                              :{(recordingDuration % 60).toString().padStart(2, "0")}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      <p className="text-center text-xs font-semibold text-[#485b4d]">
+                        {isTranscribing
+                          ? t.voice.extractingAudio
+                          : isRecording
+                          ? t.voice.recordingPrompt
+                          : extractedAudioUrl
+                          ? t.voice.listenRecording
+                          : t.voice.startPrompt}
+                      </p>
+                    </div>
+
+                    {voiceError && (
+                      <p className="mt-2 text-center text-xs text-[#a33227] font-medium bg-[#fbeae8] p-2 rounded-lg border border-[#f5c6cb]">
+                        {voiceError}
+                      </p>
+                    )}
+
+                    {/* Extracted Audio Player Preview */}
+                    {extractedAudioUrl && (
+                      <div className="mt-4 rounded-xl border border-[#cfe0d1] bg-[#edf5ee] p-3">
+                        <div className="flex items-center justify-between text-xs font-bold text-[#173f2a] mb-2">
+                          <span className="flex items-center gap-1.5">
+                            <span>🔊</span> {t.voice.audioExtractedTitle}
+                          </span>
+                          {extractedAudioBlob && (
+                            <span className="text-[11px] font-semibold text-[#37523f]">
+                              {Math.round(extractedAudioBlob.size / 1024)} KB
+                            </span>
+                          )}
+                        </div>
+                        <audio controls src={extractedAudioUrl} className="w-full h-8" />
+                      </div>
+                    )}
+
+                    {/* ODIA CIVIC ISSUE QUICK SELECTOR */}
+                    {(speechLang === "or-IN" || language === "or") && (
+                      <div className="mt-4 rounded-xl border border-[#cfe0d1] bg-[#f8faf5] p-3">
+                        <p className="text-[11px] font-bold text-[#173f2a] flex items-center gap-1.5 mb-2">
+                          <span>✨</span> ଓଡ଼ିଆ ସମସ୍ୟା ଶୀଘ୍ର ଚୟନ (Quick Odia Issue Selection):
+                        </p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                          {ODIA_GRIEVANCE_TEMPLATES.map((tpl) => (
+                            <button
+                              key={tpl.id}
+                              type="button"
+                              onClick={() => {
+                                setVoiceTranscript(tpl.odiaText);
+                                setTranslatedTranscript(tpl.englishTranslation);
+                              }}
+                              className="flex flex-col items-start p-2 rounded-lg border border-[#cbd8cd] bg-white hover:border-[#28623c] hover:bg-[#edf5ee] transition text-left group"
+                            >
+                              <span className="text-sm">{tpl.icon}</span>
+                              <span className="mt-1 text-[11px] font-bold text-[#173f2a] group-hover:text-[#28623c] leading-tight">
+                                {tpl.label}
+                              </span>
+                              <span className="text-[9px] text-[#556458] truncate w-full">
+                                {tpl.sublabel}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Transcribed & Translated Text Display */}
+                    {(voiceTranscript || translatedTranscript) ? (
+                      <div className="mt-3 space-y-2">
+                        {voiceTranscript && (
+                          <div className="rounded-lg border border-[#d6e2d6] bg-white p-3 text-xs">
+                            <span className="font-bold text-[#28623c] block text-[10px] uppercase tracking-wider">
+                              Spoken Transcript ({speechLang})
+                            </span>
+                            <p className="mt-1 text-[#173f2a] leading-relaxed">
+                              {voiceTranscript}
+                            </p>
+                          </div>
+                        )}
+
+                        {translatedTranscript &&
+                          translatedTranscript.toLowerCase() !==
+                            voiceTranscript.toLowerCase() && (
+                            <div className="rounded-lg border border-[#c5d8f0] bg-[#f0f6ff] p-3 text-xs">
+                              <span className="font-bold text-[#1e40af] block text-[10px] uppercase tracking-wider">
+                                ✓ English Translation (Administrative Priority)
+                              </span>
+                              <p className="mt-1 text-[#1e3a8a] leading-relaxed">
+                                {translatedTranscript}
+                              </p>
+                            </div>
+                          )}
+
+                        {voiceTranscript &&
+                          translatedTranscript &&
+                          voiceTranscript.toLowerCase() !==
+                            translatedTranscript.toLowerCase() && (
+                            <div className="flex items-center gap-1.5 pt-1">
+                              <span className="text-[10px] font-bold text-[#556458]">
+                                Select draft:
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => setTranslationPreference("combined")}
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold transition ${
+                                  translationPreference === "combined"
+                                    ? "bg-[#173f2a] text-white"
+                                    : "bg-[#edf5ee] text-[#28623c]"
+                                }`}
+                              >
+                                {t.voice.useBothBtn}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setTranslationPreference("original")}
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold transition ${
+                                  translationPreference === "original"
+                                    ? "bg-[#173f2a] text-white"
+                                    : "bg-[#edf5ee] text-[#28623c]"
+                                }`}
+                              >
+                                {t.voice.useOriginalBtn}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setTranslationPreference("translated")}
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold transition ${
+                                  translationPreference === "translated"
+                                    ? "bg-[#173f2a] text-white"
+                                    : "bg-[#edf5ee] text-[#28623c]"
+                                }`}
+                              >
+                                {t.voice.useTranslatedBtn}
+                              </button>
+                            </div>
+                          )}
+                      </div>
+                    ) : (
+                      <div className="mt-4 rounded-lg border border-[#d6e2d6] bg-white p-3 min-h-[60px] flex items-center justify-center text-center">
+                        <p className="text-xs text-[#6e7d71] italic">
+                          {isRecording
+                            ? t.voice.listeningPrompt
+                            : t.voice.transcriptPlaceholder}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Submission Action */}
+                  <div className="mt-4 pt-3 border-t border-[#e2eae2] flex flex-col sm:flex-row gap-2 justify-end">
+                    <button
+                      type="button"
+                      onClick={handleContinueVoiceSubmission}
+                      className="w-full sm:w-auto rounded-lg bg-[#173f2a] hover:bg-[#205639] px-4 py-2 text-xs font-bold text-white transition-all text-center shadow-2xs"
+                    >
+                      {t.voice.continueBtn}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* =====================================================
+            6. LIVE INTELLIGENCE (ANALYTICS & CHARTS)
+        ====================================================== */}
+        <section
+          id="live-intelligence"
+          className="border-b border-[#dce3dc] bg-[#f8faf5] py-16 px-4 sm:px-6 lg:px-8"
+        >
+          <div className="mx-auto max-w-7xl">
+            {/* Header */}
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end border-b border-[#e0eae0] pb-6">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#2c613a]">
+                  {t.intelligence.badge}
+                </p>
+                <h2 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-[#17221b]">
+                  {t.intelligence.heading}
+                </h2>
+                <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-[#5a6b5e]">
+                  {t.intelligence.description}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 rounded-lg bg-white border border-[#cfdacd] px-3.5 py-1.5 text-xs font-bold text-[#173f2a] shadow-2xs">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-[#2d633b]" />
+                {submissions.length} {t.hero.submissions}
+              </div>
+            </div>
+
+            {submissions.length === 0 ? (
+              <div className="mt-10 rounded-2xl border-2 border-dashed border-[#cfdacd] bg-white p-12 text-center">
+                <div className="text-5xl">📊</div>
+                <h3 className="mt-4 text-xl font-bold text-[#173f2a]">
+                  {t.hero.noDataYet}
+                </h3>
+                <p className="mx-auto mt-2 max-w-md text-xs sm:text-sm leading-relaxed text-[#5b6e60]">
+                  {t.intelligence.emptyNotice}
+                </p>
+                <a
+                  href="/citizen"
+                  className="mt-5 inline-flex rounded-lg bg-[#173f2a] hover:bg-[#205639] px-5 py-2.5 text-xs font-bold text-white shadow-2xs transition-all"
+                >
+                  {t.hero.tellCommunity}
+                </a>
+              </div>
+            ) : (
+              <div className="mt-8 grid gap-6 lg:grid-cols-2">
+                {/* 1. ISSUE DISTRIBUTION */}
+                <div className="rounded-xl border border-[#dce5dc] bg-white p-6 shadow-xs">
+                  <div className="flex items-start justify-between border-b border-[#edf3ed] pb-4">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#2c613a]">
+                        {t.intelligence.issueDistribution}
+                      </p>
+                      <p className="mt-1 text-xs text-[#5f7063]">
+                        {t.intelligence.issueDistDesc}
+                      </p>
+                    </div>
+                    <div className="text-xl">📊</div>
+                  </div>
+
+                  <div className="mt-6 space-y-4">
+                    {categoryInsights.map((category, index) => (
+                      <div key={category.name} className="group">
+                        <div className="flex items-center justify-between text-xs sm:text-sm">
+                          <div className="flex items-center gap-2.5">
+                            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#edf5ed] text-sm">
+                              {category.icon}
+                            </span>
                             <span className="font-bold text-[#173f2a]">
-                              {getCategoryTitle(
-                                category.name,
-                                language
-                              )}
+                              {getCategoryName(category.name)}
                             </span>
                           </div>
 
-                          <div className="flex items-center gap-3">
-                            <span className="text-xs text-[#778279]">
-                              {
-                                category.count
-                              }
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-[#6e7e72]">
+                              {category.count}
                             </span>
-
-                            <span className="font-bold text-[#397149]">
-                              {
-                                category.percentage
-                              }
-                              %
+                            <span className="font-bold text-[#2d633b]">
+                              {category.percentage}%
                             </span>
                           </div>
                         </div>
 
-                        <div className="mt-2 h-3 overflow-hidden rounded-full bg-[#dfe8e0] shadow-inner">
+                        <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-[#e3eae3]">
                           <div
-                            className="h-full origin-left rounded-full bg-[#397149] transition-all duration-1000 ease-out group-hover:bg-[#28623c]"
+                            className="h-full rounded-full bg-[#2d633b] transition-all duration-1000 ease-out"
                             style={{
-                              width: `${Math.max(
-                                category.percentage,
-                                3
-                              )}%`,
+                              width: `${Math.max(category.percentage, 3)}%`,
                               transitionDelay: `${index * 60}ms`,
                             }}
                           />
                         </div>
                       </div>
-                    )
-                  )}
-                </div>
-              </div>
-
-              {/* PRIORITY RANKING */}
-
-              <div className="rounded-[2rem] neu-flat shadow-[10px_10px_20px_#d2d9d1,-10px_-10px_20px_#ffffff] p-6 sm:p-8 hover:shadow-[14px_14px_28px_#cbd5cb,-14px_-14px_28px_#ffffff] hover:scale-[1.01] transition-all duration-500 ease-out">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#397149]">
-                      {t.priorityRanking}
-                    </p>
-
-                    <p className="mt-2 text-sm leading-6 text-[#68736b]">
-                      {
-                        t.priorityRankingDescription
-                      }
-                    </p>
-                  </div>
-
-                  <div className="text-2xl">
-                    🎯
+                    ))}
                   </div>
                 </div>
 
-                <div className="mt-7 space-y-4">
-                  {categoryInsights
-                    .slice(0, 6)
-                    .map(
-                      (
-                        category,
-                        index
-                      ) => (
-                        <div
-                          key={
-                            category.name
-                          }
-                          className="rounded-2xl neu-inset p-4 hover:scale-[1.01] transition-all duration-300"
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl neu-flat font-bold text-[#397149]">
-                              #
-                              {index + 1}
+                {/* 2. PRIORITY RANKING */}
+                <div className="rounded-xl border border-[#dce5dc] bg-white p-6 shadow-xs">
+                  <div className="flex items-start justify-between border-b border-[#edf3ed] pb-4">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#2c613a]">
+                        {t.intelligence.priorityRanking}
+                      </p>
+                      <p className="mt-1 text-xs text-[#5f7063]">
+                        {t.intelligence.priorityRankingDesc}
+                      </p>
+                    </div>
+                    <div className="text-xl">🎯</div>
+                  </div>
+
+                  <div className="mt-6 space-y-3">
+                    {categoryInsights.slice(0, 5).map((category, index) => (
+                      <div
+                        key={category.name}
+                        className="rounded-lg border border-[#e0eae0] bg-[#fbfdfb] p-3.5 hover:border-[#b8ceb9] transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#eaf4eb] text-xs font-extrabold text-[#173f2a]">
+                            #{index + 1}
+                          </div>
+
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-1.5 truncate">
+                                <span>{category.icon}</span>
+                                <span className="truncate text-xs sm:text-sm font-bold text-[#173f2a]">
+                                  {getCategoryName(category.name)}
+                                </span>
+                              </div>
+
+                              <span className="text-sm font-extrabold text-[#28623c]">
+                                {category.priority}
+                              </span>
                             </div>
 
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center justify-between gap-3">
-                                <div className="flex items-center gap-2">
-                                  <span>
-                                    {
-                                      category.icon
-                                    }
-                                  </span>
+                            <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-[#e3eae3]">
+                              <div
+                                className="h-full rounded-full bg-[#2d633b] transition-all duration-1000"
+                                style={{
+                                  width: `${Math.max(category.priority, 3)}%`,
+                                }}
+                              />
+                            </div>
 
-                                  <span className="truncate text-sm font-bold text-[#173f2a]">
-                                    {getCategoryTitle(
-                                      category.name,
-                                      language
-                                    )}
-                                  </span>
-                                </div>
-
-                                <span className="text-lg font-bold text-[#28623c]">
-                                  {
-                                    category.priority
-                                  }
-                                </span>
-                              </div>
-
-                              <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#dfe8e0] shadow-inner">
-                                <div
-                                  className="h-full rounded-full bg-[#397149] transition-all duration-1000"
-                                  style={{
-                                    width: `${Math.max(
-                                      category.priority,
-                                      3
-                                    )}%`,
-                                  }}
-                                />
-                              </div>
-
-                              <div className="mt-2 flex items-center justify-between text-[11px] text-[#778279]">
-                                <span>
-                                  {
-                                    category.count
-                                  }{" "}
-                                  {t.requests}
-                                </span>
-
-                                <span>
-                                  {
-                                    category.level
-                                  }
-                                </span>
-                              </div>
+                            <div className="mt-1.5 flex items-center justify-between text-[10px] text-[#6a7b6e]">
+                              <span>
+                                {category.count} {t.hero.requests}
+                              </span>
+                              <span className="font-semibold text-[#30573a]">
+                                {category.level} {t.intelligence.severityLevel}
+                              </span>
                             </div>
                           </div>
                         </div>
-                      )
-                    )}
-                </div>
-              </div>
-
-              {/* EVIDENCE */}
-
-              <div className="rounded-[2rem] neu-flat shadow-[10px_10px_20px_#d2d9d1,-10px_-10px_20px_#ffffff] p-6 sm:p-8 hover:shadow-[14px_14px_28px_#cbd5cb,-14px_-14px_28px_#ffffff] hover:scale-[1.01] transition-all duration-500 ease-out">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#397149]">
-                      {t.evidenceCoverage}
-                    </p>
-
-                    <p className="mt-2 text-sm leading-6 text-[#68736b]">
-                      {
-                        t.evidenceCoverageDescription
-                      }
-                    </p>
-                  </div>
-
-                  <div className="text-2xl">
-                    📷
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                <div className="mt-8 flex items-center gap-8">
-                  <div
-                    className="relative flex h-36 w-36 shrink-0 items-center justify-center rounded-full"
-                    style={{
-                      background: `conic-gradient(#397149 ${evidencePercentage}%, #e1e9e2 ${evidencePercentage}% 100%)`,
-                    }}
-                  >
-                    <div className="flex h-28 w-28 items-center justify-center rounded-full neu-flat shadow-[4px_4px_8px_#d2d9d1,-4px_-4px_8px_#ffffff]">
-                      <div className="text-center">
-                        <p className="text-3xl font-bold text-[#173f2a]">
-                          {
-                            evidencePercentage
-                          }
-                          %
-                        </p>
+                {/* 3. EVIDENCE COVERAGE */}
+                <div className="rounded-xl border border-[#dce5dc] bg-white p-6 shadow-xs">
+                  <div className="flex items-start justify-between border-b border-[#edf3ed] pb-4">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#2c613a]">
+                        {t.intelligence.evidenceCoverage}
+                      </p>
+                      <p className="mt-1 text-xs text-[#5f7063]">
+                        {t.intelligence.evidenceCoverageDesc}
+                      </p>
+                    </div>
+                    <div className="text-xl">📷</div>
+                  </div>
 
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-[#7b877f]">
-                          evidence
-                        </p>
+                  <div className="mt-6 flex flex-col sm:flex-row items-center gap-6">
+                    <div
+                      className="relative flex h-32 w-32 shrink-0 items-center justify-center rounded-full shadow-inner"
+                      style={{
+                        background: `conic-gradient(#2d633b ${evidencePercentage}%, #e2ece2 ${evidencePercentage}% 100%)`,
+                      }}
+                    >
+                      <div className="flex h-24 w-24 items-center justify-center rounded-full bg-white shadow-xs">
+                        <div className="text-center">
+                          <p className="text-2xl font-extrabold text-[#173f2a]">
+                            {evidencePercentage}%
+                          </p>
+                          <p className="text-[9px] font-bold uppercase tracking-wider text-[#697a6e]">
+                            {t.common.evidence}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div>
-                    <p className="text-3xl font-bold text-[#173f2a]">
-                      <AnimatedNumber
-                        value={
-                          evidenceReports
-                        }
-                      />
-                    </p>
-
-                    <p className="mt-1 text-sm text-[#68736b]">
-                      {t.evidenceReports}
-                    </p>
-
-                    <p className="mt-4 text-xs leading-5 text-[#7b877f]">
-                      {submissions.length -
-                        evidenceReports}{" "}
-                      reports currently
-                      have no photo
-                      evidence.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* LANGUAGE */}
-
-              <div className="rounded-[2rem] neu-flat shadow-[10px_10px_20px_#d2d9d1,-10px_-10px_20px_#ffffff] p-6 sm:p-8 hover:shadow-[14px_14px_28px_#cbd5cb,-14px_-14px_28px_#ffffff] hover:scale-[1.01] transition-all duration-500 ease-out">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#397149]">
-                      {t.languageInsights}
-                    </p>
-
-                    <p className="mt-2 text-sm leading-6 text-[#68736b]">
-                      {
-                        t.languageInsightsDescription
-                      }
-                    </p>
-                  </div>
-
-                  <div className="text-2xl">
-                    🌐
+                    <div className="text-center sm:text-left">
+                      <p className="text-2xl font-extrabold text-[#173f2a]">
+                        <AnimatedNumber value={evidenceReports} />
+                      </p>
+                      <p className="text-xs text-[#526557] font-semibold">
+                        {t.intelligence.withPhotoEvidence}
+                      </p>
+                      <p className="mt-2 text-xs leading-relaxed text-[#758679]">
+                        {submissions.length - evidenceReports}{" "}
+                        {t.intelligence.noPhotoReport}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="mt-7 space-y-5">
-                  {languageInsights.map(
-                    (item) => (
-                      <div
-                        key={
-                          item.language
-                        }
-                      >
-                        <div className="flex items-center justify-between text-sm">
+                {/* 4. LANGUAGE INSIGHTS */}
+                <div className="rounded-xl border border-[#dce5dc] bg-white p-6 shadow-xs">
+                  <div className="flex items-start justify-between border-b border-[#edf3ed] pb-4">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#2c613a]">
+                        {t.intelligence.languageInsights}
+                      </p>
+                      <p className="mt-1 text-xs text-[#5f7063]">
+                        {t.intelligence.languageInsightsDesc}
+                      </p>
+                    </div>
+                    <div className="text-xl">🌐</div>
+                  </div>
+
+                  <div className="mt-6 space-y-4">
+                    {languageInsights.map((item) => (
+                      <div key={item.languageCode}>
+                        <div className="flex items-center justify-between text-xs sm:text-sm">
                           <span className="font-bold text-[#173f2a]">
-                            {getLanguageLabel(
-                              item.language,
-                              language
-                            )}
+                            {item.label}
                           </span>
-
-                          <span className="font-bold text-[#397149]">
-                            {
-                              item.count
-                            }{" "}
-                            ·{" "}
-                            {
-                              item.percentage
-                            }
-                            %
+                          <span className="font-bold text-[#2d633b]">
+                            {item.count} · {item.percentage}%
                           </span>
                         </div>
-
-                        <div className="mt-2 h-3 overflow-hidden rounded-full bg-[#e0e8e1] shadow-inner">
+                        <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-[#e3eae3]">
                           <div
-                            className="h-full rounded-full bg-[#397149] transition-all duration-1000"
+                            className="h-full rounded-full bg-[#2d633b] transition-all duration-1000"
                             style={{
-                              width: `${Math.max(
-                                item.percentage,
-                                3
-                              )}%`,
+                              width: `${Math.max(item.percentage, 3)}%`,
                             }}
                           />
                         </div>
                       </div>
-                    )
-                  )}
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* =====================================================
-          LIVE PIPELINE
-      ====================================================== */}
-
-      <section className="bg-[#f5f7f4]">
-        <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
-          <div className="max-w-2xl">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#397149]">
-              {t.decisionPipeline}
-            </p>
-
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[#17221b] sm:text-4xl">
-              {t.decisionPipeline}
-            </h2>
-
-            <p className="mt-4 leading-7 text-[#66736a]">
-              {
-                t.decisionPipelineDescription
-              }
-            </p>
+            )}
           </div>
+        </section>
 
-          <div className="relative mt-12">
-            <div className="absolute left-0 right-0 top-8 hidden h-px bg-[#cfdacf] lg:block" />
+        {/* =====================================================
+            7. LIVE DECISION PIPELINE (5-STAGE WORKFLOW)
+        ====================================================== */}
+        <section
+          id="decision-pipeline"
+          className="bg-white py-16 px-4 sm:px-6 lg:px-8 border-b border-[#dce3dc]"
+        >
+          <div className="mx-auto max-w-7xl">
+            <div className="max-w-2xl border-b border-[#e8efe8] pb-4">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#2c613a]">
+                {t.pipeline.badge}
+              </p>
+              <h2 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-[#17221b]">
+                {t.pipeline.heading}
+              </h2>
+              <p className="mt-1.5 text-sm leading-relaxed text-[#5a6b5e]">
+                {t.pipeline.description}
+              </p>
+            </div>
 
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
-              {pipelineSteps.map(
-                (step, index) => (
-                  <div
-                    key={step.title}
-                    className="relative rounded-3xl neu-flat-hover p-6 shadow-[8px_8px_16px_#d2d9d1,-8px_-8px_16px_#ffffff] hover:scale-[1.03] transition-all duration-500 ease-out"
-                    style={{
-                      animationDelay: `${index * 120}ms`,
-                    }}
-                  >
-                    <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-2xl neu-inset text-2xl">
-                      {step.icon}
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+              {pipelineSteps.map((step) => (
+                <div
+                  key={step.title}
+                  className="rounded-xl border border-[#dce5dc] bg-[#fbfdfb] p-5 shadow-2xs hover:border-[#28623c] transition-all flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-extrabold text-[#3a6e49] bg-[#eaf4eb] px-2 py-0.5 rounded border border-[#cfe2d2]">
+                        STAGE {step.step}
+                      </span>
+                      <span className="text-2xl">{step.icon}</span>
                     </div>
 
-                    <p className="mt-5 text-sm font-bold text-[#173f2a]">
+                    <p className="mt-4 text-sm font-bold text-[#173f2a]">
                       {step.title}
                     </p>
-
-                    <p className="mt-2 text-xs leading-5 text-[#718078]">
+                    <p className="mt-1 text-xs text-[#5d6e61] leading-relaxed">
                       {step.text}
                     </p>
-
-                    <div className="mt-5 flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[#397149]">
-                      <span className="h-2 w-2 animate-pulse rounded-full bg-[#397149]" />
-                      LIVE
-                    </div>
                   </div>
-                )
-              )}
+
+                  <div className="mt-4 pt-3 border-t border-[#edf3ed] flex items-center gap-1.5 text-[10px] font-bold text-[#2d633b]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#2d633b] animate-pulse" />
+                    <span>{t.common.activeSignal}</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* =====================================================
-          HOW IT WORKS
-      ====================================================== */}
-
-      <section
-        id="how-it-works"
-        className="border-y border-[#dce3dc] bg-[#f5f7f4]"
-      >
-        <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
-          <div className="max-w-2xl">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#397149]">
-              {t.fromVoice}
-            </p>
-
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[#17221b] sm:text-4xl">
-              {t.sixLayers}
-            </h2>
-
-            <p className="mt-4 leading-7 text-[#66736a]">
-              {t.sixDescription}
-            </p>
-          </div>
-
-          <div className="mt-12">
-            <Coverflow items={howItWorks} language={language} />
-          </div>
-        </div>
-      </section>
-
-      {/* =====================================================
-          SECTION 2 — DEVELOPMENT PRIORITIES (3-Card Grid)
-      ====================================================== */}
-      <section className="bg-[#f5f7f4] border-b border-[#dce3dc]">
-        <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
-          <div className="max-w-2xl mb-12">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#397149]">
-              DEVELOPMENT PRIORITIES
-            </p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[#17221b] sm:text-4xl">
-              Transforming reports into action categories.
-            </h2>
-            <p className="mt-4 leading-7 text-[#66736a]">
-              Visualizing the key public infrastructure sectors where citizen demand demands immediate prioritization and budget optimization.
-            </p>
-          </div>
-
-          <div className="grid gap-8 md:grid-cols-3">
-            {/* Card 1: Roads */}
-            <motion.div
-              whileHover={{ y: -8 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="group relative flex flex-col overflow-hidden rounded-3xl neu-flat-hover shadow-[8px_8px_16px_#d2d9d1,-8px_-8px_16px_#ffffff] hover:shadow-[12px_12px_24px_#cbd5cb,-12px_-12px_24px_#ffffff]"
-            >
-              <div className="relative h-60 w-full overflow-hidden">
-                <img
-                  src={developmentImages.roadsCategory}
-                  alt="Road construction and repairs"
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </div>
-              <div className="flex flex-1 flex-col justify-between p-6">
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#397149]">Roads</span>
-                  <h3 className="mt-2 text-xl font-bold text-[#17221b]">Roads</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-[#66736a]">
-                    Repairing potholes, expanding rural connector roads, and finishing pending arterial route maintenance.
-                  </p>
-                </div>
-                <div className="mt-6 flex items-center justify-between border-t border-[#e5eae5] pt-4">
-                  <span className="text-xs text-[#7b877f]">1,284 citizen requests</span>
-                  <a href="#priorities" className="text-sm font-bold text-[#173f2a] group-hover:underline flex items-center gap-1">
-                    View Priority <span className="transition-transform group-hover:translate-x-1">→</span>
-                  </a>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Card 2: Healthcare */}
-            <motion.div
-              whileHover={{ y: -8 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="group relative flex flex-col overflow-hidden rounded-3xl neu-flat-hover shadow-[8px_8px_16px_#d2d9d1,-8px_-8px_16px_#ffffff] hover:shadow-[12px_12px_24px_#cbd5cb,-12px_-12px_24px_#ffffff]"
-            >
-              <div className="relative h-60 w-full overflow-hidden">
-                <img
-                  src={developmentImages.healthcareCategory}
-                  alt="Healthcare clinic infrastructure"
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </div>
-              <div className="flex flex-1 flex-col justify-between p-6">
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#397149]">Healthcare</span>
-                  <h3 className="mt-2 text-xl font-bold text-[#17221b]">Healthcare</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-[#66736a]">
-                    Upgrading primary health centers, improving basic diagnostics, and ensuring direct medical supply lines.
-                  </p>
-                </div>
-                <div className="mt-6 flex items-center justify-between border-t border-[#e5eae5] pt-4">
-                  <span className="text-xs text-[#7b877f]">842 citizen requests</span>
-                  <a href="#priorities" className="text-sm font-bold text-[#173f2a] group-hover:underline flex items-center gap-1">
-                    View Priority <span className="transition-transform group-hover:translate-x-1">→</span>
-                  </a>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Card 3: Education */}
-            <motion.div
-              whileHover={{ y: -8 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="group relative flex flex-col overflow-hidden rounded-3xl neu-flat-hover shadow-[8px_8px_16px_#d2d9d1,-8px_-8px_16px_#ffffff] hover:shadow-[12px_12px_24px_#cbd5cb,-12px_-12px_24px_#ffffff]"
-            >
-              <div className="relative h-60 w-full overflow-hidden">
-                <img
-                  src={developmentImages.educationCategory}
-                  alt="Rural school development"
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </div>
-              <div className="flex flex-1 flex-col justify-between p-6">
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#397149]">Education</span>
-                  <h3 className="mt-2 text-xl font-bold text-[#17221b]">Education</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-[#66736a]">
-                    Rehabilitating classroom infrastructure, supplying modern learning aids, and repairing school sanitation blocks.
-                  </p>
-                </div>
-                <div className="mt-6 flex items-center justify-between border-t border-[#e5eae5] pt-4">
-                  <span className="text-xs text-[#7b877f]">915 citizen requests</span>
-                  <a href="#priorities" className="text-sm font-bold text-[#173f2a] group-hover:underline flex items-center gap-1">
-                    View Priority <span className="transition-transform group-hover:translate-x-1">→</span>
-                  </a>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-
-
-
-
-
-
-      {/* =====================================================
-          REAL PRIORITIES
-      ====================================================== */}
-
-      <section
-        id="priorities"
-        className="bg-[#f5f7f4]"
-      >
-        <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
-          <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#397149]">
-                {t.priorityRanking}
+        {/* =====================================================
+            8. HOW IT WORKS (6 LAYERS OF CIVIC INTELLIGENCE)
+        ====================================================== */}
+        <section
+          id="how-it-works"
+          className="border-b border-[#dce3dc] bg-[#f0f6f1] py-16 px-4 sm:px-6 lg:px-8"
+        >
+          <div className="mx-auto max-w-7xl">
+            <div className="max-w-2xl">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#2c613a]">
+                {t.howItWorks.badge}
               </p>
-
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[#17221b] sm:text-4xl">
-                {t.whatSystem}
+              <h2 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-[#17221b]">
+                {t.howItWorks.heading}
               </h2>
-            </div>
-
-            <a
-              href="/dashboard"
-              className="text-sm font-bold text-[#397149] hover:underline"
-            >
-              {language === "en"
-                ? "Open full dashboard →"
-                : language === "hi"
-                  ? "पूरा डैशबोर्ड खोलें →"
-                  : "ସମ୍ପୂର୍ଣ୍ଣ ଡ୍ୟାସବୋର୍ଡ ଖୋଲନ୍ତୁ →"}
-            </a>
-          </div>
-
-          {categoryInsights.length === 0 ? (
-            <div className="mt-10 rounded-[2rem] border border-dashed border-[#cbd8cd] bg-white p-12 text-center">
-              <div className="text-5xl">
-                🎯
-              </div>
-
-              <p className="mt-4 font-bold text-[#173f2a]">
-                {t.noDataYet}
+              <p className="mt-2 text-sm leading-relaxed text-[#56685a]">
+                {t.howItWorks.description}
               </p>
             </div>
-          ) : (
-            <div className="mt-10 grid gap-5 lg:grid-cols-3">
-              {categoryInsights
-                .slice(0, 3)
-                .map(
-                  (item, index) => (
-                    <div
-                      key={item.name}
-                      className="rounded-3xl neu-flat-hover p-6 shadow-[8px_8px_16px_#d2d9d1,-8px_-8px_16px_#ffffff] hover:scale-[1.03] transition-all duration-500 ease-out"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl neu-inset text-xl">
-                          {item.icon}
-                        </div>
 
-                        <span className="text-xs font-bold tracking-widest text-[#9aa49d]">
-                          #
-                          {String(
-                            index + 1
-                          ).padStart(
-                            2,
-                            "0"
-                          )}
-                        </span>
-                      </div>
-
-                      <div className="mt-6 flex items-end justify-between">
-                        <div>
-                          <h3 className="text-xl font-bold text-[#17221b]">
-                            {getCategoryTitle(
-                              item.name,
-                              language
-                            )}
-                          </h3>
-
-                          <p className="mt-2 text-xs text-[#78837b]">
-                            {item.count}{" "}
-                            {t.requests}
-                          </p>
-                        </div>
-
-                        <div className="text-right">
-                          <span className="text-3xl font-bold text-[#28623c]">
-                            {
-                              item.priority
-                            }
-                          </span>
-
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-[#89948c]">
-                            {t.priority}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="mt-5 h-2 rounded-full bg-[#e8ede8] shadow-inner">
-                        <div
-                          className="h-full rounded-full bg-[#397149] transition-all duration-1000"
-                          style={{
-                            width: `${Math.max(
-                              item.priority,
-                              3
-                            )}%`,
-                          }}
-                        />
-                      </div>
-
-                      <div className="mt-4 flex justify-between text-xs text-[#78837b]">
-                        <span>
-                          {
-                            item.percentage
-                          }
-                          % of reports
-                        </span>
-
-                        <span>
-                          {
-                            item.locations
-                          }{" "}
-                          locations
-                        </span>
-                      </div>
+            {/* 6 Process Steps Grid */}
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {howItWorks.map((item) => (
+                <div
+                  key={item.number}
+                  className="rounded-xl border border-[#d2e0d3] bg-white p-5 shadow-xs flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between border-b border-[#edf3ed] pb-3">
+                      <span className="text-xs font-extrabold text-[#28623c] bg-[#eaf4eb] px-2.5 py-0.5 rounded-full">
+                        {item.number}
+                      </span>
+                      <span className="text-2xl">{item.icon}</span>
                     </div>
-                  )
-                )}
+
+                    <h3 className="mt-3 text-base font-bold text-[#17221b]">
+                      {item.title[language] || item.title.en}
+                    </h3>
+                    <p className="mt-1.5 text-xs text-[#596b5d] leading-relaxed">
+                      {item.text[language] || item.text.en}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
-        </div>
-      </section>
 
-      {/* =====================================================
-          DATA INTEGRITY NOTICE
-      ====================================================== */}
+            {/* Interactive Coverflow */}
+            <div className="mt-10 rounded-2xl border border-[#d2dfd3] bg-white/70 backdrop-blur-xs p-4 sm:p-6 shadow-xs">
+              <div className="text-center mb-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#43644d]">
+                  {t.howItWorks.explorerTitle}
+                </span>
+              </div>
+              <Coverflow items={howItWorks} language={language} />
+            </div>
+          </div>
+        </section>
 
-      <section className="bg-[#f5f7f4]">
-        <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-          <div className="rounded-[2rem] neu-flat shadow-[10px_10px_20px_#d2d9d1,-10px_-10px_20px_#ffffff] p-7 sm:p-9 hover:scale-[1.01] transition-all duration-500 ease-out">
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl neu-button-primary text-xl text-white shadow-none">
-                🛡️
+        {/* =====================================================
+            9. SECTION 2 — DEVELOPMENT PRIORITIES (3-CARD GRID)
+        ====================================================== */}
+        <section className="bg-white py-16 px-4 sm:px-6 lg:px-8 border-b border-[#dce3dc]">
+          <div className="mx-auto max-w-7xl">
+            <div className="max-w-2xl mb-10 border-b border-[#e9efe9] pb-4">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#2c613a]">
+                {t.developmentPriorities.badge}
+              </p>
+              <h2 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-[#17221b]">
+                {t.developmentPriorities.heading}
+              </h2>
+              <p className="mt-1.5 text-sm leading-relaxed text-[#5a6c60]">
+                {t.developmentPriorities.description}
+              </p>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-3">
+              {/* Card 1: Roads */}
+              <div className="flex flex-col overflow-hidden rounded-xl border border-[#dce5dc] bg-[#fcfdfc] shadow-xs hover:border-[#28623c] transition-all group">
+                <div className="relative h-48 w-full overflow-hidden bg-[#eaf0ea]">
+                  <img
+                    src={developmentImages.roadsCategory}
+                    alt="Road construction"
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-102"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="flex flex-1 flex-col justify-between p-5">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#2d633b] bg-[#eaf4eb] px-2 py-0.5 rounded border border-[#d2e2d3]">
+                      {t.developmentPriorities.roadsTag}
+                    </span>
+                    <h3 className="mt-2 text-lg font-bold text-[#17221b]">
+                      {t.developmentPriorities.roadsTitle}
+                    </h3>
+                    <p className="mt-1.5 text-xs leading-relaxed text-[#5a6c60]">
+                      {t.developmentPriorities.roadsDesc}
+                    </p>
+                  </div>
+
+                  <div className="mt-5 flex items-center justify-between border-t border-[#edf2ed] pt-3 text-xs">
+                    <span className="text-[#6d7e71] font-medium">
+                      1,284 {t.developmentPriorities.citizenRequestsCount}
+                    </span>
+                    <a
+                      href="#priorities"
+                      className="font-bold text-[#173f2a] group-hover:underline flex items-center gap-1"
+                    >
+                      <span>{t.developmentPriorities.viewPriority}</span>
+                    </a>
+                  </div>
+                </div>
               </div>
 
-              <div className="flex-1">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#397149]">
-                  {language === "en"
-                    ? "DATA INTEGRITY"
-                    : language === "hi"
-                      ? "डेटा विश्वसनीयता"
-                      : "ତଥ୍ୟ ବିଶ୍ୱସନୀୟତା"}
-                </p>
-
-                <h2 className="mt-2 text-2xl font-bold text-[#173f2a]">
-                  {language === "en"
-                    ? "No fabricated intelligence"
-                    : language === "hi"
-                      ? "कोई नकली आँकड़े नहीं"
-                      : "କୌଣସି ନକଲି ତଥ୍ୟ ନାହିଁ"}
-                </h2>
-
-                <p className="mt-3 max-w-3xl text-sm leading-7 text-[#66736a]">
-                  {language === "en"
-                    ? "Every number shown on this page is calculated from the citizen submissions currently available to the application. Metrics that require an external dataset are intentionally not displayed."
-                    : language === "hi"
-                      ? "इस पेज पर दिखाया गया हर आँकड़ा वर्तमान में एप्लिकेशन में उपलब्ध नागरिक रिपोर्टों से निकाला जाता है। जिन मेट्रिक्स के लिए बाहरी डेटासेट चाहिए, उन्हें जानबूझकर नहीं दिखाया गया है।"
-                      : "ଏହି ପୃଷ୍ଠାରେ ଦେଖାଯାଉଥିବା ପ୍ରତ୍ୟେକ ତଥ୍ୟ ବର୍ତ୍ତମାନ ଆପ୍ଲିକେସନରେ ଥିବା ନାଗରିକ ରିପୋର୍ଟରୁ ଗଣନା କରାଯାଏ। ବାହ୍ୟ ଡାଟାସେଟ୍ ଆବଶ୍ୟକ କରୁଥିବା ମେଟ୍ରିକ୍ ଜାଣିଶୁଣି ଦେଖାଯାଉନାହିଁ।"}
-                </p>
-
-                <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-2xl neu-inset p-4 hover:scale-[1.01] transition-all duration-300">
-                    <p className="text-xs font-bold text-[#397149]">
-                      {t.locationVerified}
-                    </p>
-
-                    <p className="mt-2 text-xs leading-5 text-[#66736a]">
-                      {t.locationVerifiedText}
+              {/* Card 2: Healthcare */}
+              <div className="flex flex-col overflow-hidden rounded-xl border border-[#dce5dc] bg-[#fcfdfc] shadow-xs hover:border-[#28623c] transition-all group">
+                <div className="relative h-48 w-full overflow-hidden bg-[#eaf0ea]">
+                  <img
+                    src={developmentImages.healthcareCategory}
+                    alt="Healthcare clinic"
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-102"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="flex flex-1 flex-col justify-between p-5">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#2d633b] bg-[#eaf4eb] px-2 py-0.5 rounded border border-[#d2e2d3]">
+                      {t.developmentPriorities.healthTag}
+                    </span>
+                    <h3 className="mt-2 text-lg font-bold text-[#17221b]">
+                      {t.developmentPriorities.healthTitle}
+                    </h3>
+                    <p className="mt-1.5 text-xs leading-relaxed text-[#5a6c60]">
+                      {t.developmentPriorities.healthDesc}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl neu-inset p-4 hover:scale-[1.01] transition-all duration-300">
-                    <p className="text-xs font-bold text-[#397149]">
-                      {t.evidenceFirst}
-                    </p>
+                  <div className="mt-5 flex items-center justify-between border-t border-[#edf2ed] pt-3 text-xs">
+                    <span className="text-[#6d7e71] font-medium">
+                      842 {t.developmentPriorities.citizenRequestsCount}
+                    </span>
+                    <a
+                      href="#priorities"
+                      className="font-bold text-[#173f2a] group-hover:underline flex items-center gap-1"
+                    >
+                      <span>{t.developmentPriorities.viewPriority}</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
 
-                    <p className="mt-2 text-xs leading-5 text-[#66736a]">
-                      {t.evidenceFirstText}
+              {/* Card 3: Education */}
+              <div className="flex flex-col overflow-hidden rounded-xl border border-[#dce5dc] bg-[#fcfdfc] shadow-xs hover:border-[#28623c] transition-all group">
+                <div className="relative h-48 w-full overflow-hidden bg-[#eaf0ea]">
+                  <img
+                    src={developmentImages.educationCategory}
+                    alt="Education and school"
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-102"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="flex flex-1 flex-col justify-between p-5">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#2d633b] bg-[#eaf4eb] px-2 py-0.5 rounded border border-[#d2e2d3]">
+                      {t.developmentPriorities.eduTag}
+                    </span>
+                    <h3 className="mt-2 text-lg font-bold text-[#17221b]">
+                      {t.developmentPriorities.eduTitle}
+                    </h3>
+                    <p className="mt-1.5 text-xs leading-relaxed text-[#5a6c60]">
+                      {t.developmentPriorities.eduDesc}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl neu-inset p-4 hover:scale-[1.01] transition-all duration-300">
-                    <p className="text-xs font-bold text-[#397149]">
-                      {t.noBudgetData}
-                    </p>
-
-                    <p className="mt-2 text-xs leading-5 text-[#66736a]">
-                      {t.noBudgetDataText}
-                    </p>
+                  <div className="mt-5 flex items-center justify-between border-t border-[#edf2ed] pt-3 text-xs">
+                    <span className="text-[#6d7e71] font-medium">
+                      915 {t.developmentPriorities.citizenRequestsCount}
+                    </span>
+                    <a
+                      href="#priorities"
+                      className="font-bold text-[#173f2a] group-hover:underline flex items-center gap-1"
+                    >
+                      <span>{t.developmentPriorities.viewPriority}</span>
+                    </a>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+
+        {/* =====================================================
+            10. REAL PRIORITIES (TOP 3 CALCULATED)
+        ====================================================== */}
+        <section
+          id="priorities"
+          className="bg-[#f8faf5] py-16 px-4 sm:px-6 lg:px-8 border-b border-[#dce3dc]"
+        >
+          <div className="mx-auto max-w-7xl">
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end border-b border-[#e2eae2] pb-6">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#2c613a]">
+                  {t.intelligence.priorityRanking}
+                </p>
+                <h2 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-[#17221b]">
+                  {t.intelligence.heading}
+                </h2>
+              </div>
+
+              <a
+                href="/dashboard"
+                className="text-xs sm:text-sm font-bold text-[#205639] hover:underline flex items-center gap-1"
+              >
+                {t.realPriorities.openFull}
+              </a>
+            </div>
+
+            {categoryInsights.length === 0 ? (
+              <div className="mt-8 rounded-xl border border-dashed border-[#cbd8cd] bg-white p-10 text-center">
+                <div className="text-4xl">🎯</div>
+                <p className="mt-2 text-sm font-bold text-[#173f2a]">
+                  {t.hero.noDataYet}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-8 grid gap-5 lg:grid-cols-3">
+                {categoryInsights.slice(0, 3).map((item, index) => (
+                  <div
+                    key={item.name}
+                    className="rounded-xl border border-[#dce5dc] bg-white p-5 shadow-xs hover:border-[#28623c] transition-all"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#edf5ed] text-lg">
+                        {item.icon}
+                      </div>
+
+                      <span className="text-[11px] font-extrabold text-[#758679]">
+                        #{String(index + 1).padStart(2, "0")}
+                      </span>
+                    </div>
+
+                    <div className="mt-4 flex items-end justify-between">
+                      <div>
+                        <h3 className="text-lg font-bold text-[#17221b]">
+                          {getCategoryName(item.name)}
+                        </h3>
+                        <p className="mt-1 text-xs text-[#6e7e72]">
+                          {item.count} {t.hero.requests}
+                        </p>
+                      </div>
+
+                      <div className="text-right">
+                        <span className="text-2xl font-extrabold text-[#28623c]">
+                          {item.priority}
+                        </span>
+                        <p className="text-[9px] font-bold uppercase tracking-wider text-[#798a7d]">
+                          {t.hero.priority}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#e5eee5]">
+                      <div
+                        className="h-full rounded-full bg-[#2d633b] transition-all duration-1000"
+                        style={{
+                          width: `${Math.max(item.priority, 3)}%`,
+                        }}
+                      />
+                    </div>
+
+                    <div className="mt-3 flex justify-between text-[11px] text-[#6a7c6f]">
+                      <span>
+                        {item.percentage} {t.realPriorities.reportsRatio}
+                      </span>
+                      <span>
+                        {item.locations} {t.realPriorities.locationsCount}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* =====================================================
+            11. DATA INTEGRITY & CITIZEN CHARTER
+        ====================================================== */}
+        <section className="bg-white py-14 px-4 sm:px-6 lg:px-8 border-b border-[#dce3dc]">
+          <div className="mx-auto max-w-7xl">
+            <div className="rounded-2xl border border-[#cfdfcf] bg-[#f8faf8] p-6 sm:p-8">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#173f2a] text-xl text-white shadow-2xs">
+                  🛡️
+                </div>
+
+                <div className="flex-1">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#2c613a]">
+                    {t.dataIntegrity.badge}
+                  </p>
+
+                  <h2 className="mt-1 text-xl sm:text-2xl font-bold text-[#173f2a]">
+                    {t.dataIntegrity.heading}
+                  </h2>
+
+                  <p className="mt-2 max-w-3xl text-xs sm:text-sm leading-relaxed text-[#56685a]">
+                    {t.dataIntegrity.description}
+                  </p>
+
+                  <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                    <div className="rounded-xl border border-[#dce6dc] bg-white p-4">
+                      <p className="text-xs font-bold text-[#2d633b]">
+                        {t.dataIntegrity.locVerifiedTitle}
+                      </p>
+                      <p className="mt-1.5 text-xs leading-relaxed text-[#5c6e60]">
+                        {t.dataIntegrity.locVerifiedDesc}
+                      </p>
+                    </div>
+
+                    <div className="rounded-xl border border-[#dce6dc] bg-white p-4">
+                      <p className="text-xs font-bold text-[#2d633b]">
+                        {t.dataIntegrity.evidenceFirstTitle}
+                      </p>
+                      <p className="mt-1.5 text-xs leading-relaxed text-[#5c6e60]">
+                        {t.dataIntegrity.evidenceFirstDesc}
+                      </p>
+                    </div>
+
+                    <div className="rounded-xl border border-[#dce6dc] bg-white p-4">
+                      <p className="text-xs font-bold text-[#2d633b]">
+                        {t.dataIntegrity.noBudgetTitle}
+                      </p>
+                      <p className="mt-1.5 text-xs leading-relaxed text-[#5c6e60]">
+                        {t.dataIntegrity.noBudgetDataDesc}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* =====================================================
+            12. OUR DIFFERENCE / ABOUT
+        ====================================================== */}
+        <section
+          id="about"
+          className="bg-[#f2f7f2] py-16 px-4 sm:px-6 lg:px-8 border-b border-[#dce3dc]"
+        >
+          <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-2 items-center">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#2c613a]">
+                {t.about.badge}
+              </p>
+
+              <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-[#17221b]">
+                {t.about.heading}
+              </h2>
+
+              <p className="mt-4 max-w-xl text-sm sm:text-base leading-relaxed text-[#526356]">
+                {t.about.description}
+              </p>
+
+              <div className="mt-6 flex items-center gap-3 text-xs text-[#3b5442] font-semibold">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#173f2a] text-white text-xs">
+                  ✓
+                </span>
+                <span>{t.about.guarantee}</span>
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-xl border border-[#d6e2d6] bg-white p-5 shadow-xs">
+                <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[#edf5ed] text-lg text-[#173f2a]">
+                  📍
+                </div>
+                <h3 className="mt-3 text-sm font-bold text-[#17221b]">
+                  {t.about.realityCheckTitle}
+                </h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-[#5b6d5f]">
+                  {t.about.realityCheckDesc}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-[#d6e2d6] bg-white p-5 shadow-xs">
+                <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[#edf5ed] text-lg text-[#173f2a]">
+                  🧠
+                </div>
+                <h3 className="mt-3 text-sm font-bold text-[#17221b]">
+                  {t.about.explainableTitle}
+                </h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-[#5b6d5f]">
+                  {t.about.explainableDesc}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-[#d6e2d6] bg-white p-5 shadow-xs">
+                <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[#edf5ed] text-lg text-[#173f2a]">
+                  📷
+                </div>
+                <h3 className="mt-3 text-sm font-bold text-[#17221b]">
+                  {t.dataIntegrity.evidenceFirstTitle}
+                </h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-[#5b6d5f]">
+                  {t.dataIntegrity.evidenceFirstDesc}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-[#d6e2d6] bg-white p-5 shadow-xs">
+                <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[#edf5ed] text-lg text-[#173f2a]">
+                  🇮🇳
+                </div>
+                <h3 className="mt-3 text-sm font-bold text-[#17221b]">
+                  {t.dataIntegrity.locVerifiedTitle}
+                </h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-[#5b6d5f]">
+                  {t.dataIntegrity.locVerifiedDesc}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* =====================================================
+            13. FINAL CITIZEN CALL TO ACTION BANNER
+        ====================================================== */}
+        <section className="bg-[#ddebd8] py-12 px-4 sm:px-6 lg:px-8 border-b border-[#c8dbc8]">
+          <div className="mx-auto max-w-7xl flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#245233] bg-white/70 px-2.5 py-0.5 rounded border border-[#bfd8bf]">
+                {t.cta.badge}
+              </span>
+              <h2 className="mt-2 text-2xl sm:text-3xl font-extrabold text-[#173f2a]">
+                {t.cta.heading}
+              </h2>
+              <p className="mt-1 text-xs sm:text-sm text-[#3b5943]">
+                {t.cta.description}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3 shrink-0">
+              <a
+                href="/citizen"
+                className="rounded-lg bg-[#173f2a] hover:bg-[#21563a] px-5 py-3 text-xs font-bold text-white shadow-sm transition-all"
+              >
+                {t.cta.submitBtn}
+              </a>
+              <a
+                href="/track"
+                className="rounded-lg border border-[#afc9b1] bg-white hover:bg-[#f3f7f3] px-5 py-3 text-xs font-bold text-[#204a2f] shadow-2xs transition-all"
+              >
+                {t.cta.trackBtn}
+              </a>
+            </div>
+          </div>
+        </section>
+      </main>
 
       {/* =====================================================
-          UNIQUENESS
+          14. CLEAN LIGHT GOVERNMENT-STYLE FOOTER
       ====================================================== */}
+      <footer className="bg-[#f8faf5] border-t border-[#dce3dc] text-[#334237]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
+            {/* Col 1 & 2: Branding & Mission */}
+            <div className="lg:col-span-2">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#173f2a] text-white font-bold text-base shadow-2xs">
+                  P
+                </div>
+                <div>
+                  <span className="text-sm font-extrabold tracking-wider text-[#173f2a]">
+                    {t.common.siteName}
+                  </span>
+                  <p className="text-[10px] text-[#55675a]">
+                    {t.common.portalTagline}
+                  </p>
+                </div>
+              </div>
 
-      <section
-        id="about"
-        className="bg-[#173f2a] text-white"
-      >
-        <div className="mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-2 lg:px-8 lg:py-24">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#a8c8ae]">
-              {t.ourDifference}
-            </p>
+              <p className="mt-3 max-w-sm text-xs leading-relaxed text-[#5a6b5e]">
+                {t.footer.mission}
+              </p>
 
-            <h2 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
-              {t.notComplaint}
-            </h2>
+              <div className="mt-4 flex items-center gap-2 text-xs text-[#43644d]">
+                <span className="font-bold">{t.footer.pinVerificationLabel}</span>
+                <span className="bg-[#eaf3ea] px-2 py-0.5 rounded border border-[#cfdfd0] text-[11px]">
+                  {t.footer.pinStatus}
+                </span>
+              </div>
+            </div>
 
-            <p className="mt-6 max-w-xl text-base leading-8 text-white/65">
-              {t.differenceDescription}
-            </p>
+            {/* Col 3: Citizen Services */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-[#173f2a]">
+                {t.footer.citizenServicesTitle}
+              </p>
+              <ul className="mt-3 space-y-2 text-xs text-[#526356]">
+                <li>
+                  <a
+                    href="/citizen"
+                    className="hover:text-[#173f2a] hover:underline"
+                  >
+                    {t.footer.submitNeedLink}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/track"
+                    className="hover:text-[#173f2a] hover:underline"
+                  >
+                    {t.footer.trackComplaintLink}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#voice-assistant"
+                    className="hover:text-[#173f2a] hover:underline"
+                  >
+                    {t.footer.voiceRedressalLink}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/dashboard"
+                    className="hover:text-[#173f2a] hover:underline"
+                  >
+                    {t.footer.constituencyDashboardLink}
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Col 4: Process & Architecture */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-[#173f2a]">
+                {t.footer.methodologyTitle}
+              </p>
+              <ul className="mt-3 space-y-2 text-xs text-[#526356]">
+                <li>
+                  <a
+                    href="#how-it-works"
+                    className="hover:text-[#173f2a] hover:underline"
+                  >
+                    {t.footer.sixLayersLink}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#decision-pipeline"
+                    className="hover:text-[#173f2a] hover:underline"
+                  >
+                    {t.footer.pipelineLink}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#priorities"
+                    className="hover:text-[#173f2a] hover:underline"
+                  >
+                    {t.footer.priorityScoringLink}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#about"
+                    className="hover:text-[#173f2a] hover:underline"
+                  >
+                    {t.footer.realityCheckLink}
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Col 5: Administration & Support */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-[#173f2a]">
+                {t.footer.helpTitle}
+              </p>
+              <ul className="mt-3 space-y-2 text-xs text-[#526356]">
+                <li>
+                  <a
+                    href="/login?redirect=/dashboard"
+                    className="hover:text-[#173f2a] hover:underline font-semibold"
+                  >
+                    {t.footer.adminPortalLink}
+                  </a>
+                </li>
+                <li>
+                  <span className="text-[#657969]">
+                    {t.footer.helplineLabel}
+                  </span>
+                </li>
+                <li>
+                  <span className="text-[#657969]">
+                    {t.footer.accessibilityLabel}
+                  </span>
+                </li>
+                <li>
+                  <span className="text-[#657969]">
+                    {t.footer.multilingualLabel}
+                  </span>
+                </li>
+              </ul>
+            </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-3xl neu-dark-flat p-6 hover:scale-[1.03] transition-all duration-300">
-              <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl neu-dark-inset text-2xl">
-                📍
-              </div>
+          {/* Bottom Bar: Copyright & Government Portal Disclaimer */}
+          <div className="mt-10 pt-6 border-t border-[#e2eae2] flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-[#6d7e71]">
+            <p>{t.footer.copyright}</p>
 
-              <h3 className="mt-4 font-bold">
-                {t.realityCheck}
-              </h3>
-
-              <p className="mt-3 text-sm leading-6 text-white/55">
-                {t.realityText}
-              </p>
-            </div>
-
-            <div className="rounded-3xl neu-dark-flat p-6 hover:scale-[1.03] transition-all duration-300">
-              <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl neu-dark-inset text-2xl">
-                🧠
-              </div>
-
-              <h3 className="mt-4 font-bold">
-                {t.explainableAI}
-              </h3>
-
-              <p className="mt-3 text-sm leading-6 text-white/55">
-                {t.explainableText}
-              </p>
-            </div>
-
-            <div className="rounded-3xl neu-dark-flat p-6 hover:scale-[1.03] transition-all duration-300">
-              <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl neu-dark-inset text-2xl">
-                📷
-              </div>
-
-              <h3 className="mt-4 font-bold">
-                {t.evidenceFirst}
-              </h3>
-
-              <p className="mt-3 text-sm leading-6 text-white/55">
-                {t.evidenceFirstText}
-              </p>
-            </div>
-
-            <div className="rounded-3xl neu-dark-flat p-6 hover:scale-[1.03] transition-all duration-300">
-              <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl neu-dark-inset text-2xl">
-                🇮🇳
-              </div>
-
-              <h3 className="mt-4 font-bold">
-                {t.locationVerified}
-              </h3>
-
-              <p className="mt-3 text-sm leading-6 text-white/55">
-                {t.locationVerifiedText}
-              </p>
+            <div className="flex items-center gap-4">
+              <span>{t.footer.lightPortalNote}</span>
+              <span>•</span>
+              <span>{t.footer.accessibilityCompliant}</span>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* =====================================================
-          FOOTER
-      ====================================================== */}
-
-      <footer className="bg-[#102d1e] text-white/50">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-6 py-8 text-xs sm:flex-row sm:items-center sm:justify-between lg:px-8">
-          <p>
-            PEOPLE&apos;S PRIORITIES · AI FOR
-            CONSTITUENCY DEVELOPMENT
-          </p>
-
-          <p>
-            PARAKRAM 1.0
-          </p>
         </div>
       </footer>
-    </main>
+    </div>
   );
 }

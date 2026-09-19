@@ -2,11 +2,17 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { calculatePriority } from "@/lib/priority";
 import {
   classifyIssue,
+  analyzeIssueContext,
+  CATEGORY_ICONS,
   type IssueCategory,
+  type ContextualIssueAnalysis,
 } from "@/lib/issueClassifier";
+import { useLanguage } from "@/lib/LanguageContext";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 type Submission = {
   id: string;
@@ -21,8 +27,12 @@ type Submission = {
   issue?: string;
   photos?: string[];
   status?: string;
+  language?: string;
   voiceLanguage?: string;
+  voiceAudioUrl?: string;
+  voiceTranslatedText?: string;
   writingLanguages?: Record<string, string>;
+  classification?: ContextualIssueAnalysis;
 };
 
 type Category = {
@@ -30,11 +40,7 @@ type Category = {
   count: number;
   icon: string;
   priority: number;
-  level:
-    | "Low"
-    | "Medium"
-    | "High"
-    | "Critical";
+  level: "Low" | "Medium" | "High" | "Critical";
   reasons: string[];
   breakdown: {
     frequency: number;
@@ -45,122 +51,64 @@ type Category = {
   };
 };
 
-/*
- * ============================================================
- * SEVERITY
- * ============================================================
- *
- * Transparent prototype rule.
- *
- * Later this can be replaced by a more advanced
- * AI/public-data assisted severity model.
- * ============================================================
- */
-
-const getSeverity = (
-  category: IssueCategory
-) => {
+const getSeverity = (category: IssueCategory) => {
   switch (category) {
     case "Healthcare":
+      return 90;
+    case "Food Safety":
+      return 88;
+    case "Health & Hygiene":
+      return 85;
     case "Flooding":
+    case "Public Safety":
     case "Safety":
       return 90;
-
     case "Water & Sanitation":
     case "Electricity":
       return 85;
-
+    case "Roads & Infrastructure":
     case "Roads & Transport":
       return 75;
-
     case "Waste Management":
       return 72;
-
     case "Agriculture":
     case "Housing":
       return 70;
-
     case "Employment":
       return 68;
-
     case "Education":
       return 65;
-
     case "Government Services":
       return 60;
-
     case "Internet & Connectivity":
       return 55;
-
     case "Environment":
       return 65;
-
     default:
       return 55;
   }
 };
 
-/*
- * ============================================================
- * PRIORITY COLORS
- * ============================================================
- */
-
-const getPriorityColor = (
-  level: Category["level"]
-) => {
+const getPriorityColor = (level: Category["level"]) => {
   switch (level) {
     case "Critical":
       return "bg-red-100 text-red-700 border-red-200";
-
     case "High":
       return "bg-orange-100 text-orange-700 border-orange-200";
-
     case "Medium":
-      return "bg-yellow-100 text-yellow-700 border-yellow-200";
-
+      return "bg-amber-100 text-amber-800 border-amber-200";
     default:
-      return "bg-green-100 text-green-700 border-green-200";
+      return "bg-emerald-100 text-emerald-800 border-emerald-200";
   }
 };
-
-/*
- * ============================================================
- * LANGUAGE LABEL
- * ============================================================
- */
-
-const getLanguageLabel = (
-  language?: string
-) => {
-  switch (language) {
-    case "Hindi":
-      return "हिन्दी";
-
-    case "Odia":
-      return "ଓଡ଼ିଆ";
-
-    case "English":
-      return "English";
-
-    case "Mixed":
-      return "Mixed";
-
-    default:
-      return "Unknown";
-  }
-};
-
-/*
- * ============================================================
- * DASHBOARD
- * ============================================================
- */
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { t, getCategoryName, getStatusName } = useLanguage();
+
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
   useEffect(() => {
     const token = localStorage.getItem("admin-auth-token");
@@ -171,54 +119,157 @@ export default function DashboardPage() {
     }
   }, [router]);
 
-  const [
-    selectedCategory,
-    setSelectedCategory,
-  ] = useState("All");
+  const seedDemoCases = () => {
+    const demoItems: Submission[] = [
+      {
+        id: "PP-DEMO-01",
+        createdAt: new Date(Date.now() - 3600000).toISOString(),
+        name: "Subrat Sahoo",
+        village: "Pipili",
+        district: "Puri",
+        pincode: "752104",
+        issue: "The food quality in our area is very poor and contaminated food is causing malaria and typhoid.",
+        language: "en",
+        status: "Submitted",
+      },
+      {
+        id: "PP-DEMO-02",
+        createdAt: new Date(Date.now() - 7200000).toISOString(),
+        name: "Ramesh Jena",
+        village: "Nimapada",
+        district: "Puri",
+        pincode: "752106",
+        issue: "Dirty water is causing diarrhea in our village.",
+        language: "en",
+        status: "Under Review",
+      },
+      {
+        id: "PP-DEMO-03",
+        createdAt: new Date(Date.now() - 10800000).toISOString(),
+        name: "Sunita Behera",
+        village: "Bhubaneswar",
+        district: "Khordha",
+        pincode: "751001",
+        issue: "Garbage is not collected and mosquitoes are increasing.",
+        language: "en",
+        status: "Submitted",
+      },
+      {
+        id: "PP-DEMO-04",
+        createdAt: new Date(Date.now() - 14400000).toISOString(),
+        name: "Prabhat Nayak",
+        village: "Chandanpur",
+        district: "Puri",
+        pincode: "752012",
+        issue: "There is no doctor in our village.",
+        language: "en",
+        status: "Verified",
+      },
+      {
+        id: "PP-DEMO-05",
+        createdAt: new Date(Date.now() - 18000000).toISOString(),
+        name: "Minati Mohanty",
+        village: "Jatni",
+        district: "Khordha",
+        pincode: "752050",
+        issue: "The hospital has no medicines.",
+        language: "en",
+        status: "Submitted",
+      },
+      {
+        id: "PP-DEMO-06",
+        createdAt: new Date(Date.now() - 21600000).toISOString(),
+        name: "Bikram Das",
+        village: "Delanga",
+        district: "Puri",
+        pincode: "752015",
+        issue: "The road is broken and ambulances cannot reach the village.",
+        language: "en",
+        status: "Under Review",
+      },
+      {
+        id: "PP-DEMO-07",
+        createdAt: new Date(Date.now() - 25200000).toISOString(),
+        name: "Sarojini Panda",
+        village: "Khordha",
+        district: "Khordha",
+        pincode: "752055",
+        issue: "School food is stale and children are becoming sick.",
+        language: "en",
+        status: "Submitted",
+      },
+      {
+        id: "PP-DEMO-08",
+        createdAt: new Date(Date.now() - 28800000).toISOString(),
+        name: "Kailash Mishra",
+        village: "Gop",
+        district: "Puri",
+        pincode: "752110",
+        issue: "There is no clean drinking water near our school.",
+        language: "en",
+        status: "Verified",
+      },
+      {
+        id: "PP-DEMO-09",
+        createdAt: new Date(Date.now() - 32400000).toISOString(),
+        name: "Arati Sethi",
+        village: "Puri Town",
+        district: "Puri",
+        pincode: "752001",
+        issue: "Garbage near the market is causing bad smell and illness.",
+        language: "en",
+        status: "Submitted",
+      },
+      {
+        id: "PP-DEMO-10",
+        createdAt: new Date(Date.now() - 36000000).toISOString(),
+        name: "Dhiren Pradhan",
+        village: "Brahmagiri",
+        district: "Puri",
+        pincode: "752011",
+        issue: "Our village has no water and no garbage collection.",
+        language: "en",
+        status: "Under Review",
+      },
+      {
+        id: "PP-DEMO-11",
+        createdAt: new Date(Date.now() - 39600000).toISOString(),
+        name: "Manorama Devi",
+        village: "Khandagiri",
+        district: "Khordha",
+        pincode: "751030",
+        issue: "ଗାଁରେ ପିଇବା ପାଣି ଦୂଷିତ ଅଛି ଏବଂ ଝାଡାବାନ୍ତି ବ୍ୟାପୁଛି।",
+        language: "or",
+        status: "Submitted",
+      },
+    ];
 
-  /*
-   * ==========================================================
-   * LOAD DATA
-   * ==========================================================
-   */
-
-  useEffect(() => {
     try {
-      const saved = JSON.parse(
-        localStorage.getItem(
-          "peoples-priorities-submissions"
-        ) || "[]"
-      );
-
-      if (Array.isArray(saved)) {
-        setSubmissions(saved);
-      }
+      localStorage.setItem("peoples-priorities-submissions", JSON.stringify(demoItems));
+      setSubmissions(demoItems);
     } catch {
-      setSubmissions([]);
-    }
-  }, []);
-
-  /*
-   * ==========================================================
-   * REFRESH
-   * ==========================================================
-   */
-
-  const refreshDashboard = () => {
-    try {
-      const saved = JSON.parse(
-        localStorage.getItem(
-          "peoples-priorities-submissions"
-        ) || "[]"
-      );
-
-      if (Array.isArray(saved)) {
-        setSubmissions(saved);
-      }
-    } catch {
-      setSubmissions([]);
+      setSubmissions(demoItems);
     }
   };
+
+  const loadSubmissions = () => {
+    try {
+      const saved = JSON.parse(
+        localStorage.getItem("peoples-priorities-submissions") || "[]"
+      );
+      if (Array.isArray(saved) && saved.length > 0) {
+        setSubmissions(saved);
+      } else {
+        seedDemoCases();
+      }
+    } catch {
+      seedDemoCases();
+    }
+  };
+
+  useEffect(() => {
+    loadSubmissions();
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("admin-auth-token");
@@ -226,1350 +277,613 @@ export default function DashboardPage() {
     router.replace("/");
   };
 
-  /*
-   * ==========================================================
-   * CATEGORY + PRIORITY ENGINE
-   * ==========================================================
-   */
-
+  /* CATEGORY & PRIORITY ENGINE */
   const categories = useMemo(() => {
-    const grouped: Record<
-      string,
-      Submission[]
-    > = {};
-
-    /*
-     * First classify every submission.
-     */
+    const grouped: Record<string, Submission[]> = {};
 
     submissions.forEach((submission) => {
-      const classification =
-        classifyIssue(
-          submission.issue || ""
-        );
-
-      const category =
-        classification.category;
-
+      const analysis =
+        submission.classification ||
+        analyzeIssueContext(submission.issue || "", submission.language);
+      const category = analysis.primaryCategory;
       if (!grouped[category]) {
         grouped[category] = [];
       }
-
-      grouped[category].push(
-        submission
-      );
+      grouped[category].push(submission);
     });
 
-    /*
-     * Build category intelligence.
-     */
+    const result: Category[] = Object.entries(grouped).map(
+      ([name, categorySubmissions]) => {
+        const category = name as IssueCategory;
+        const count = categorySubmissions.length;
 
-    const result: Category[] =
-      Object.entries(grouped).map(
-        ([name, categorySubmissions]) => {
-          const category =
-            name as IssueCategory;
+        const frequency =
+          submissions.length > 0
+            ? Math.round((count / submissions.length) * 100)
+            : 0;
 
-          const firstClassification =
-            classifyIssue(
-              categorySubmissions[0]
-                ?.issue || ""
-            );
+        const locationCounts: Record<string, number> = {};
+        categorySubmissions.forEach((submission) => {
+          const location =
+            submission.district?.trim() ||
+            submission.state?.trim() ||
+            submission.village?.trim() ||
+            submission.location?.trim() ||
+            "Unknown";
+          const normalized = location.toLowerCase();
+          locationCounts[normalized] = (locationCounts[normalized] || 0) + 1;
+        });
 
-          const count =
-            categorySubmissions.length;
+        const highestLocationCount = Math.max(0, ...Object.values(locationCounts));
+        const geographicConcentration =
+          count > 0 ? Math.round((highestLocationCount / count) * 100) : 0;
 
-          /*
-           * --------------------------------------------------
-           * FREQUENCY
-           * --------------------------------------------------
-           */
+        const reportsWithPhotos = categorySubmissions.filter(
+          (submission) =>
+            Array.isArray(submission.photos) && submission.photos.length > 0
+        ).length;
+        const evidence =
+          count > 0 ? Math.round((reportsWithPhotos / count) * 100) : 0;
 
-          const frequency =
-            submissions.length > 0
-              ? Math.round(
-                  (count /
-                    submissions.length) *
-                    100
-                )
-              : 0;
+        const now = Date.now();
+        const recentReports = categorySubmissions.filter((submission) => {
+          const created = new Date(submission.createdAt).getTime();
+          if (Number.isNaN(created)) return false;
+          const days = (now - created) / (1000 * 60 * 60 * 24);
+          return days <= 7;
+        }).length;
 
-          /*
-           * --------------------------------------------------
-           * GEOGRAPHIC CONCENTRATION
-           * --------------------------------------------------
-           *
-           * We use the verified district/state when
-           * available, otherwise village/location.
-           *
-           * This keeps the system India-wide.
-           */
+        const recency =
+          count > 0 ? Math.round((recentReports / count) * 100) : 0;
+        const severity = getSeverity(category);
 
-          const locationCounts: Record<
-            string,
-            number
-          > = {};
+        const priority = calculatePriority({
+          frequency,
+          severity,
+          geographicConcentration,
+          evidence,
+          recency,
+        });
 
-          categorySubmissions.forEach(
-            (submission) => {
-              const location =
-                submission.district?.trim() ||
-                submission.state?.trim() ||
-                submission.village?.trim() ||
-                submission.location?.trim() ||
-                "Unknown";
-
-              const normalized =
-                location.toLowerCase();
-
-              locationCounts[
-                normalized
-              ] =
-                (locationCounts[
-                  normalized
-                ] || 0) + 1;
-            }
-          );
-
-          const highestLocationCount =
-            Math.max(
-              0,
-              ...Object.values(
-                locationCounts
-              )
-            );
-
-          const geographicConcentration =
-            count > 0
-              ? Math.round(
-                  (highestLocationCount /
-                    count) *
-                    100
-                )
-              : 0;
-
-          /*
-           * --------------------------------------------------
-           * PHOTO EVIDENCE
-           * --------------------------------------------------
-           */
-
-          const reportsWithPhotos =
-            categorySubmissions.filter(
-              (submission) =>
-                Array.isArray(
-                  submission.photos
-                ) &&
-                submission.photos.length >
-                  0
-            ).length;
-
-          const evidence =
-            count > 0
-              ? Math.round(
-                  (reportsWithPhotos /
-                    count) *
-                    100
-                )
-              : 0;
-
-          /*
-           * --------------------------------------------------
-           * RECENCY
-           * --------------------------------------------------
-           */
-
-          const now = Date.now();
-
-          const recentReports =
-            categorySubmissions.filter(
-              (submission) => {
-                const created =
-                  new Date(
-                    submission.createdAt
-                  ).getTime();
-
-                if (
-                  Number.isNaN(created)
-                ) {
-                  return false;
-                }
-
-                const days =
-                  (now - created) /
-                  (1000 *
-                    60 *
-                    60 *
-                    24);
-
-                return days <= 7;
-              }
-            ).length;
-
-          const recency =
-            count > 0
-              ? Math.round(
-                  (recentReports /
-                    count) *
-                    100
-                )
-              : 0;
-
-          /*
-           * --------------------------------------------------
-           * SEVERITY
-           * --------------------------------------------------
-           */
-
-          const severity =
-            getSeverity(category);
-
-          /*
-           * --------------------------------------------------
-           * PRIORITY
-           * --------------------------------------------------
-           */
-
-          const priority =
-            calculatePriority({
-              frequency,
-              severity,
-              geographicConcentration,
-              evidence,
-              recency,
-            });
-
-          return {
-            name: category,
-            count,
-            icon: firstClassification.icon,
-            priority: priority.score,
-            level: priority.level,
-            reasons: priority.reasons,
-            breakdown:
-              priority.breakdown,
-          };
-        }
-      );
-
-    /*
-     * Highest priority first.
-     */
-
-    return result.sort(
-      (a, b) =>
-        b.priority - a.priority
-    );
-  }, [submissions]);
-
-  /*
-   * ==========================================================
-   * LOCATION ANALYSIS
-   * ==========================================================
-   */
-
-  const locations = useMemo(() => {
-    const counts: Record<
-      string,
-      number
-    > = {};
-
-    submissions.forEach(
-      (submission) => {
-        const location =
-          submission.district?.trim() ||
-          submission.state?.trim() ||
-          submission.village?.trim() ||
-          submission.location?.trim() ||
-          "Unknown";
-
-        counts[location] =
-          (counts[location] || 0) + 1;
+        return {
+          name: category,
+          count,
+          icon: CATEGORY_ICONS[category] || "📌",
+          priority: priority.score,
+          level: priority.level,
+          reasons: priority.reasons,
+          breakdown: priority.breakdown,
+        };
       }
     );
 
-    return Object.entries(counts)
-      .map(([name, count]) => ({
-        name,
-        count,
-      }))
-      .sort(
-        (a, b) =>
-          b.count - a.count
-      );
+    return result.sort((a, b) => b.priority - a.priority);
   }, [submissions]);
 
-  /*
-   * ==========================================================
-   * FILTER
-   * ==========================================================
-   */
+  /* GEOGRAPHIC HOTSPOTS */
+  const locations = useMemo(() => {
+    const counts: Record<string, number> = {};
 
+    submissions.forEach((submission) => {
+      const location =
+        submission.district?.trim() ||
+        submission.state?.trim() ||
+        submission.village?.trim() ||
+        submission.location?.trim() ||
+        "Unknown";
+      counts[location] = (counts[location] || 0) + 1;
+    });
+
+    return Object.entries(counts)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [submissions]);
+
+  /* FILTER SUBMISSIONS */
   const filteredSubmissions =
     selectedCategory === "All"
       ? submissions
-      : submissions.filter(
-          (submission) =>
-            classifyIssue(
-              submission.issue || ""
-            ).category ===
-            selectedCategory
-        );
-
-  /*
-   * ==========================================================
-   * PAGE
-   * ==========================================================
-   */
+      : submissions.filter((submission) => {
+          const analysis =
+            submission.classification ||
+            analyzeIssueContext(submission.issue || "", submission.language);
+          return (
+            analysis.primaryCategory === selectedCategory ||
+            analysis.secondaryCategories.includes(selectedCategory as IssueCategory)
+          );
+        });
 
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen bg-[#f5f7f4] flex items-center justify-center">
+      <div className="min-h-screen bg-[#f8faf5] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#173f2a] mx-auto animate-pulse"></div>
-          <p className="mt-4 text-sm text-[#536058] font-bold">Verifying authorization...</p>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#173f2a] mx-auto"></div>
+          <p className="mt-4 text-sm text-[#556458] font-bold">Verifying authorization...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#f5f7f4] text-[#17221b]">
-
-      {/* =====================================================
-          HEADER
-          ===================================================== */}
-
-      <header className="border-b border-[#dce3dc] bg-white">
-
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-5">
-
-          <a
-            href="/"
-            className="text-sm font-bold tracking-[0.18em] text-[#173f2a]"
-          >
-            PEOPLE'S PRIORITIES
-          </a>
+    <main className="min-h-screen bg-[#f8faf5] text-[#17221b]">
+      {/* HEADER */}
+      <header className="border-b border-[#e2e8df] bg-white sticky top-0 z-30">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-4">
+          <Link href="/" className="text-sm font-black tracking-wider text-[#173f2a] flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded bg-[#173f2a] text-white text-xs font-bold">PP</span>
+            {t.common.siteName}
+          </Link>
 
           <div className="flex flex-wrap items-center gap-3">
-
-            <a
+            <LanguageSwitcher compact />
+            <Link
               href="/citizen"
-              className="rounded-full border border-[#397149] bg-white px-4 py-2 text-xs font-bold text-[#397149] transition hover:bg-[#f0f8f1]"
+              className="rounded-lg border border-[#28623c] bg-white px-3.5 py-1.5 text-xs font-bold text-[#173f2a] hover:bg-[#edf5ee] transition"
             >
-              + Share a Need
-            </a>
-
-            <a
+              + {t.common.shareNeed}
+            </Link>
+            <Link
               href="/track"
-              className="rounded-full border border-[#397149] bg-white px-4 py-2 text-xs font-bold text-[#397149] transition hover:bg-[#f0f8f1]"
+              className="rounded-lg border border-[#28623c] bg-white px-3.5 py-1.5 text-xs font-bold text-[#173f2a] hover:bg-[#edf5ee] transition"
             >
-              🔎 Track
-            </a>
-
-            <a
+              🔎 {t.common.track}
+            </Link>
+            <Link
               href="/admin"
-              className="rounded-full bg-[#173f2a] px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-[#0f2f1e]"
+              className="rounded-lg bg-[#173f2a] px-3.5 py-1.5 text-xs font-bold text-white hover:bg-[#0f2a1c] transition"
             >
-              🛠 Admin
-            </a>
-
+              🛠 {t.common.admin}
+            </Link>
             <button
-              onClick={
-                refreshDashboard
-              }
-              className="rounded-full border border-[#cbd8cd] bg-white px-4 py-2 text-xs font-bold text-[#397149] transition hover:bg-[#f0f8f1]"
+              onClick={loadSubmissions}
+              className="rounded-lg border border-[#cbd8cd] bg-white px-3 py-1.5 text-xs font-bold text-[#28623c] hover:bg-[#edf5ee] transition"
             >
-              ↻ Refresh
+              {t.dashboard.refreshBtn}
             </button>
-
             <button
               type="button"
               onClick={handleLogout}
-              className="rounded-full border border-[#b81d1d] bg-white px-4 py-2 text-xs font-bold text-[#b81d1d] transition hover:bg-[#fdf2f2]"
+              className="rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-bold text-red-700 hover:bg-red-50 transition"
             >
-              Logout
+              {t.dashboard.logoutBtn}
             </button>
-
           </div>
-
         </div>
-
       </header>
 
-      {/* =====================================================
-          MAIN
-          ===================================================== */}
-
-      <section className="mx-auto max-w-6xl px-5 py-10 sm:px-8">
-
-        {/* ===================================================
-            TITLE
-            =================================================== */}
-
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-
+      {/* DASHBOARD CONTENT */}
+      <section className="mx-auto max-w-6xl px-5 py-8 sm:px-8">
+        {/* TITLE */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#397149]">
-              Community Intelligence
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#28623c]">
+              {t.dashboard.badge}
             </p>
-
-            <h1 className="mt-3 text-3xl font-bold text-[#173f2a] sm:text-4xl">
-              People's Priorities Dashboard
+            <h1 className="mt-2 text-2xl sm:text-3xl font-black text-[#173f2a]">
+              {t.dashboard.heading}
             </h1>
-
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-[#66736a]">
-              Transforming citizen voices
-              from across India into
-              transparent, evidence-based
-              community priorities.
+            <p className="mt-2 max-w-2xl text-xs sm:text-sm leading-relaxed text-[#556458]">
+              {t.dashboard.description}
             </p>
-
           </div>
 
-          <div className="rounded-2xl border border-[#cfe0d1] bg-white px-5 py-4">
-
-            <p className="text-xs font-bold text-[#66736a]">
-              DATA SOURCE
+          <div className="rounded-2xl border border-[#cfe0d1] bg-white px-4 py-3 shadow-xs">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[#556458]">
+              {t.dashboard.sourceTitle}
             </p>
-
-            <p className="mt-1 text-sm font-bold text-[#397149]">
-              🇮🇳 India-wide Citizen
-              Submissions
+            <p className="mt-0.5 text-xs font-bold text-[#28623c]">
+              {t.dashboard.sourceText}
             </p>
-
           </div>
-
         </div>
 
-        {/* ===================================================
-            STAT CARDS
-            =================================================== */}
-
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-
-          <div className="rounded-2xl border border-[#d9e2da] bg-white p-5 shadow-sm">
-
-            <p className="text-xs font-bold uppercase tracking-wider text-[#66736a]">
-              Total Needs
+        {/* STATS OVERVIEW */}
+        <div className="mt-8 grid gap-4 grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-2xl border border-[#d9e2da] bg-white p-5 shadow-xs">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#556458]">
+              {t.dashboard.totalSubmissions}
             </p>
-
-            <p className="mt-3 text-4xl font-bold text-[#173f2a]">
+            <p className="mt-2 text-3xl sm:text-4xl font-black text-[#173f2a]">
               {submissions.length}
             </p>
-
-            <p className="mt-2 text-xs text-[#66736a]">
-              Citizen submissions
-            </p>
-
+            <p className="mt-1 text-xs text-[#556458]">Citizen Submissions</p>
           </div>
 
-          <div className="rounded-2xl border border-[#d9e2da] bg-white p-5 shadow-sm">
-
-            <p className="text-xs font-bold uppercase tracking-wider text-[#66736a]">
+          <div className="rounded-2xl border border-[#d9e2da] bg-white p-5 shadow-xs">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#556458]">
               Issue Types
             </p>
-
-            <p className="mt-3 text-4xl font-bold text-[#173f2a]">
+            <p className="mt-2 text-3xl sm:text-4xl font-black text-[#173f2a]">
               {categories.length}
             </p>
-
-            <p className="mt-2 text-xs text-[#66736a]">
-              Automatically classified
-            </p>
-
+            <p className="mt-1 text-xs text-[#556458]">Automatically Classified</p>
           </div>
 
-          <div className="rounded-2xl border border-[#d9e2da] bg-white p-5 shadow-sm">
-
-            <p className="text-xs font-bold uppercase tracking-wider text-[#66736a]">
-              Locations
+          <div className="rounded-2xl border border-[#d9e2da] bg-white p-5 shadow-xs">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#556458]">
+              {t.dashboard.uniqueLocations}
             </p>
-
-            <p className="mt-3 text-4xl font-bold text-[#173f2a]">
+            <p className="mt-2 text-3xl sm:text-4xl font-black text-[#173f2a]">
               {locations.length}
             </p>
-
-            <p className="mt-2 text-xs text-[#66736a]">
-              Districts / areas represented
-            </p>
-
+            <p className="mt-1 text-xs text-[#556458]">Represented Areas</p>
           </div>
 
-          <div className="rounded-2xl border border-[#d9e2da] bg-white p-5 shadow-sm">
-
-            <p className="text-xs font-bold uppercase tracking-wider text-[#66736a]">
-              Highest Priority
+          <div className="rounded-2xl border border-[#d9e2da] bg-white p-5 shadow-xs">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#556458]">
+              {t.dashboard.highestPriorityTitle}
             </p>
-
-            <p className="mt-3 text-xl font-bold text-[#397149]">
-              {categories[0]
-                ? `${categories[0].icon} ${categories[0].name}`
-                : "No data"}
+            <p className="mt-2 text-xl font-bold text-[#28623c] truncate">
+              {categories[0] ? `${categories[0].icon} ${getCategoryName(categories[0].name)}` : "—"}
             </p>
-
             {categories[0] && (
-              <p className="mt-2 text-xs font-bold text-[#397149]">
-                {categories[0].priority}
-                /100
+              <p className="mt-1 text-xs font-bold text-[#28623c]">
+                {categories[0].priority}/100
               </p>
             )}
-
           </div>
-
         </div>
 
-        {/* ===================================================
-            EMPTY STATE
-            =================================================== */}
-
+        {/* EMPTY STATE */}
         {submissions.length === 0 ? (
-
-          <div className="mt-8 rounded-3xl border border-dashed border-[#cbd8cd] bg-white p-14 text-center">
-
-            <div className="text-6xl">
-              📊
-            </div>
-
-            <h2 className="mt-5 text-2xl font-bold text-[#173f2a]">
-              No community data yet
+          <div className="mt-8 rounded-3xl border border-dashed border-[#cbd8cd] bg-white p-12 text-center">
+            <span className="text-5xl">📊</span>
+            <h2 className="mt-4 text-xl font-black text-[#173f2a]">
+              No Community Data Yet
             </h2>
-
-            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-[#66736a]">
-              Submit community needs
-              from the citizen portal and
-              this dashboard will
-              automatically classify and
-              analyse them.
+            <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-[#556458]">
+              Submit community needs from the citizen portal and this dashboard will automatically analyze them.
             </p>
-
-            <a
+            <Link
               href="/citizen"
-              className="mt-6 inline-block rounded-xl bg-[#173f2a] px-6 py-3 text-sm font-bold text-white"
+              className="mt-6 inline-block rounded-xl bg-[#173f2a] px-6 py-3 text-xs font-bold text-white hover:bg-[#0f2a1c] transition"
             >
-              Share a Need
-            </a>
-
+              + {t.common.shareNeed}
+            </Link>
           </div>
-
         ) : (
-
           <>
-
-            {/* =================================================
-                MULTILINGUAL CLASSIFICATION
-                ================================================= */}
-
-            <div className="mt-8 rounded-3xl border border-[#d9e2da] bg-white p-6 shadow-sm sm:p-8">
-
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-
+            {/* EXPLAINABLE PRIORITY SECTORS */}
+            <div className="mt-8 rounded-3xl border border-[#d9e2da] bg-white p-6 sm:p-8 shadow-sm">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between border-b border-[#e2e8df] pb-4">
                 <div>
-
-                  <p className="text-xs font-bold uppercase tracking-wider text-[#397149]">
-                    Multilingual Issue Intelligence
-                  </p>
-
-                  <h2 className="mt-2 text-2xl font-bold text-[#173f2a]">
-                    Citizen problems are automatically classified
-                  </h2>
-
-                  <p className="mt-2 max-w-2xl text-sm leading-6 text-[#66736a]">
-                    English, हिन्दी and
-                    ଓଡ଼ିଆ complaints are
-                    analysed using the same
-                    classification engine.
-                  </p>
-
-                </div>
-
-                <div className="rounded-xl bg-[#f0f8f1] px-4 py-3 text-xs font-bold text-[#397149]">
-                  🇮🇳 India-wide
-                </div>
-
-              </div>
-
-              <div className="mt-6 grid gap-4 sm:grid-cols-3">
-
-                <div className="rounded-2xl bg-[#f8faf8] p-5">
-
-                  <p className="text-2xl">
-                    🇬🇧
-                  </p>
-
-                  <p className="mt-3 text-sm font-bold text-[#173f2a]">
-                    English
-                  </p>
-
-                  <p className="mt-1 text-xs text-[#66736a]">
-                    Roads, water,
-                    electricity and more.
-                  </p>
-
-                </div>
-
-                <div className="rounded-2xl bg-[#f8faf8] p-5">
-
-                  <p className="text-2xl">
-                    हिन्दी
-                  </p>
-
-                  <p className="mt-3 text-sm font-bold text-[#173f2a]">
-                    Hindi
-                  </p>
-
-                  <p className="mt-1 text-xs text-[#66736a]">
-                    हिन्दी complaints are
-                    classified automatically.
-                  </p>
-
-                </div>
-
-                <div className="rounded-2xl bg-[#f8faf8] p-5">
-
-                  <p className="text-2xl">
-                    ଓଡ଼ିଆ
-                  </p>
-
-                  <p className="mt-3 text-sm font-bold text-[#173f2a]">
-                    Odia
-                  </p>
-
-                  <p className="mt-1 text-xs text-[#66736a]">
-                    ଓଡ଼ିଆ complaints are
-                    classified automatically.
-                  </p>
-
-                </div>
-
-              </div>
-
-            </div>
-
-            {/* =================================================
-                PRIORITY ANALYSIS
-                ================================================= */}
-
-            <div className="mt-8 rounded-3xl border border-[#d9e2da] bg-white p-6 shadow-sm sm:p-8">
-
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-
-                <div>
-
-                  <p className="text-xs font-bold uppercase tracking-wider text-[#397149]">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#28623c]">
                     Explainable Priority Engine
                   </p>
-
-                  <h2 className="mt-2 text-2xl font-bold text-[#173f2a]">
-                    What should be prioritised?
+                  <h2 className="mt-1 text-xl sm:text-2xl font-black text-[#173f2a]">
+                    Transparent Community Priority Ranking
                   </h2>
-
                 </div>
-
-                <p className="text-xs text-[#66736a]">
-                  Score = frequency +
-                  severity + location +
-                  evidence + recency
+                <p className="text-xs text-[#556458]">
+                  Score = frequency + severity + location + evidence + recency
                 </p>
-
               </div>
 
-              <div className="mt-6 space-y-5">
-
-                {categories.map(
-                  (
-                    category,
-                    index
-                  ) => (
-
-                    <button
-                      key={
-                        category.name
-                      }
-                      onClick={() =>
-                        setSelectedCategory(
-                          category.name
-                        )
-                      }
-                      className={`w-full rounded-2xl border p-5 text-left transition ${
-                        selectedCategory ===
-                        category.name
-                          ? "border-[#397149] bg-[#f0f8f1]"
-                          : "border-[#e1e8e2] bg-[#f8faf8] hover:bg-[#f0f8f1]"
-                      }`}
-                    >
-
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-
-                        <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl bg-white text-2xl">
-                          {
-                            category.icon
-                          }
-                        </div>
-
-                        <div className="min-w-0 flex-1">
-
-                          <div className="flex flex-wrap items-center justify-between gap-3">
-
-                            <div className="flex flex-wrap items-center gap-3">
-
-                              <span className="text-xs font-bold text-[#397149]">
-                                #{index +
-                                  1}
-                              </span>
-
-                              <span className="text-base font-bold text-[#173f2a]">
-                                {
-                                  category.name
-                                }
-                              </span>
-
-                              <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-bold text-[#397149]">
-                                {
-                                  category.count
-                                }{" "}
-                                reports
-                              </span>
-
-                              <span
-                                className={`rounded-full border px-2.5 py-1 text-[10px] font-bold ${getPriorityColor(
-                                  category.level
-                                )}`}
-                              >
-                                {
-                                  category.level
-                                }
-                              </span>
-
-                            </div>
-
-                            <span className="text-2xl font-bold text-[#173f2a]">
-                              {
-                                category.priority
-                              }
-                              <span className="text-xs text-[#66736a]">
-                                /100
-                              </span>
-                            </span>
-
-                          </div>
-
-                          <div className="mt-3 h-3 overflow-hidden rounded-full bg-[#dce6de]">
-
-                            <div
-                              className="h-full rounded-full bg-[#397149] transition-all"
-                              style={{
-                                width: `${Math.max(
-                                  category.priority,
-                                  3
-                                )}%`,
-                              }}
-                            />
-
-                          </div>
-
-                          <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-[#66736a] sm:grid-cols-5">
-
-                            <span>
-                              Frequency{" "}
-                              <strong>
-                                {
-                                  category
-                                    .breakdown
-                                    .frequency
-                                }
-                              </strong>
-                            </span>
-
-                            <span>
-                              Severity{" "}
-                              <strong>
-                                {
-                                  category
-                                    .breakdown
-                                    .severity
-                                }
-                              </strong>
-                            </span>
-
-                            <span>
-                              Location{" "}
-                              <strong>
-                                {
-                                  category
-                                    .breakdown
-                                    .geographicConcentration
-                                }
-                              </strong>
-                            </span>
-
-                            <span>
-                              Evidence{" "}
-                              <strong>
-                                {
-                                  category
-                                    .breakdown
-                                    .evidence
-                                }
-                              </strong>
-                            </span>
-
-                            <span>
-                              Recency{" "}
-                              <strong>
-                                {
-                                  category
-                                    .breakdown
-                                    .recency
-                                }
-                              </strong>
-                            </span>
-
-                          </div>
-
-                        </div>
-
+              <div className="mt-6 space-y-4">
+                {categories.map((cat, index) => (
+                  <button
+                    key={cat.name}
+                    onClick={() => setSelectedCategory(cat.name)}
+                    className={`w-full rounded-2xl border p-5 text-left transition ${
+                      selectedCategory === cat.name
+                        ? "border-[#28623c] bg-[#edf5ee]"
+                        : "border-[#e2e8df] bg-[#f8faf5] hover:bg-[#edf5ee]/70"
+                    }`}
+                  >
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-white text-2xl shadow-xs">
+                        {cat.icon}
                       </div>
 
-                      <div className="mt-4 rounded-xl bg-white p-4">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-xs font-bold text-[#28623c]">
+                              #{index + 1}
+                            </span>
+                            <span className="text-base font-bold text-[#173f2a]">
+                              {getCategoryName(cat.name)}
+                            </span>
+                            <span className="rounded-full bg-white px-2.5 py-0.5 text-[10px] font-bold text-[#28623c] border border-[#d9e2da]">
+                              {cat.count} reports
+                            </span>
+                            <span
+                              className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${getPriorityColor(
+                                cat.level
+                              )}`}
+                            >
+                              {cat.level}
+                            </span>
+                          </div>
 
-                        <p className="text-xs font-bold uppercase tracking-wider text-[#397149]">
-                          Why this score?
-                        </p>
+                          <span className="text-xl font-black text-[#173f2a]">
+                            {cat.priority}
+                            <span className="text-xs text-[#556458]">/100</span>
+                          </span>
+                        </div>
 
-                        <ul className="mt-2 space-y-1">
+                        {/* Priority Bar */}
+                        <div className="mt-2.5 h-2.5 overflow-hidden rounded-full bg-[#e2e8df]">
+                          <div
+                            className="h-full rounded-full bg-[#28623c] transition-all"
+                            style={{ width: `${Math.max(cat.priority, 5)}%` }}
+                          />
+                        </div>
 
-                          {category.reasons.map(
-                            (reason) => (
-                              <li
-                                key={
-                                  reason
-                                }
-                                className="text-xs leading-5 text-[#66736a]"
-                              >
-                                ✓{" "}
-                                {
-                                  reason
-                                }
-                              </li>
-                            )
-                          )}
-
-                        </ul>
-
+                        {/* Breakdown */}
+                        <div className="mt-2.5 grid grid-cols-2 gap-2 text-xs text-[#556458] sm:grid-cols-5">
+                          <span>
+                            Frequency: <strong>{cat.breakdown.frequency}%</strong>
+                          </span>
+                          <span>
+                            Severity: <strong>{cat.breakdown.severity}%</strong>
+                          </span>
+                          <span>
+                            Location: <strong>{cat.breakdown.geographicConcentration}%</strong>
+                          </span>
+                          <span>
+                            Evidence: <strong>{cat.breakdown.evidence}%</strong>
+                          </span>
+                          <span>
+                            Recency: <strong>{cat.breakdown.recency}%</strong>
+                          </span>
+                        </div>
                       </div>
+                    </div>
 
-                    </button>
-
-                  )
-                )}
-
+                    {/* Explanations */}
+                    <div className="mt-3 rounded-xl bg-white border border-[#e2e8df] p-3 text-xs">
+                      <p className="font-bold uppercase tracking-wider text-[#28623c] text-[10px]">
+                        Why this score?
+                      </p>
+                      <ul className="mt-1.5 space-y-1 text-[#556458]">
+                        {cat.reasons.map((reason) => (
+                          <li key={reason}>✓ {reason}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </button>
+                ))}
               </div>
-
             </div>
 
-            {/* =================================================
-                LOCATION ANALYSIS + TOP PRIORITY
-                ================================================= */}
-
-            <div className="mt-8 grid gap-8 lg:grid-cols-2">
-
-              {/* LOCATION */}
-
+            {/* HOTSPOTS & DECISION SUPPORT */}
+            <div className="mt-8 grid gap-6 lg:grid-cols-2">
+              {/* HOTSPOTS */}
               <div className="rounded-3xl border border-[#d9e2da] bg-white p-6 shadow-sm sm:p-8">
-
-                <p className="text-xs font-bold uppercase tracking-wider text-[#397149]">
-                  India-wide Location Analysis
+                <p className="text-xs font-bold uppercase tracking-wider text-[#28623c]">
+                  Location Clusters
                 </p>
-
-                <h2 className="mt-2 text-2xl font-bold text-[#173f2a]">
-                  Community hotspots
+                <h2 className="mt-1 text-xl font-black text-[#173f2a]">
+                  {t.dashboard.hotspotsTitle}
                 </h2>
-
-                <p className="mt-2 text-sm text-[#66736a]">
-                  Areas with the highest
-                  concentration of
-                  reported needs.
+                <p className="mt-1 text-xs text-[#556458]">
+                  {t.dashboard.hotspotsDesc}
                 </p>
 
-                <div className="mt-6 space-y-4">
+                <div className="mt-5 space-y-3">
+                  {locations.slice(0, 5).map((loc, idx) => {
+                    const percentage = submissions.length
+                      ? Math.round((loc.count / submissions.length) * 100)
+                      : 0;
 
-                  {locations
-                    .slice(0, 6)
-                    .map(
-                      (
-                        location,
-                        index
-                      ) => {
-
-                        const percentage =
-                          submissions.length
-                            ? Math.round(
-                                (location.count /
-                                  submissions.length) *
-                                  100
-                              )
-                            : 0;
-
-                        return (
-                          <div
-                            key={
-                              location.name
-                            }
-                            className="rounded-xl bg-[#f8faf8] p-4"
-                          >
-
-                            <div className="flex items-center justify-between">
-
-                              <div className="flex items-center gap-3">
-
-                                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#e9f4ea] text-xs font-bold text-[#397149]">
-                                  {index +
-                                    1}
-                                </span>
-
-                                <span className="text-sm font-bold text-[#173f2a]">
-                                  📍{" "}
-                                  {
-                                    location.name
-                                  }
-                                </span>
-
-                              </div>
-
-                              <span className="text-sm font-bold text-[#397149]">
-                                {
-                                  location.count
-                                }
-                              </span>
-
-                            </div>
-
-                            <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#dce6de]">
-
-                              <div
-                                className="h-full rounded-full bg-[#397149]"
-                                style={{
-                                  width: `${Math.max(
-                                    percentage,
-                                    5
-                                  )}%`,
-                                }}
-                              />
-
-                            </div>
-
-                            <p className="mt-2 text-xs text-[#66736a]">
-                              {
-                                percentage
-                              }
-                              % of all
-                              reports
-                            </p>
-
+                    return (
+                      <div key={loc.name} className="rounded-xl bg-[#f8faf5] border border-[#e2e8df] p-3.5">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#edf5ee] text-xs font-bold text-[#28623c]">
+                              {idx + 1}
+                            </span>
+                            <span className="text-xs font-bold text-[#173f2a]">
+                              📍 {loc.name}
+                            </span>
                           </div>
-                        );
-                      }
-                    )}
+                          <span className="text-xs font-bold text-[#28623c]">
+                            {loc.count} {loc.count === 1 ? "report" : "reports"}
+                          </span>
+                        </div>
 
+                        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#e2e8df]">
+                          <div
+                            className="h-full rounded-full bg-[#28623c]"
+                            style={{ width: `${Math.max(percentage, 5)}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-
               </div>
 
-              {/* TOP PRIORITY */}
-
+              {/* DECISION SUPPORT */}
               <div className="rounded-3xl bg-[#173f2a] p-6 text-white shadow-sm sm:p-8">
-
                 <p className="text-xs font-bold uppercase tracking-wider text-[#b8d8bd]">
-                  Decision Support
+                  {t.dashboard.decisionSupportBadge}
                 </p>
-
-                <h2 className="mt-3 text-2xl font-bold">
-                  Highest priority
+                <h2 className="mt-1 text-xl font-black">
+                  Recommended Action
                 </h2>
 
                 {categories[0] && (
-
-                  <div className="mt-6">
-
-                    <div className="rounded-2xl bg-white/10 p-6">
-
-                      <p className="text-4xl">
-                        {
-                          categories[0]
-                            .icon
-                        }
+                  <div className="mt-5">
+                    <div className="rounded-2xl bg-white/10 p-5 border border-white/15">
+                      <p className="text-3xl">{categories[0].icon}</p>
+                      <p className="mt-2 text-2xl font-black">
+                        {getCategoryName(categories[0].name)}
                       </p>
-
-                      <p className="mt-4 text-3xl font-bold">
-                        {
-                          categories[0]
-                            .name
-                        }
+                      <p className="mt-1 text-xs text-[#d7e7d9]">
+                        Priority Index: <strong className="text-white">{categories[0].priority}/100</strong>
                       </p>
-
-                      <div className="mt-4 flex items-end gap-2">
-
-                        <span className="text-5xl font-bold">
-                          {
-                            categories[0]
-                              .priority
-                          }
-                        </span>
-
-                        <span className="mb-2 text-sm text-[#c7dfca]">
-                          /100 priority
-                        </span>
-
-                      </div>
-
-                      <span
-                        className={`mt-4 inline-block rounded-full border px-3 py-1 text-xs font-bold ${
-                          categories[0]
-                            .level ===
-                          "Critical"
-                            ? "border-red-300 bg-red-100 text-red-700"
-                            : categories[0]
-                                .level ===
-                              "High"
-                            ? "border-orange-300 bg-orange-100 text-orange-700"
-                            : "border-white/20 bg-white/10 text-white"
-                        }`}
-                      >
-                        {
-                          categories[0]
-                            .level
-                        }
+                      <span className="mt-3 inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-bold text-white">
+                        {categories[0].level}
                       </span>
-
                     </div>
 
-                    <div className="mt-4 rounded-2xl border border-white/20 p-5">
-
-                      <p className="text-sm font-bold">
-                        Recommended action
-                      </p>
-
-                      <p className="mt-2 text-sm leading-6 text-[#d7e7d9]">
-                        Review{" "}
-                        <strong>
-                          {
-                            categories[0]
-                              .name
-                          }
-                        </strong>{" "}
-                        issues first,
-                        verify affected
-                        locations, and
-                        consider this
-                        category for
-                        priority
-                        intervention.
-                      </p>
-
+                    <div className="mt-4 rounded-2xl border border-white/20 p-4 text-xs leading-relaxed text-[#d7e7d9]">
+                      Immediate deployment recommended in verified clusters experiencing multiple submissions in{" "}
+                      <strong className="text-white">{getCategoryName(categories[0].name)}</strong>.
                     </div>
-
                   </div>
-
                 )}
-
               </div>
-
             </div>
 
-            {/* =================================================
-                CITIZEN REPORTS
-                ================================================= */}
-
+            {/* CITIZEN SUBMISSIONS LIST (PRESERVES RAW REPORT LANGUAGE) */}
             <div className="mt-8 rounded-3xl border border-[#d9e2da] bg-white p-6 shadow-sm sm:p-8">
-
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between border-b border-[#e2e8df] pb-4">
                 <div>
-
-                  <p className="text-xs font-bold uppercase tracking-wider text-[#397149]">
-                    Citizen Reports
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#28623c]">
+                    Verified Citizen Feedback
                   </p>
-
-                  <h2 className="mt-2 text-2xl font-bold text-[#173f2a]">
-                    {selectedCategory ===
-                    "All"
-                      ? "All community needs"
-                      : `${selectedCategory} needs`}
+                  <h2 className="mt-1 text-xl font-black text-[#173f2a]">
+                    {selectedCategory === "All"
+                      ? t.dashboard.citizenReportsTitle
+                      : `${getCategoryName(selectedCategory)} (${t.dashboard.citizenReportsTitle})`}
                   </h2>
-
                 </div>
 
-                {selectedCategory !==
-                  "All" && (
-
+                {selectedCategory !== "All" && (
                   <button
-                    onClick={() =>
-                      setSelectedCategory(
-                        "All"
-                      )
-                    }
-                    className="text-xs font-bold text-[#397149]"
+                    onClick={() => setSelectedCategory("All")}
+                    className="text-xs font-bold text-[#28623c] hover:underline"
                   >
-                    ← Show all
+                    {t.dashboard.showAllBtn}
                   </button>
-
                 )}
-
               </div>
 
-              <div className="mt-6 space-y-3">
+              <div className="mt-6 space-y-4">
+                {filteredSubmissions.slice().reverse().map((sub) => {
+                  const analysis =
+                    sub.classification ||
+                    analyzeIssueContext(sub.issue || "", sub.language);
+                  const icon = CATEGORY_ICONS[analysis.primaryCategory] || "📌";
+                  const confidencePct = Math.round(analysis.confidence * 100);
 
-                {filteredSubmissions
-                  .slice()
-                  .reverse()
-                  .map(
-                    (submission) => {
-
-                      const classification =
-                        classifyIssue(
-                          submission.issue ||
-                            ""
-                        );
-
-                      return (
-                        <div
-                          key={
-                            submission.id
-                          }
-                          className="rounded-2xl border border-[#e1e8e2] bg-[#f8faf8] p-5"
-                        >
-
-                          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-
-                            <div className="flex gap-4">
-
-                              <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-white text-xl">
-                                {
-                                  classification.icon
-                                }
-                              </div>
-
-                              <div className="min-w-0">
-
-                                <div className="flex flex-wrap items-center gap-2">
-
-                                  <span className="text-sm font-bold text-[#173f2a]">
-                                    {
-                                      classification.category
-                                    }
-                                  </span>
-
-                                  <span className="rounded-full bg-[#e9f4ea] px-2 py-1 text-[10px] font-bold text-[#397149]">
-                                    {
-                                      submission.status ||
-                                      "Submitted"
-                                    }
-                                  </span>
-
-                                  <span className="rounded-full border border-[#d5ded6] bg-white px-2 py-1 text-[10px] font-bold text-[#66736a]">
-                                    {
-                                      getLanguageLabel(
-                                        classification.language
-                                      )
-                                    }
-                                  </span>
-
-                                  {classification.confidence >
-                                    0 && (
-                                    <span className="rounded-full border border-[#d5ded6] bg-white px-2 py-1 text-[10px] font-bold text-[#66736a]">
-                                      {
-                                        classification.confidence
-                                      }
-                                      % match
-                                    </span>
-                                  )}
-
-                                </div>
-
-                                <p className="mt-3 text-sm leading-6 text-[#39463d]">
-                                  {
-                                    submission.issue
-                                  }
-                                </p>
-
-                                <p className="mt-2 text-xs text-[#66736a]">
-                                  📍{" "}
-                                  {submission.village ||
-                                    "Unknown"}
-                                  {" • "}
-                                  {submission.location ||
-                                    "Unknown"}
-                                </p>
-
-                                {(submission.district ||
-                                  submission.state) && (
-                                  <p className="mt-1 text-xs font-semibold text-[#397149]">
-                                    🇮🇳{" "}
-                                    {submission.district ||
-                                      ""}
-                                    {submission.district &&
-                                    submission.state
-                                      ? ", "
-                                      : ""}
-                                    {submission.state ||
-                                      ""}
-                                    {submission.pincode
-                                      ? ` • PIN ${submission.pincode}`
-                                      : ""}
-                                  </p>
-                                )}
-
-                                {classification
-                                  .matchedKeywords
-                                  .length >
-                                  0 && (
-                                  <p className="mt-2 text-[11px] text-[#7b877f]">
-                                    Detected:
-                                    {" "}
-                                    {classification.matchedKeywords
-                                      .slice(
-                                        0,
-                                        3
-                                      )
-                                      .join(
-                                        ", "
-                                      )}
-                                  </p>
-                                )}
-
-                              </div>
-
-                            </div>
-
-                            <p className="text-xs font-bold text-[#397149]">
-                              {
-                                submission.id
-                              }
-                            </p>
-
+                  return (
+                    <div
+                      key={sub.id}
+                      className="rounded-2xl border border-[#d9e2da] bg-[#fbfdfa] p-4 sm:p-5 shadow-xs transition hover:border-[#28623c]/40"
+                    >
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="flex items-start gap-3.5 flex-1 min-w-0">
+                          <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-white border border-[#e2e8df] text-xl shadow-xs">
+                            {icon}
                           </div>
 
+                          <div className="min-w-0 flex-1">
+                            {/* Badges: Category, Multi-Issue, Status, Language, Confidence */}
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-xs font-black text-[#173f2a]">
+                                {getCategoryName(analysis.primaryCategory)}
+                              </span>
+
+                              {analysis.isMultiIssue && analysis.secondaryCategories.length > 0 && (
+                                <div className="flex flex-wrap gap-1">
+                                  {analysis.secondaryCategories.map((sec) => (
+                                    <span
+                                      key={sec}
+                                      className="rounded-full bg-[#f0f4ee] border border-[#d5ded6] px-2 py-0.5 text-[10px] font-bold text-[#2d503b]"
+                                    >
+                                      + {CATEGORY_ICONS[sec] || ""} {getCategoryName(sec)}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+
+                              <span className="rounded-full bg-[#edf5ee] px-2 py-0.5 text-[10px] font-bold text-[#28623c]">
+                                {getStatusName(sub.status || "Submitted")}
+                              </span>
+
+                              {sub.language && (
+                                <span className="rounded-full border border-[#d5ded6] bg-white px-2 py-0.5 text-[10px] font-bold text-[#556458]">
+                                  {sub.language.toUpperCase()}
+                                </span>
+                              )}
+
+                              <span
+                                className={`rounded-full px-2 py-0.5 text-[10px] font-bold border ${
+                                  confidencePct >= 85
+                                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                    : confidencePct >= 70
+                                    ? "bg-amber-50 text-amber-700 border-amber-200"
+                                    : "bg-slate-50 text-slate-700 border-slate-200"
+                                }`}
+                              >
+                                {confidencePct}% Confidence
+                              </span>
+                            </div>
+
+                            {/* Raw transcript preserved */}
+                            <p className="mt-2.5 text-xs sm:text-sm font-medium leading-relaxed text-[#17221b]">
+                              &ldquo;{sub.issue}&rdquo;
+                            </p>
+
+                            {/* Audio player if recorded */}
+                            {sub.voiceAudioUrl && (
+                              <div className="mt-2.5 flex items-center gap-2 rounded-xl bg-white border border-[#e2e8df] p-2">
+                                <span className="text-xs font-bold text-[#28623c]">🎙️ Spoken Recording:</span>
+                                <audio
+                                  controls
+                                  src={sub.voiceAudioUrl}
+                                  className="h-7 max-w-[260px]"
+                                />
+                              </div>
+                            )}
+
+                            {/* Structured AI Contextual Classification Panel */}
+                            <div className="mt-3.5 rounded-xl border border-[#e0e9e1] bg-white p-3.5 space-y-2 text-xs shadow-2xs">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] border-b border-[#f0f4ef] pb-2">
+                                <div>
+                                  <span className="font-bold text-[#556458]">Category: </span>
+                                  <span className="font-extrabold text-[#173f2a]">
+                                    {getCategoryName(analysis.primaryCategory)}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="font-bold text-[#556458]">Theme: </span>
+                                  <span className="rounded-md bg-[#edf5ee] px-1.5 py-0.5 font-bold text-[#28623c]">
+                                    {analysis.theme}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="font-bold text-[#556458]">Root Issue: </span>
+                                  <span className="font-medium text-[#17221b]">
+                                    {analysis.rootIssues.join("; ")}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="font-bold text-[#556458]">Impact: </span>
+                                  <span className="font-medium text-[#c04b36]">
+                                    {analysis.impacts.length > 0 ? analysis.impacts.join("; ") : "Community Inconvenience"}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="pt-0.5 text-[11px] leading-relaxed text-[#556458]">
+                                <strong className="font-bold text-[#28623c]">Reason: </strong>
+                                <span className="text-[#324036]">{analysis.reason}</span>
+                              </div>
+                            </div>
+
+                            <p className="mt-2 text-[11px] text-[#556458]">
+                              📍 {sub.village || "—"}, {sub.district || sub.location || "—"} • PIN {sub.pincode || "—"}
+                            </p>
+                          </div>
                         </div>
-                      );
-                    }
-                  )}
 
+                        <span className="text-xs font-mono font-bold text-[#28623c] self-start">
+                          {sub.id}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-
             </div>
-
-            {/* =================================================
-                HOW IT WORKS
-                ================================================= */}
-
-            <div className="mt-8 rounded-3xl border border-[#d9e2da] bg-white p-6 shadow-sm sm:p-8">
-
-              <p className="text-xs font-bold uppercase tracking-wider text-[#397149]">
-                People's Priorities
-              </p>
-
-              <h2 className="mt-2 text-2xl font-bold text-[#173f2a]">
-                From citizen voice to action
-              </h2>
-
-              <div className="mt-6 grid gap-4 sm:grid-cols-5">
-
-                <div className="rounded-2xl bg-[#f8faf8] p-5">
-                  <div className="text-2xl">
-                    🗣️
-                  </div>
-
-                  <p className="mt-3 text-sm font-bold text-[#173f2a]">
-                    1. Collect
-                  </p>
-
-                  <p className="mt-2 text-xs leading-5 text-[#66736a]">
-                    Citizens report
-                    problems in
-                    their own
-                    language.
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-[#f8faf8] p-5">
-                  <div className="text-2xl">
-                    📷
-                  </div>
-
-                  <p className="mt-3 text-sm font-bold text-[#173f2a]">
-                    2. Evidence
-                  </p>
-
-                  <p className="mt-2 text-xs leading-5 text-[#66736a]">
-                    Photos provide
-                    supporting
-                    evidence.
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-[#f8faf8] p-5">
-                  <div className="text-2xl">
-                    🧠
-                  </div>
-
-                  <p className="mt-3 text-sm font-bold text-[#173f2a]">
-                    3. Understand
-                  </p>
-
-                  <p className="mt-2 text-xs leading-5 text-[#66736a]">
-                    English, Hindi
-                    and Odia
-                    issues are
-                    classified.
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-[#f8faf8] p-5">
-                  <div className="text-2xl">
-                    📊
-                  </div>
-
-                  <p className="mt-3 text-sm font-bold text-[#173f2a]">
-                    4. Score
-                  </p>
-
-                  <p className="mt-2 text-xs leading-5 text-[#66736a]">
-                    Transparent
-                    factors create
-                    a priority
-                    score.
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-[#f8faf8] p-5">
-                  <div className="text-2xl">
-                    🎯
-                  </div>
-
-                  <p className="mt-3 text-sm font-bold text-[#173f2a]">
-                    5. Prioritise
-                  </p>
-
-                  <p className="mt-2 text-xs leading-5 text-[#66736a]">
-                    Decision-makers
-                    see where
-                    attention is
-                    needed.
-                  </p>
-                </div>
-
-              </div>
-
-            </div>
-
           </>
-
         )}
-
       </section>
-
     </main>
   );
 }

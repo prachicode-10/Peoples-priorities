@@ -1,6 +1,8 @@
 import {
   classifyIssue,
+  CATEGORY_ICONS,
   type IssueCategory,
+  type ContextualIssueAnalysis,
 } from "@/lib/issueClassifier";
 
 export type BusinessSubmission = {
@@ -17,7 +19,10 @@ export type BusinessSubmission = {
   photos?: string[];
   status?: string;
   voiceLanguage?: string;
+  voiceAudioUrl?: string;
+  voiceTranslatedText?: string;
   writingLanguages?: Record<string, string>;
+  classification?: ContextualIssueAnalysis;
 };
 
 export type BusinessCategory = {
@@ -40,12 +45,17 @@ export type BudgetAllocation = BusinessCategory & {
 
 const SEVERITY: Record<string, number> = {
   Healthcare: 90,
+  "Food Safety": 88,
+  "Health & Hygiene": 85,
   Flooding: 90,
+  "Public Safety": 90,
   Safety: 90,
   "Water & Sanitation": 85,
   Electricity: 85,
+  "Roads & Infrastructure": 75,
   "Roads & Transport": 75,
   "Waste Management": 72,
+  Sanitation: 72,
   Education: 65,
   Agriculture: 70,
   Housing: 70,

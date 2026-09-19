@@ -7,6 +7,9 @@ import {
   useState,
 } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useLanguage } from "@/lib/LanguageContext";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 import {
   classifyIssue,
@@ -36,6 +39,8 @@ type Submission = {
   status?: string;
 
   voiceLanguage?: string;
+  voiceAudioUrl?: string;
+  voiceTranslatedText?: string;
   writingLanguages?: Record<string, string>;
 
   /*
@@ -93,7 +98,10 @@ function getPriorityColor(
 ) {
   switch (category) {
     case "Healthcare":
+    case "Food Safety":
+    case "Health & Hygiene":
     case "Flooding":
+    case "Public Safety":
     case "Safety":
       return "bg-red-100 text-red-700";
 
@@ -101,6 +109,7 @@ function getPriorityColor(
     case "Electricity":
       return "bg-orange-100 text-orange-700";
 
+    case "Roads & Infrastructure":
     case "Roads & Transport":
     case "Waste Management":
       return "bg-yellow-100 text-yellow-700";
@@ -228,6 +237,7 @@ function getOpenStreetMapEmbedUrl(
 
 export default function AdminPage() {
   const router = useRouter();
+  const { t, getCategoryName, getStatusName } = useLanguage();
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
@@ -659,49 +669,50 @@ export default function AdminPage() {
           HEADER
       ================================================= */}
 
-      <header className="border-b border-[#dce3dc] bg-white">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-5 sm:px-8">
+      <header className="border-b border-[#dce3dc] bg-white sticky top-0 z-30">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4 sm:px-8">
 
           <div>
-            <a
+            <Link
               href="/"
               className="text-sm font-bold tracking-[0.18em] text-[#173f2a]"
             >
-              PEOPLE'S PRIORITIES
-            </a>
+              {t.common.siteName}
+            </Link>
 
-            <p className="mt-1 text-xs text-[#66736a]">
-              Administration Portal
+            <p className="mt-0.5 text-xs text-[#66736a]">
+              {t.common.admin} Portal
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            <LanguageSwitcher compact />
 
-            <a
+            <Link
               href="/citizen"
-              className="rounded-full border border-[#397149] bg-white px-4 py-2 text-xs font-bold text-[#397149] transition hover:bg-[#f0f8f1]"
+              className="rounded-full border border-[#397149] bg-white px-3.5 py-1.5 text-xs font-bold text-[#397149] transition hover:bg-[#f0f8f1]"
             >
-              + Citizen
-            </a>
+              + {t.common.shareNeed}
+            </Link>
 
-            <a
+            <Link
               href="/dashboard"
-              className="rounded-full border border-[#397149] bg-white px-4 py-2 text-xs font-bold text-[#397149] transition hover:bg-[#f0f8f1]"
+              className="rounded-full border border-[#397149] bg-white px-3.5 py-1.5 text-xs font-bold text-[#397149] transition hover:bg-[#f0f8f1]"
             >
-              📊 Dashboard
-            </a>
+              📊 {t.common.adminDashboard}
+            </Link>
 
-            <a
+            <Link
               href="/track"
-              className="rounded-full border border-[#397149] bg-white px-4 py-2 text-xs font-bold text-[#397149] transition hover:bg-[#f0f8f1]"
+              className="rounded-full border border-[#397149] bg-white px-3.5 py-1.5 text-xs font-bold text-[#397149] transition hover:bg-[#f0f8f1]"
             >
-              🔎 Track
-            </a>
+              🔎 {t.common.track}
+            </Link>
 
             <button
               type="button"
               onClick={() => setShowBusinessAnalysis(true)}
-              className="rounded-full bg-[#173f2a] px-4 py-2 text-xs font-bold text-white transition hover:bg-[#0f2f1e]"
+              className="rounded-full bg-[#173f2a] px-3.5 py-1.5 text-xs font-bold text-white transition hover:bg-[#0f2f1e]"
             >
               💼 Business Analysis
             </button>
@@ -709,9 +720,9 @@ export default function AdminPage() {
             <button
               type="button"
               onClick={loadSubmissions}
-              className="rounded-full bg-[#173f2a] px-4 py-2 text-xs font-bold text-white transition hover:bg-[#0f2f1e]"
+              className="rounded-full bg-[#173f2a] px-3.5 py-1.5 text-xs font-bold text-white transition hover:bg-[#0f2f1e]"
             >
-              ↻ Refresh
+              ↻ {t.common.refresh}
             </button>
 
           </div>
