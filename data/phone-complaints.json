@@ -1,0 +1,265 @@
+[
+  {
+    "id": "PP-CALL-MU861RGH-OR",
+    "name": "Dipti Ranjan Sahoo",
+    "village": "Balipatna",
+    "pin": "752102",
+    "issue": "ଆମ ଗାଁରେ ପାନୀୟ ଜଳ ଯୋଗାଣ ବିଚ୍ଛିନ୍ନ ହୋଇଛି ଏବଂ ପିଇବା ପାଣି ମିଳୁନାହିଁ।",
+    "voiceLanguage": "or",
+    "source": "phone",
+    "callSid": "CA_TEST_CALL_ODIA_101",
+    "streamSid": "MZ_TEST_STREAM_101",
+    "location": "Balipatna",
+    "pincode": "752102",
+    "category": "Water & Sanitation",
+    "theme": "Drinking Water Supply & Purity",
+    "confidence": 0.89,
+    "reason": "The complaint focuses on drinking water purity, supply interruption, or water infrastructure deficiencies.",
+    "classification": {
+      "primaryCategory": "Water & Sanitation",
+      "secondaryCategories": [],
+      "theme": "Drinking Water Supply & Purity",
+      "rootIssues": [
+        "Unsafe, contaminated or deficient drinking water"
+      ],
+      "impacts": [
+        "Community inconvenience"
+      ],
+      "keywords": [
+        "ପିଇବା ପାଣି"
+      ],
+      "confidence": 0.89,
+      "reason": "The complaint focuses on drinking water purity, supply interruption, or water infrastructure deficiencies.",
+      "isMultiIssue": false,
+      "language": "or",
+      "originalTranscript": "ଆମ ଗାଁରେ ପାନୀୟ ଜଳ ଯୋଗାଣ ବିଚ୍ଛିନ୍ନ ହୋଇଛି ଏବଂ ପିଇବା ପାଣି ମିଳୁନାହିଁ।",
+      "normalizedText": "ଆମ ଗାଁରେ ପାନୀୟ ଜଳ ଯୋଗାଣ ବିଚ୍ଛିନ୍ନ ହୋଇଛି ଏବଂ ପିଇବା ପାଣି ମିଳୁନାହିଁ"
+    },
+    "status": "Submitted",
+    "submittedAt": "2026-09-19T09:09:29.573Z"
+  },
+  {
+    "id": "PP-CALL-MU861RHQ-EN",
+    "name": "Kavita Sharma",
+    "village": "Chandrasekharpur",
+    "pin": "751024",
+    "issue": "The main road is completely broken with large potholes causing frequent bike accidents.",
+    "voiceLanguage": "en",
+    "source": "phone",
+    "callSid": "CA_TEST_CALL_EN_102",
+    "streamSid": "MZ_TEST_STREAM_102",
+    "location": "Chandrasekharpur",
+    "pincode": "751024",
+    "category": "Roads & Infrastructure",
+    "theme": "Road Quality & Transit Infrastructure",
+    "confidence": 0.94,
+    "reason": "The complaint primarily reports damaged road infrastructure and potholes; emergency access disruption (ambulance / fire) is identified as a consequence/impact rather than the root cause.",
+    "classification": {
+      "primaryCategory": "Roads & Infrastructure",
+      "secondaryCategories": [],
+      "theme": "Road Quality & Transit Infrastructure",
+      "rootIssues": [
+        "Damaged road infrastructure and potholes"
+      ],
+      "impacts": [
+        "Emergency access disruption (Ambulance / Fire)"
+      ],
+      "keywords": [
+        "road",
+        "pothole",
+        "potholes",
+        "accidents"
+      ],
+      "confidence": 0.94,
+      "reason": "The complaint primarily reports damaged road infrastructure and potholes; emergency access disruption (ambulance / fire) is identified as a consequence/impact rather than the root cause.",
+      "isMultiIssue": false,
+      "language": "en",
+      "originalTranscript": "The main road is completely broken with large potholes causing frequent bike accidents.",
+      "normalizedText": "the main road is completely broken with large potholes causing frequent bike accidents.",
+      "detectedCauseEffect": {
+        "cause": "the main road is completely broken with large potholes",
+        "effect": "causing frequent bike accidents."
+      }
+    },
+    "status": "Submitted",
+    "submittedAt": "2026-09-19T09:09:29.612Z"
+  },
+  {
+    "id": "PP-CALL-MU865RVA-OR",
+    "name": "Dipti Ranjan Sahoo",
+    "village": "Balipatna",
+    "pin": "752102",
+    "issue": "ଆମ ଗାଁରେ ପାନୀୟ ଜଳ ଯୋଗାଣ ବିଚ୍ଛିନ୍ନ ହୋଇଛି ଏବଂ ପିଇବା ପାଣି ମିଳୁନାହିଁ।",
+    "voiceLanguage": "or",
+    "source": "phone",
+    "callSid": "CA_TEST_CALL_ODIA_101",
+    "streamSid": "MZ_TEST_STREAM_101",
+    "location": "Balipatna",
+    "pincode": "752102",
+    "category": "Water & Sanitation",
+    "theme": "Drinking Water Supply & Purity",
+    "rootIssue": "Unsafe, contaminated or deficient drinking water",
+    "impact": "Community inconvenience",
+    "confidence": 0.89,
+    "reason": "The complaint focuses on drinking water purity, supply interruption, or water infrastructure deficiencies.",
+    "classification": {
+      "primaryCategory": "Water & Sanitation",
+      "secondaryCategories": [],
+      "theme": "Drinking Water Supply & Purity",
+      "rootIssues": [
+        "Unsafe, contaminated or deficient drinking water"
+      ],
+      "impacts": [
+        "Community inconvenience"
+      ],
+      "keywords": [
+        "ପିଇବା ପାଣି"
+      ],
+      "confidence": 0.89,
+      "reason": "The complaint focuses on drinking water purity, supply interruption, or water infrastructure deficiencies.",
+      "isMultiIssue": false,
+      "language": "or",
+      "originalTranscript": "ଆମ ଗାଁରେ ପାନୀୟ ଜଳ ଯୋଗାଣ ବିଚ୍ଛିନ୍ନ ହୋଇଛି ଏବଂ ପିଇବା ପାଣି ମିଳୁନାହିଁ।",
+      "normalizedText": "ଆମ ଗାଁରେ ପାନୀୟ ଜଳ ଯୋଗାଣ ବିଚ୍ଛିନ୍ନ ହୋଇଛି ଏବଂ ପିଇବା ପାଣି ମିଳୁନାହିଁ"
+    },
+    "status": "Submitted",
+    "submittedAt": "2026-09-19T09:12:36.719Z"
+  },
+  {
+    "id": "PP-CALL-MU865RW9-EN",
+    "name": "Kavita Sharma",
+    "village": "Chandrasekharpur",
+    "pin": "751024",
+    "issue": "The main road is completely broken with large potholes causing frequent bike accidents.",
+    "voiceLanguage": "en",
+    "source": "phone",
+    "callSid": "CA_TEST_CALL_EN_102",
+    "streamSid": "MZ_TEST_STREAM_102",
+    "location": "Chandrasekharpur",
+    "pincode": "751024",
+    "category": "Roads & Infrastructure",
+    "theme": "Road Quality & Transit Infrastructure",
+    "rootIssue": "Damaged road infrastructure and potholes",
+    "impact": "Emergency access disruption (Ambulance / Fire)",
+    "confidence": 0.94,
+    "reason": "The complaint primarily reports damaged road infrastructure and potholes; emergency access disruption (ambulance / fire) is identified as a consequence/impact rather than the root cause.",
+    "classification": {
+      "primaryCategory": "Roads & Infrastructure",
+      "secondaryCategories": [],
+      "theme": "Road Quality & Transit Infrastructure",
+      "rootIssues": [
+        "Damaged road infrastructure and potholes"
+      ],
+      "impacts": [
+        "Emergency access disruption (Ambulance / Fire)"
+      ],
+      "keywords": [
+        "road",
+        "pothole",
+        "potholes",
+        "accidents"
+      ],
+      "confidence": 0.94,
+      "reason": "The complaint primarily reports damaged road infrastructure and potholes; emergency access disruption (ambulance / fire) is identified as a consequence/impact rather than the root cause.",
+      "isMultiIssue": false,
+      "language": "en",
+      "originalTranscript": "The main road is completely broken with large potholes causing frequent bike accidents.",
+      "normalizedText": "the main road is completely broken with large potholes causing frequent bike accidents.",
+      "detectedCauseEffect": {
+        "cause": "the main road is completely broken with large potholes",
+        "effect": "causing frequent bike accidents."
+      }
+    },
+    "status": "Submitted",
+    "submittedAt": "2026-09-19T09:12:36.746Z"
+  },
+  {
+    "id": "PP-CALL-MU86HQPP-OR",
+    "name": "Dipti Ranjan Sahoo",
+    "village": "Balipatna",
+    "pin": "752102",
+    "issue": "ଆମ ଗାଁରେ ପାନୀୟ ଜଳ ଯୋଗାଣ ବିଚ୍ଛିନ୍ନ ହୋଇଛି ଏବଂ ପିଇବା ପାଣି ମିଳୁନାହିଁ।",
+    "voiceLanguage": "or",
+    "source": "phone",
+    "callSid": "CA_TEST_CALL_ODIA_101",
+    "streamSid": "MZ_TEST_STREAM_101",
+    "location": "Balipatna",
+    "pincode": "752102",
+    "category": "Water & Sanitation",
+    "theme": "Drinking Water Supply & Purity",
+    "rootIssue": "Unsafe, contaminated or deficient drinking water",
+    "impact": "Community inconvenience",
+    "confidence": 0.89,
+    "reason": "The complaint focuses on drinking water purity, supply interruption, or water infrastructure deficiencies.",
+    "classification": {
+      "primaryCategory": "Water & Sanitation",
+      "secondaryCategories": [],
+      "theme": "Drinking Water Supply & Purity",
+      "rootIssues": [
+        "Unsafe, contaminated or deficient drinking water"
+      ],
+      "impacts": [
+        "Community inconvenience"
+      ],
+      "keywords": [
+        "ପିଇବା ପାଣି"
+      ],
+      "confidence": 0.89,
+      "reason": "The complaint focuses on drinking water purity, supply interruption, or water infrastructure deficiencies.",
+      "isMultiIssue": false,
+      "language": "or",
+      "originalTranscript": "ଆମ ଗାଁରେ ପାନୀୟ ଜଳ ଯୋଗାଣ ବିଚ୍ଛିନ୍ନ ହୋଇଛି ଏବଂ ପିଇବା ପାଣି ମିଳୁନାହିଁ।",
+      "normalizedText": "ଆମ ଗାଁରେ ପାନୀୟ ଜଳ ଯୋଗାଣ ବିଚ୍ଛିନ୍ନ ହୋଇଛି ଏବଂ ପିଇବା ପାଣି ମିଳୁନାହିଁ"
+    },
+    "status": "Submitted",
+    "submittedAt": "2026-09-19T09:21:55.090Z"
+  },
+  {
+    "id": "PP-CALL-MU86HQQH-EN",
+    "name": "Kavita Sharma",
+    "village": "Chandrasekharpur",
+    "pin": "751024",
+    "issue": "The main road is completely broken with large potholes causing frequent bike accidents.",
+    "voiceLanguage": "en",
+    "source": "phone",
+    "callSid": "CA_TEST_CALL_EN_102",
+    "streamSid": "MZ_TEST_STREAM_102",
+    "location": "Chandrasekharpur",
+    "pincode": "751024",
+    "category": "Roads & Infrastructure",
+    "theme": "Road Quality & Transit Infrastructure",
+    "rootIssue": "Damaged road infrastructure and potholes",
+    "impact": "Emergency access disruption (Ambulance / Fire)",
+    "confidence": 0.94,
+    "reason": "The complaint primarily reports damaged road infrastructure and potholes; emergency access disruption (ambulance / fire) is identified as a consequence/impact rather than the root cause.",
+    "classification": {
+      "primaryCategory": "Roads & Infrastructure",
+      "secondaryCategories": [],
+      "theme": "Road Quality & Transit Infrastructure",
+      "rootIssues": [
+        "Damaged road infrastructure and potholes"
+      ],
+      "impacts": [
+        "Emergency access disruption (Ambulance / Fire)"
+      ],
+      "keywords": [
+        "road",
+        "pothole",
+        "potholes",
+        "accidents"
+      ],
+      "confidence": 0.94,
+      "reason": "The complaint primarily reports damaged road infrastructure and potholes; emergency access disruption (ambulance / fire) is identified as a consequence/impact rather than the root cause.",
+      "isMultiIssue": false,
+      "language": "en",
+      "originalTranscript": "The main road is completely broken with large potholes causing frequent bike accidents.",
+      "normalizedText": "the main road is completely broken with large potholes causing frequent bike accidents.",
+      "detectedCauseEffect": {
+        "cause": "the main road is completely broken with large potholes",
+        "effect": "causing frequent bike accidents."
+      }
+    },
+    "status": "Submitted",
+    "submittedAt": "2026-09-19T09:21:55.115Z"
+  }
+]
