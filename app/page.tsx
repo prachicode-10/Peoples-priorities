@@ -2196,6 +2196,87 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* =====================================================
+            13B. ABOUT THE BUILDERS / MEET THE TEAM SECTION
+        ====================================================== */}
+        <section
+          id="about"
+          className="bg-[#0f2e1e] py-20 sm:py-28 px-4 sm:px-6 lg:px-8 relative overflow-hidden border-t border-[#18462b]"
+        >
+          {/* Subtle ambient light glow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-[#1a4a32]/25 blur-[120px] rounded-full pointer-events-none" />
+
+          <div className="mx-auto max-w-7xl relative z-10">
+            <div className="text-center max-w-3xl mx-auto">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+                Meet the Team
+              </h2>
+            </div>
+
+            <div className="mt-12 sm:mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto items-stretch">
+              {/* Pratik Ranjan Panigraghi */}
+              <div className="rounded-2xl sm:rounded-3xl bg-[#143d28] border border-[#1e4e34] shadow-xl p-8 sm:p-9 flex flex-col items-center text-center transition-all duration-300 hover:border-[#38a169] hover:-translate-y-1.5 hover:shadow-2xl">
+                <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-full overflow-hidden border-2 border-[#2b593f] shadow-lg mb-6 relative bg-[#0b2215] shrink-0">
+                  <img
+                    src="/team/pratik.jpg"
+                    alt="Pratik Ranjan Panigraghi"
+                    className="w-full h-full object-cover scale-105"
+                  />
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-tight">
+                  Pratik Ranjan Panigraghi
+                </h3>
+                <p className="mt-2 text-xs sm:text-[13px] font-bold uppercase tracking-widest text-[#7dd39f]">
+                  TEAM LEADER
+                </p>
+                <p className="mt-6 text-sm sm:text-[15px] text-[#cbd5e1] italic font-normal leading-relaxed max-w-xs">
+                  &ldquo;True development begins when we give every citizen a verifiable voice in the decision-making process.&rdquo;
+                </p>
+              </div>
+
+              {/* Prachi Sharma */}
+              <div className="rounded-2xl sm:rounded-3xl bg-[#143d28] border border-[#1e4e34] shadow-xl p-8 sm:p-9 flex flex-col items-center text-center transition-all duration-300 hover:border-[#38a169] hover:-translate-y-1.5 hover:shadow-2xl">
+                <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-full overflow-hidden border-2 border-[#2b593f] shadow-lg mb-6 relative bg-[#0b2215] shrink-0">
+                  <img
+                    src="/team/prachi.jpg"
+                    alt="Prachi Sharma"
+                    className="w-full h-full object-cover scale-105"
+                  />
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-tight">
+                  Prachi Sharma
+                </h3>
+                <p className="mt-2 text-xs sm:text-[13px] font-bold uppercase tracking-widest text-[#7dd39f]">
+                  DEVELOPER
+                </p>
+                <p className="mt-6 text-sm sm:text-[15px] text-[#cbd5e1] italic font-normal leading-relaxed max-w-xs">
+                  &ldquo;Transforming raw civic data into explainable signals that drive immediate community action.&rdquo;
+                </p>
+              </div>
+
+              {/* Anisha Das */}
+              <div className="rounded-2xl sm:rounded-3xl bg-[#143d28] border border-[#1e4e34] shadow-xl p-8 sm:p-9 flex flex-col items-center text-center transition-all duration-300 hover:border-[#38a169] hover:-translate-y-1.5 hover:shadow-2xl">
+                <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-full overflow-hidden border-2 border-[#2b593f] shadow-lg mb-6 relative bg-[#0b2215] shrink-0">
+                  <img
+                    src="/team/anisha.jpg"
+                    alt="Anisha Das"
+                    className="w-full h-full object-cover scale-105"
+                  />
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-tight">
+                  Anisha Das
+                </h3>
+                <p className="mt-2 text-xs sm:text-[13px] font-bold uppercase tracking-widest text-[#7dd39f]">
+                  DEVELOPER
+                </p>
+                <p className="mt-6 text-sm sm:text-[15px] text-[#cbd5e1] italic font-normal leading-relaxed max-w-xs">
+                  &ldquo;Building interfaces that bridge the gap between people&apos;s priorities and actionable governance.&rdquo;
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* =====================================================
